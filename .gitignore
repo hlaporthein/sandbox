@@ -15,7 +15,7 @@ libtool
 ltmain.sh
 .libs
 .deps
-Makefile
+#Makefile
 Makefile.in
 aclocal.m4
 ar-lib
