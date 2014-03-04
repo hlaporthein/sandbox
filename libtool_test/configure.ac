@@ -5,9 +5,9 @@ AC_PREREQ([2.68])
 AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign -Wall -Werror])
+AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_HEADERS([config.h])
-AM_PROG_AR
+#AM_PROG_AR
 LT_INIT
 
 # Checks for programs.
