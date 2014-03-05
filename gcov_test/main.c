@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
 
 void hello(const char* format, int n, ...) {
@@ -16,6 +17,6 @@ int main() {
 	for (int i = 0; i < 10; i++) {
 		printf("Hello World %d!!!\n", i);
 	}
-
+	system("sh echo coucou");
 	hello("Hello %d\n" , 4, 1, 2, 4, 5);
 }
