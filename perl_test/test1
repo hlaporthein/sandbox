@@ -1,0 +1,7 @@
+#!/usr/bin/env perl
+use strict;
+
+my $var;
+
+printf(STDERR "Hello\n");
+printf(STDERR "COucou\n");
