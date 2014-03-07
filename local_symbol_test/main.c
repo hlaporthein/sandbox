@@ -1,10 +1,18 @@
 int printf(const char* format, ...);
 
-static int hello(name) {
+void bye(char *name);
+
+static int hello_jlg(char *name) {
 	printf("Hello %s!\n", name);
 	return 0;
 }
 
+void coucou_jlg(char *name) {
+	printf("Hello %s!\n", name);
+}
+
 int main() {
-	return hello("JL");
+	coucou_jlg("Jean-Louis");
+	bye("Machin");
+	return hello_jlg("JL");
 }
