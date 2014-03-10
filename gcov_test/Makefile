@@ -3,4 +3,4 @@ all:
 	gcc main.o -o hello --coverage
 
 clean:
-	rm -rf *.o *.exe *.gcov *.gcda *.gcno
+	rm -rf *.o *.exe *.gcov *.gcda *.gcno *.info

@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <zlib.h>
 
+#include <jlg_log.h>
+
 #if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 	#include <fcntl.h>
 	#include <io.h>
@@ -21,6 +23,7 @@
    an error reading or writing the files. */
 int def(FILE *source, FILE *dest, int level)
 {
+    jlg_log("def start");
     int ret, flush;
     unsigned have;
     z_stream strm;
@@ -31,10 +34,15 @@ int def(FILE *source, FILE *dest, int level)
     strm.zalloc = Z_NULL;
     strm.zfree = Z_NULL;
     strm.opaque = Z_NULL;
+
+    jlg_log("Do deflateInit");
     ret = deflateInit(&strm, level);
+    jlg_log("deflateInit done.");
+
     if (ret != Z_OK)
         return ret;
 
+    jlg_log("About to compress file...");
     /* compress until end of file */
     do {
         strm.avail_in = fread(in, 1, CHUNK, source);
@@ -93,6 +101,7 @@ int inf(FILE *source, FILE *dest)
     if (ret != Z_OK)
         return ret;
 
+    jlg_log("About to decompress file...");
     /* decompress until deflate stream ends or end of file */
     do {
         strm.avail_in = fread(in, 1, CHUNK, source);
@@ -161,7 +170,8 @@ void zerr(int ret)
 /* compress or decompress from stdin to stdout */
 int main(int argc, char **argv)
 {
-    int ret;
+	jlg_log("Start...");
+	int ret;
 
     /* avoid end-of-line conversions */
     SET_BINARY_MODE(stdin);
@@ -169,6 +179,7 @@ int main(int argc, char **argv)
 
     /* do compression if no arguments */
     if (argc == 1) {
+    	jlg_log("Compressing...");
         ret = def(stdin, stdout, Z_DEFAULT_COMPRESSION);
         if (ret != Z_OK)
             zerr(ret);
@@ -177,6 +188,7 @@ int main(int argc, char **argv)
 
     /* do decompression if -d specified */
     else if (argc == 2 && strcmp(argv[1], "-d") == 0) {
+    	jlg_log("Decompressing...");
         ret = inf(stdin, stdout);
         if (ret != Z_OK)
             zerr(ret);
