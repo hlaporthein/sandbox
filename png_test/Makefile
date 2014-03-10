@@ -3,4 +3,4 @@ all:
 	gcc main.o -o png.exe -lpng
 
 clean:
-	rm -f *.o *.exe
+	rm -f *.o *.exe *png
