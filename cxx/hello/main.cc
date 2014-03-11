@@ -1,10 +1,24 @@
 #include <iostream>
+#define NL cout << endl
 
 using namespace std;
 
+extern string yannis;
+
+class Yannis {
+	public:
+		void operator<<(string str) {
+			cout << "Yannis: " << str << endl;
+		}
+};
+
 int main() {
-	char *var = "I'm a var!";
-	cout << "Hello World!!" << endl << "I'm a C++ program" << endl;
-	#warning Pas bien.
-	cout << (string) var;
+	string var = "I'm a var!";
+
+	Yannis y;
+	y << "Hello World!!";
+	y << (string) var;
+	NL;
+	y << yannis;
+	NL;
 }
