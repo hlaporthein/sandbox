@@ -1,14 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
-#include <png.h>
-#include <getopt.h>
 
-#include "qrencode.h"
 
 int main() {
-	char *buffer = "Hello";
-	bzero( buffer, 6 );
-
+	char buffer[1024];
+	snprintf(buffer, 1024, "Coucou asdfasdf");
 	printf("buffer: %s\n", buffer);
+	bzero(buffer, 1024);
+	//memset(buffer, 0, 6);
+	printf("buffer: %s\n", buffer);
+	return 0;
 }
