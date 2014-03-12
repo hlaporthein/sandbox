@@ -5,4 +5,4 @@ all:
 	gcc -o hello main.o hello.o -lstdc++ -Wall
 
 clean:
-	rm -f *.o *.exe
+	rm -f *.o *.exe *.ii

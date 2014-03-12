@@ -69,7 +69,7 @@ int main() {
 	int foo = 10, bar = 15;
 	int res = 0;
     asm volatile("addl  %%ebx,%%eax"
-                         :"=a"(res)
+                         :"=r"(res)
                          :"a"(foo), "b"(bar)
                          );
     y << "foo+bar=" << res;
