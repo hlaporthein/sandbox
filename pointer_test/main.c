@@ -41,7 +41,10 @@ int main() {
 	type_func x = &my_func;
 	x('d', 4);
 
-	char *c = "sample text";
+	char *tmp = "sample text";
+	char buffer[64];
+	snprintf(buffer, 64, tmp);
+	const char *c = buffer;
 	print(c);
 	return 0;
 }

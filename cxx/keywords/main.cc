@@ -3,6 +3,8 @@
 #include <vector>
 #include <typeinfo> // for typeid
 
+#include <stdio.h>
+
 using namespace std;
 void keyword_auto();
 void keyword_bitand();
@@ -16,6 +18,8 @@ void keyword_constexpr(int a);
 void keyword_const_cast();
 void keyword_cast1();
 void keyword_cast2();
+void keyword_refto();
+void keyword_default();
 
 class Animal {
 	private:
@@ -58,6 +62,8 @@ int main()
 	keyword_const_cast();
 	keyword_cast1();
 	keyword_cast2();
+	keyword_refto();
+	keyword_default();
 }
 
 template<class T, class U>
@@ -318,12 +324,79 @@ void keyword_cast1() {
 }
 
 void print (char * str) {
-	str[0] = 'a';
+	//str[0] = 'a';
 	cout << str << endl;
 }
 
 void keyword_cast2() {
 	cout << "\nKeyword cast2\n";
-	char *c = "sample text";
-	print(c);
+	char *tmp = "sample text";
+	char buffer[64];
+	snprintf(buffer, 64, tmp);
+	const char *c = buffer;
+	print(const_cast<char *>(c));
+}
+
+int& foo(int& a) {
+	a = a * 2;
+	return a;
+}
+
+void keyword_refto() {
+	cout << "\nKeyword refto\n";
+	int a = 2;
+	int& b = a;
+	cout << "a=" << a << endl;
+	cout << "b=" << b << endl;
+	a = 8;
+	cout << "a=" << a << endl;
+	cout << "b=" << b << endl;
+	b = 12;
+	cout << "a=" << a << endl;
+	cout << "b=" << b << endl;
+	b = foo(a);
+	cout << "a=" << a << endl;
+	cout << "b=" << b << endl;
+}
+
+class A {
+	public:
+		int x = 1;
+		A() {
+			cout << "Construct A" << endl;
+		}
+
+		A(int x) {
+			this->x = x;
+			cout << "Construct A(" << x << ")" << endl;
+		}
+
+		A(const A& a) {
+			cout << "Copy constructor A" << endl;
+		}
+
+		A& operator=(const A& a) {
+			cout << "Copy assignment operator" << endl;
+			this->x = a.x;
+			printf("this->x=%d\n", this->x);
+			return *this;
+		}
+};
+
+class B {
+};
+
+void keyword_default() {
+	cout << "\nKeyword default\n";
+	print("1");
+	A a(2);
+	print("2");
+	A b = a;
+	print("3");
+	A& c = a;
+	print("4");
+	A d;
+	print("5");
+	d = a;
+	printf("d.x=%d\n", d.x);
 }
