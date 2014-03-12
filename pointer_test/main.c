@@ -18,6 +18,11 @@ void swap(int *i, int *j) {
 	*j = tmp;
 }
 
+void print(char * str) {
+	str[0] = 'a';
+	printf("str=%s\n", str);
+}
+
 int main() {
 	int i = 3;
 	int j = 5;
@@ -36,6 +41,8 @@ int main() {
 	type_func x = &my_func;
 	x('d', 4);
 
+	char *c = "sample text";
+	print(c);
 	return 0;
 }
 

@@ -6,3 +6,4 @@ clean:
 		make clean; \
 		cd -; \
 	done
+	find . -name 'Edit.*' | xargs rm -f || :

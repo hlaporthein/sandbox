@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 int main() {
 	char buffer[1024];
 	snprintf(buffer, 1024, "Coucou asdfasdf");
