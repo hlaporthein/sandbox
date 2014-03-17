@@ -2,6 +2,9 @@
 #include <cmath>
 #include <vector>
 #include <typeinfo> // for typeid
+#include <string>
+
+//#include <cstddef>
 
 #include <stdio.h>
 
@@ -20,6 +23,43 @@ void keyword_cast1();
 void keyword_cast2();
 void keyword_refto();
 void keyword_default();
+void keyword_abstract();
+void keyword_cast();
+void keyword_enum();
+void keyword_explicit();
+void keyword_nullptr();
+void keyword_protected();
+void keyword_static();
+void keyword_template();
+
+
+int main()
+{
+//	keyword_auto();
+//	keyword_bitand();
+//	keyword_bitor();
+//	keyword_catch();
+//	keyword_type();
+//	keyword_class();
+//	keyword_compl();
+//	keyword_const();
+//	keyword_constexpr(12);
+//	keyword_const_cast();
+//	keyword_cast1();
+//	keyword_cast2();
+//	keyword_refto();
+//	keyword_default();
+//	keyword_abstract();
+//	keyword_cast();
+//	keyword_enum();
+//	keyword_explicit();
+//	keyword_nullptr();
+//	keyword_protected();
+//	keyword_static();
+	keyword_template();
+
+	return 0;
+}
 
 class Animal {
 	private:
@@ -47,24 +87,6 @@ class Person {
 		string getFirstname();
 		int getAge();
 };
-
-int main()
-{
-	keyword_auto();
-	keyword_bitand();
-	keyword_bitor();
-	keyword_catch();
-	keyword_type();
-	keyword_class();
-	keyword_compl();
-	keyword_const();
-	keyword_constexpr(12);
-	keyword_const_cast();
-	keyword_cast1();
-	keyword_cast2();
-	keyword_refto();
-	keyword_default();
-}
 
 template<class T, class U>
 auto add(T t, U u) -> decltype(t + u) // the return type of add is the type of operator+(T,U)
@@ -399,4 +421,255 @@ void keyword_default() {
 	print("5");
 	d = a;
 	printf("d.x=%d\n", d.x);
+}
+
+class P1 {
+	public:
+		virtual void say_hello() = 0;
+};
+
+class A1 : public virtual P1 {
+		void say_hello() override {
+			cout << "A says Hello!" << endl;
+		};
+};
+
+class B1 : P1 {
+	public:
+		void say_hello() override {
+			cout << "B says Hello!" << endl;
+		};
+};
+
+void keyword_abstract() {
+	cout << "\nkeyword_abstract\n";
+	A1 a;
+	//a.say_hello();
+	B1 b;
+	b.say_hello();
+	P1& p = a;
+	p.say_hello();
+	//P1 p;
+	//p.say_hello();
+}
+
+class A2 {
+	public:
+		virtual ~A2() {};
+};
+
+class B2 : public A2 {
+	public:
+		int x = 2;
+};
+
+class C2 {
+};
+
+void keyword_cast() {
+	cout << "\nkeyword_cast\n";
+	B2 *b = new B2();
+	//A2 *a = static_cast<A2*>(b);
+	A2 *a2 = new A2();
+	B2 *b2 = dynamic_cast<B2*>(a2);
+	if (b2) {
+		print("Cast possible.");
+	} else {
+		print("Cast not possible.");
+	}
+
+	float a3 = 3.14;
+	int b3 = (int) a3;
+	printf("a3=%f, b3=%d\n", a3, b3);
+	printf("int=%d, float=%d\n", sizeof(int), sizeof(float));
+	int& c3 = reinterpret_cast<int&>(a3);
+	printf("a3=%f, c3=%d\n", a3, c3);
+
+	int a4 = 1;
+	float& c4 = reinterpret_cast<float&>(a4);
+	printf("a4=%d, c4=%e\n", a4, c4);
+}
+
+enum E {
+	LUNDI,
+	MARDI,
+	MERCREDI
+};
+
+void keyword_enum() {
+	cout << "\nkeyword_enum\n";
+	cout << MARDI << endl;
+}
+
+class A3 {
+	public:
+		/*explicit*/ A3(int x) {};
+};
+
+void bad_print_A3(A3 a) {
+	print("bad_print_A3");
+}
+
+void keyword_explicit() {
+	cout << "\nkeyword_explicit\n";
+	bad_print_A3(4);
+}
+
+template<class F, class A>
+void Fwd(F f, A a) {
+    f(a);
+}
+
+void g(int* i) {
+    std::cout << "Function g called\n";
+}
+
+void keyword_nullptr() {
+	cout << "\nkeyword_nullptr\n";
+	g(NULL);			// Fine
+	g(0);				// Fine
+	Fwd(g, nullptr);	// Fine
+//	Fwd(g, NULL);		// ERROR: No function g(int)
+}
+
+class A4 {
+	protected:
+		void say_hello() {
+			print("Coucou");
+		};
+};
+
+class B4 : A4 {
+	public:
+		void b_say_hello() {
+			say_hello();
+		};
+};
+
+void keyword_protected() {
+	cout << "\nkeyword_protected\n";
+	A4 a;
+//	a.say_hello();
+	B4 b;
+	b.b_say_hello();
+}
+
+class A5 {
+	static int count;
+	public:
+		A5() {
+			count++;
+		};
+
+		static int getCount() {
+			return count;
+		};
+};
+
+int A5::count = 0;
+
+void keyword_static() {
+	const int b = 3;
+	cout << "\nkeyword_static\n";
+	for (int i = 0; i < 10; i++) {
+		A5 a;
+		printf("count=%d\n", A5::getCount());
+		static_assert(b < 5, "b must be < 5.");
+	}
+}
+
+template<class T>
+class my_list {
+
+	class node {
+		public:
+			node(T t) {
+				this->data = t;
+			};
+			node *next = nullptr;
+			T data;
+	};
+
+	node *head = nullptr;
+	string buffer;
+
+	public:
+		void add(T t);
+		T& get(int i);
+		void remove(int i);
+		string& to_string();
+};
+
+template<class T>
+void my_list<T>::add(T t) {
+	node *last = new node(t);
+	if (this->head == nullptr) {
+		this->head = last;
+		return;
+	}
+	node *n = this->head;
+	while (n->next != nullptr) {
+		n = n->next;
+	}
+	n->next = last;
+}
+
+template<class T>
+T& my_list<T>::get(int index) {
+	node *n = this->head;
+	for (int i = 0; i < index; i++) {
+		n = n->next;
+	}
+	return n->data;
+}
+
+template<class T>
+void my_list<T>::remove(int index) {
+	node *n = this->head;
+	node *previous = nullptr;
+	for (int i = 0; i < index; i++) {
+		previous = n;
+		n = n->next;
+	}
+	previous->next = n->next;
+	delete n;
+}
+
+template<class T>
+string& my_list<T>::to_string() {
+	buffer = "[";
+	bool is_first = true;
+	node *n = head;
+	while (n != nullptr) {
+		if (!is_first) {
+			buffer += ", ";
+		}
+		is_first = false;
+//		char buf[512];
+//		snprintf(buf, 512, "%d", (int) n->data);
+//		buffer += buf;
+		buffer += std::to_string(n->data);
+		n = n->next;
+	}
+	buffer += "]";
+	return buffer;
+}
+
+template<class T>
+ostream& operator<<(ostream& cout, my_list<T> obj)
+{
+	cout << obj.to_string();
+	return cout;
+}
+
+void keyword_template() {
+	cout << "\nkeyword_template\n";
+	my_list<int> li;
+	li.add(3);
+	li.add(5);
+	li.add(7);
+	cout << li << endl;
+	printf("li[2]=%d\n", li.get(2));
+	li.remove(1);
+	cout << li << endl;
 }

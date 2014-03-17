@@ -15,8 +15,9 @@ class my_string {
 		my_string() {
 		};
 
-		my_string(char *str) {
-			this->str = str;
+		my_string(const char *str) {
+			cout << "Copy constructor A" << endl;
+			this->_assign(str);
 		};
 
 		~my_string() {
@@ -25,11 +26,13 @@ class my_string {
 		}
 
 		my_string& operator=(const char * str) {
+			cout << "= A(const char * str)" << endl;
 			this->_assign(str);
 			return *this;
 		}
 
 		my_string& operator=(const string& s) {
+			cout << "= A(const string& s)" << endl;
 			this->_assign(s.c_str());
 			return *this;
 		}
