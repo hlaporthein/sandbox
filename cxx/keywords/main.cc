@@ -16,9 +16,8 @@ namespace std
 
 //#include <cstddef>
 
-#include <stdio.h>
-
 using namespace std;
+
 void keyword_auto();
 void keyword_bitand();
 void keyword_bitor();
@@ -42,6 +41,7 @@ void keyword_protected();
 void keyword_static();
 void keyword_template();
 void keyword_thread_local();
+void keyword_type_id();
 
 
 int main() {
@@ -67,7 +67,8 @@ int main() {
 //	keyword_protected();
 //	keyword_static();
 //	keyword_template();
-	keyword_thread_local();
+//	keyword_thread_local();
+	keyword_type_id();
 
 	return 0;
 }
@@ -706,4 +707,49 @@ void keyword_thread_local() {
 
 	a.join();
 	b.join();
+}
+
+struct Base {}; // non-polymorphic
+struct Derived : Base {};
+
+struct Base2 { virtual void foo() {} }; // polymorphic
+struct Derived2 : Base2 {};
+
+void keyword_type_id() {
+	cout << "\nkeyword_type_id\n";
+    int myint = 50;
+    std::string mystr = "string";
+    double *mydoubleptr = nullptr;
+
+    std::cout << "myint has type: " << typeid(myint).name() << '\n'
+              << "mystr has type: " << typeid(mystr).name() << '\n'
+              << "mydoubleptr has type: " << typeid(mydoubleptr).name() << '\n';
+
+    // std::cout << myint is a glvalue expression of polymorphic type; it is evaluated
+    const std::type_info& r1 = typeid(std::cout << myint);
+    std::cout << "std::cout<<myint has type : " << r1.name() << '\n';
+
+    // std::printf() is not a glvalue expression of polymorphic type; NOT evaluated
+    const std::type_info& r2 = typeid(std::printf("%d\n", myint));
+    std::cout << "printf(\"%d\\n\",myint) has type : " << r2.name() << '\n';
+
+    // Non-polymorphic lvalue is a static type
+    Derived d1;
+    Base& b1 = d1;
+    std::cout << "reference to non-polymorphic base: " << typeid(b1).name() << '\n';
+
+    Derived2 d2;
+    Base2& b2 = d2;
+    std::cout << "reference to polymorphic base: " << typeid(b2).name() << '\n';
+
+    try {
+        // dereferencing a null pointer: okay for a non-polymoprhic expression
+        std::cout << "mydoubleptr points to " << typeid(*mydoubleptr).name() << '\n';
+        // dereferencing a null pointer: not okay for a polymorphic lvalue
+        Derived2* bad_ptr = NULL;
+        std::cout << "bad_ptr points to... ";
+        std::cout << typeid(*bad_ptr).name() << '\n';
+    } catch(const std::bad_typeid& e) {
+         std::cout << " caught " << e.what() << '\n';
+    }
 }
