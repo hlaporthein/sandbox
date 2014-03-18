@@ -1,9 +1,14 @@
 CFLAGS=-std=gnu99
+SOURCES=$(shell find . -name '*.c')
+OBJECTS=$(SOURCES:%.c=%.o)
 
-all:
-	gcc $(CFLAGS) -c main.c -o main.o
-	gcc $(CFLAGS) -c hexa.c -o hexa.o
-	gcc -o pe_reader main.o hexa.o
+all: pe_reader.exe
+
+pe_reader.exe: $(OBJECTS)
+	gcc -o $@ $(OBJECTS)
+
+%.o: %.c
+	gcc $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -f *.exe *.o
