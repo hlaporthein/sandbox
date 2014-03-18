@@ -3,6 +3,16 @@
 #include <vector>
 #include <typeinfo> // for typeid
 #include <string>
+#include <boost/thread.hpp>
+namespace std
+{
+   using boost::mutex;
+   using boost::recursive_mutex;
+   using boost::lock_guard;
+   using boost::condition_variable;
+   using boost::unique_lock;
+   using boost::thread;
+}
 
 //#include <cstddef>
 
@@ -31,10 +41,10 @@ void keyword_nullptr();
 void keyword_protected();
 void keyword_static();
 void keyword_template();
+void keyword_thread_local();
 
 
-int main()
-{
+int main() {
 //	keyword_auto();
 //	keyword_bitand();
 //	keyword_bitor();
@@ -56,7 +66,8 @@ int main()
 //	keyword_nullptr();
 //	keyword_protected();
 //	keyword_static();
-	keyword_template();
+//	keyword_template();
+	keyword_thread_local();
 
 	return 0;
 }
@@ -645,10 +656,10 @@ string& my_list<T>::to_string() {
 			buffer += ", ";
 		}
 		is_first = false;
-//		char buf[512];
-//		snprintf(buf, 512, "%d", (int) n->data);
-//		buffer += buf;
-		buffer += std::to_string(n->data);
+		char buf[512];
+		snprintf(buf, 512, "%d", (int) n->data);
+		buffer += buf;
+//		buffer += std::to_string(n->data);
 		n = n->next;
 	}
 	buffer += "]";
@@ -672,4 +683,27 @@ void keyword_template() {
 	printf("li[2]=%d\n", li.get(2));
 	li.remove(1);
 	cout << li << endl;
+}
+
+
+thread_local unsigned int rage = 1;
+std::mutex cout_mutex;
+
+void increase_rage(const std::string& thread_name) {
+    ++rage;
+    std::lock_guard<std::mutex> lock(cout_mutex);
+    std::cout << "Rage counter for " << thread_name << ": " << rage << '\n';
+}
+
+void keyword_thread_local() {
+	cout << "\nkeyword_thread_local\n";
+	std::thread a(increase_rage, "a"), b(increase_rage, "b");
+
+	{
+		std::lock_guard<std::mutex> lock(cout_mutex);
+		std::cout << "Rage counter for main: " << rage << '\n';
+	}
+
+	a.join();
+	b.join();
 }
