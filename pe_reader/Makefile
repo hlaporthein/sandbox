@@ -1,4 +1,4 @@
-CFLAGS=-std=c11
+CFLAGS=-std=gnu99
 
 all:
 	gcc $(CFLAGS) -c main.c -o main.o

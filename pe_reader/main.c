@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <libgen.h>
 
 #include "pe_reader.h"
-
-char *basename(const char *);
 
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
@@ -12,6 +11,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	char *file = argv[1];
-	print_hexa(file);
+	print_hexa2(file);
 	return 0;
 }
