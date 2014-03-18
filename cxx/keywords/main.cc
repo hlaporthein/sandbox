@@ -66,9 +66,9 @@ int main() {
 //	keyword_nullptr();
 //	keyword_protected();
 //	keyword_static();
-//	keyword_template();
+	keyword_template();
 //	keyword_thread_local();
-	keyword_type_id();
+//	keyword_type_id();
 
 	return 0;
 }
@@ -657,10 +657,10 @@ string& my_list<T>::to_string() {
 			buffer += ", ";
 		}
 		is_first = false;
-		char buf[512];
-		snprintf(buf, 512, "%d", (int) n->data);
-		buffer += buf;
-//		buffer += std::to_string(n->data);
+
+		std::ostringstream stm ;
+		stm << n->data;
+		buffer += stm.str();
 		n = n->next;
 	}
 	buffer += "]";
@@ -676,12 +676,12 @@ ostream& operator<<(ostream& cout, my_list<T> obj)
 
 void keyword_template() {
 	cout << "\nkeyword_template\n";
-	my_list<int> li;
-	li.add(3);
-	li.add(5);
-	li.add(7);
+	my_list<char *> li;
+	li.add("Coucou");
+	li.add("Toto");
+	li.add("JIji");
 	cout << li << endl;
-	printf("li[2]=%d\n", li.get(2));
+	cout << "li[2]=" << li.get(2) << endl;
 	li.remove(1);
 	cout << li << endl;
 }
