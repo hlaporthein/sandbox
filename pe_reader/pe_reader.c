@@ -2,35 +2,12 @@
 #include <errno.h>
 #include <string.h>
 
-#define BUFFER_SIZE 1<<16
-
-typedef unsigned short WORD;
-typedef long LONG;
-
-typedef struct _IMAGE_DOS_HEADER {      // DOS .EXE header
-	WORD e_magic;                     // Magic number
-	WORD e_cblp;                      // Bytes on last page of file
-	WORD e_cp;                        // Pages in file
-	WORD e_crlc;                      // Relocations
-	WORD e_cparhdr;                   // Size of header in paragraphs
-	WORD e_minalloc;                  // Minimum extra paragraphs needed
-	WORD e_maxalloc;                  // Maximum extra paragraphs needed
-	WORD e_ss;                        // Initial (relative) SS value
-	WORD e_sp;                        // Initial SP value
-	WORD e_csum;                      // Checksum
-	WORD e_ip;                        // Initial IP value
-	WORD e_cs;                        // Initial (relative) CS value
-	WORD e_lfarlc;                    // File address of relocation table
-	WORD e_ovno;                      // Overlay number
-	WORD e_res[4];                    // Reserved words
-	WORD e_oemid;                     // OEM identifier (for e_oeminfo)
-	WORD e_oeminfo;                   // OEM information; e_oemid specific
-	WORD e_res2[10];                  // Reserved words
-	LONG   e_lfanew;                    // File address of new exe header
-} IMAGE_DOS_HEADER, *PIMAGE_DOS_HEADER;
-
+#include "pe_reader.h"
+#include "my_winnt.h"
 
 void pe_reader(const char *file) {
+	init_map();
+
 	FILE *fd = fopen(file, "rb");
 	if (fd == NULL) {
 		fprintf(stderr, "ERROR: %s\n", strerror(errno));
@@ -46,7 +23,39 @@ void pe_reader(const char *file) {
 		goto cleanup;
 	}
 
+	if (dos_header.e_magic != 0x5A4D) {
+		fprintf(stderr, "ERROR: This is not a DOS file.\n");
+		goto cleanup;
+	}
+
 	printf("PE starts at: %08x\n", dos_header.e_lfanew);
+
+	if (fseek(fd, dos_header.e_lfanew, SEEK_SET) != 0) {
+		fprintf(stderr, "ERROR: %s\n", strerror(errno));
+		goto cleanup;
+	}
+
+	IMAGE_NT_HEADERS nt_header;
+	s = fread(&nt_header, sizeof(IMAGE_NT_HEADERS), 1, fd);
+	if (ferror(fd)) {
+		fprintf(stderr, "ERROR: %s\n", strerror(errno));
+		goto cleanup;
+	}
+
+	if (nt_header.Signature != IMAGE_NT_SIGNATURE) {
+		fprintf(stderr, "ERROR: This is not a PE file: %08x\n", nt_header.Signature);
+		goto cleanup;
+	}
+
+	printf("PE signature: %08x\n", nt_header.Signature);
+	printf("Machine: %s\n", map(SECTION_MACHINE, nt_header.FileHeader.Machine));
+//	WORD  Machine;
+//	WORD  NumberOfSections;
+//	DWORD TimeDateStamp;
+//	DWORD PointerToSymbolTable;
+//	DWORD NumberOfSymbols;
+//	WORD  SizeOfOptionalHeader;
+//	WORD  Characteristics;
 
 cleanup:
 	if (fd) {
