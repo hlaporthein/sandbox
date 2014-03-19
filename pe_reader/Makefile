@@ -5,7 +5,7 @@ OBJECTS=$(SOURCES:%.c=%.o)
 all: pe_reader.exe
 
 pe_reader.exe: $(OBJECTS)
-	gcc -o $@ $(OBJECTS)
+	gcc -o $@ $(OBJECTS) -Wl,--strip-all
 
 %.o: %.c
 	gcc $(CFLAGS) -c $< -o $@
