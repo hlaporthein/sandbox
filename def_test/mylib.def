@@ -4,5 +4,5 @@ EXPORTS
 coucou
 hello
 hello2 = hello
-hello3 = truc2.dll.kiki
+hello3 = truc.kiki
 
