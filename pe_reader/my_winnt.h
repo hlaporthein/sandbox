@@ -143,6 +143,9 @@
 #define IMAGE_NUMBEROF_DIRECTORY_ENTRIES 16
 #define IMAGE_SIZEOF_SHORT_NAME 8
 
+#define IMAGE_ORDINAL_FLAG32 0x80000000
+#define IMAGE_ORDINAL_FLAG64 0x8000000000000000ULL
+
 //typedef struct { unsigned char a[2]; } WORD;
 //typedef struct { unsigned char a[4]; } DWORD;
 //typedef struct { unsigned char a[4]; } LONG;
@@ -152,7 +155,9 @@ typedef unsigned short WORD;
 typedef unsigned int DWORD;
 typedef unsigned int LONG;
 typedef unsigned char BYTE;
-typedef unsigned long long ULONGLONG,*PULONGLONG;
+typedef unsigned long long ULONGLONG, *PULONGLONG;
+
+typedef DWORD rva_t;
 
 typedef struct _IMAGE_DOS_HEADER {    // DOS .EXE header
 	WORD e_magic;                     // Magic number
@@ -291,8 +296,21 @@ typedef struct _IMAGE_SECTION_HEADER {
 	DWORD Characteristics;
 } IMAGE_SECTION_HEADER, *PIMAGE_SECTION_HEADER;
 
+typedef struct _IMAGE_IMPORT_DESCRIPTOR {
+	union {
+		DWORD Characteristics;
+		DWORD OriginalFirstThunk;
+	} DUMMYUNIONNAME;
+	DWORD TimeDateStamp;
+	DWORD ForwarderChain;
+	DWORD Name;
+	DWORD FirstThunk;
+} IMAGE_IMPORT_DESCRIPTOR, *PIMAGE_IMPORT_DESCRIPTOR;
+
 typedef struct {
 	int is_32bit;
+	FILE *fd;
+	long idata_offset;
 	IMAGE_DOS_HEADER dos_header;
 	IMAGE_NT_HEADERS header;
 	PIMAGE_SECTION_HEADER section_table;

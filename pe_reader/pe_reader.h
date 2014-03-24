@@ -15,6 +15,10 @@ void pe_print_optional_header_winspec();
 void pe_print_optional_header_data_directory();
 void pe_print_section_table();
 void pe_print_section_header(int index);
+void pe_print_section_idata();
+void read_rva(char *buffer, rva_t address);
+long rva2offset(rva_t address);
+void pe_print_section_idata_lookup(const char *dll_name, rva_t rva);
 
 char *get_flags(char *buffer, size_t size, int section, int flags);
 char* list_flags(char *buffer, size_t size, int section, int flags);

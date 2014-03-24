@@ -19,16 +19,16 @@ void pe_reader(const char *file) {
 	memset(&s_pe, 0, sizeof(PE_FILE));
 	init_map();
 
-	FILE *fd = fopen(file, "rb");
-	if (fd == NULL) {
+	s_pe.fd = fopen(file, "rb");
+	if (s_pe.fd == NULL) {
 		fprintf(stderr, "ERROR: %s\n", strerror(errno));
 		goto cleanup;
 	}
 
-	clearerr(fd);
+	clearerr(s_pe.fd);
 
-	size_t s = fread(&s_pe.dos_header, sizeof(IMAGE_DOS_HEADER), 1, fd);
-	if (ferror(fd)) {
+	size_t s = fread(&s_pe.dos_header, sizeof(IMAGE_DOS_HEADER), 1, s_pe.fd);
+	if (ferror(s_pe.fd)) {
 		fprintf(stderr, "ERROR: %s\n", strerror(errno));
 		goto cleanup;
 	}
@@ -40,13 +40,13 @@ void pe_reader(const char *file) {
 
 	printf("PE starts at: 0x%08x\n", s_pe.dos_header.e_lfanew);
 
-	if (fseek(fd, s_pe.dos_header.e_lfanew, SEEK_SET) != 0) {
+	if (fseek(s_pe.fd, s_pe.dos_header.e_lfanew, SEEK_SET) != 0) {
 		fprintf(stderr, "ERROR: %s\n", strerror(errno));
 		goto cleanup;
 	}
 
-	s = fread(&s_pe.header, sizeof(IMAGE_NT_HEADERS), 1, fd);
-	if (ferror(fd)) {
+	s = fread(&s_pe.header, sizeof(IMAGE_NT_HEADERS), 1, s_pe.fd);
+	if (ferror(s_pe.fd)) {
 		fprintf(stderr, "ERROR: %s\n", strerror(errno));
 		goto cleanup;
 	}
@@ -67,26 +67,29 @@ void pe_reader(const char *file) {
 	int section_header_offset = s_pe.dos_header.e_lfanew + sizeof(s_pe.header.Signature) +
 			sizeof(s_pe.header.FileHeader) + s_pe.header.FileHeader.SizeOfOptionalHeader;
 	printf("section_header_offset=%08x\n", section_header_offset);
-	if (fseek(fd, section_header_offset, SEEK_SET) != 0) {
+	if (fseek(s_pe.fd, section_header_offset, SEEK_SET) != 0) {
 		fprintf(stderr, "ERROR: %s\n", strerror(errno));
 		goto cleanup;
 	}
 
 	size_t size = sizeof(IMAGE_SECTION_HEADER) * s_pe.header.FileHeader.NumberOfSections;
-	printf("size=%d\n", size);
 	s_pe.section_table = (PIMAGE_SECTION_HEADER) malloc(size);
-	s = fread(s_pe.section_table, sizeof(IMAGE_SECTION_HEADER), s_pe.header.FileHeader.NumberOfSections, fd);
-	if (ferror(fd)) {
+	s = fread(s_pe.section_table, sizeof(IMAGE_SECTION_HEADER), s_pe.header.FileHeader.NumberOfSections, s_pe.fd);
+	if (ferror(s_pe.fd)) {
 		fprintf(stderr, "ERROR: %s\n", strerror(errno));
 		goto cleanup;
 	}
 
 	pe_print_section_table();
 
+	pe_print_section_idata();
+	if (errno) {
+		goto cleanup;
+	}
 
 cleanup:
-	if (fd) {
-		fclose(fd);
+	if (s_pe.fd) {
+		fclose(s_pe.fd);
 	}
 
 	if (s_pe.section_table) {
@@ -219,4 +222,135 @@ void pe_print_section_header(int index) {
 	printf("  Characteristics: %s\n",
 			list_flags(s_buffer, BUFFER_SIZE, SECTION_SECTION_CHARACTERISTICS, p->Characteristics));
 	printf("\n");
+
+	if (strcmp(buf, ".idata") == 0) {
+		printf(".idata_offset=%x\n", p->PointerToRawData);
+		s_pe.idata_offset = p->PointerToRawData;
+	}
+}
+
+void pe_print_section_idata() {
+	title("Import table: .idata");
+	if (fseek(s_pe.fd, s_pe.idata_offset, SEEK_SET) != 0) {
+		fprintf(stderr, "ERROR: %s\n", strerror(errno));
+		goto cleanup;
+	}
+	IMAGE_IMPORT_DESCRIPTOR import_descriptors_table;
+	while (1) {
+		size_t s = fread(&import_descriptors_table, sizeof(IMAGE_IMPORT_DESCRIPTOR), 1, s_pe.fd);
+		if (ferror(s_pe.fd)) {
+			fprintf(stderr, "ERROR: %s\n", strerror(errno));
+			goto cleanup;
+		}
+		if (import_descriptors_table.Name == 0) {
+			break;
+		}
+
+		char dll_name[BUFFER_SIZE];
+		read_rva(dll_name, import_descriptors_table.Name);
+
+//		printf("**OriginalFirstThunk: 0x%08x\n", import_descriptors_table.DUMMYUNIONNAME);
+//		printf("  TimeDateStamp: %d\n", import_descriptors_table.TimeDateStamp);
+//		printf("  ForwarderChain: 0x%08x\n", import_descriptors_table.ForwarderChain);
+//		printf("  Name: 0x%08x (%s)\n", import_descriptors_table.Name, dll_name);
+//		printf("  FirstThunk: 0x%08x\n", import_descriptors_table.FirstThunk);
+//		printf("\n");
+		pe_print_section_idata_lookup(dll_name, (rva_t) import_descriptors_table.DUMMYUNIONNAME.OriginalFirstThunk);
+	}
+
+//	size_t size = sizeof(IMAGE_IMPORT_DESCRIPTOR);
+//	s_pe.import_descriptors = (PIMAGE_IMPORT_DESCRIPTOR) malloc(size);
+
+cleanup:
+	;
+}
+
+void pe_print_section_idata_lookup(const char *dll_name, rva_t rva) {
+	long previous_offset = ftell(s_pe.fd);
+	if (ferror(s_pe.fd)) {
+		fprintf(stderr, "ERROR: %s\n", strerror(errno));
+		goto cleanup;
+	}
+
+	long offset = rva2offset(rva);
+	if (fseek(s_pe.fd, offset, SEEK_SET) != 0) {
+		fprintf(stderr, "ERROR: %s\n", strerror(errno));
+		goto cleanup;
+	}
+
+	size_t size = sizeof(ULONGLONG);
+	if (s_pe.is_32bit) {
+		DWORD IMAGE_ORDINAL_FLAG = IMAGE_ORDINAL_FLAG32;
+		DWORD entry;
+		while(1) {
+			size_t s = fread(&entry, sizeof(DWORD), 1, s_pe.fd);
+			if (ferror(s_pe.fd)) {
+				fprintf(stderr, "ERROR: %s\n", strerror(errno));
+				goto cleanup;
+			}
+			if (entry == 0) {
+				break;
+			} else if (entry & IMAGE_ORDINAL_FLAG) {
+				printf("Look per ordinal: %d\n", entry & ((1 << 16) - 1));
+			} else {
+				char buf[BUFFER_SIZE];
+				read_rva(buf, entry + 2);
+				printf("%s: %s\n", dll_name, buf);
+			}
+		}
+	}
+
+	if (fseek(s_pe.fd, previous_offset, SEEK_SET) != 0) {
+		fprintf(stderr, "ERROR: %s\n", strerror(errno));
+		goto cleanup;
+	}
+
+cleanup:
+	;
+}
+
+void read_rva(char *buffer, rva_t address) {
+	long previous_offset = ftell(s_pe.fd);
+	if (ferror(s_pe.fd)) {
+		fprintf(stderr, "ERROR: %s\n", strerror(errno));
+		goto cleanup;
+	}
+
+	long offset = rva2offset(address);
+	if (fseek(s_pe.fd, offset, SEEK_SET) != 0) {
+		fprintf(stderr, "ERROR: %s\n", strerror(errno));
+		goto cleanup;
+	}
+
+	size_t s = fread(buffer, BUFFER_SIZE, 1, s_pe.fd);
+	if (ferror(s_pe.fd)) {
+		fprintf(stderr, "ERROR: %s\n", strerror(errno));
+		goto cleanup;
+	}
+
+	if (fseek(s_pe.fd, previous_offset, SEEK_SET) != 0) {
+		fprintf(stderr, "ERROR: %s\n", strerror(errno));
+		goto cleanup;
+	}
+
+cleanup:
+	;
+}
+
+long rva2offset(rva_t address) {
+	long section_offset = 0;
+	int index = 0;
+	for (int i = 0; i < s_pe.header.FileHeader.NumberOfSections; i++) {
+		if (address > s_pe.section_table[i].VirtualAddress) {
+			section_offset = address - s_pe.section_table[i].VirtualAddress;
+			index = i;
+		} else {
+			break;
+		}
+	}
+	char buf[IMAGE_SIZEOF_SHORT_NAME + 1];
+	memset(buf, 0, IMAGE_SIZEOF_SHORT_NAME + 1);
+	memcpy(buf, s_pe.section_table[index].Name, IMAGE_SIZEOF_SHORT_NAME);
+	long result = section_offset + s_pe.section_table[index].PointerToRawData;
+	return result;
 }
