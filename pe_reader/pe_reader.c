@@ -27,11 +27,7 @@ void pe_reader(const char *file) {
 
 	clearerr(s_pe.fd);
 
-	size_t s = fread(&s_pe.dos_header, sizeof(IMAGE_DOS_HEADER), 1, s_pe.fd);
-	if (ferror(s_pe.fd)) {
-		fprintf(stderr, "ERROR: %s\n", strerror(errno));
-		goto cleanup;
-	}
+	size_t s = FREAD(&s_pe.dos_header, sizeof(IMAGE_DOS_HEADER), 1);
 
 	if (s_pe.dos_header.e_magic != IMAGE_DOS_SIGNATURE) {
 		fprintf(stderr, "ERROR: This is not a DOS file.\n");
@@ -39,17 +35,9 @@ void pe_reader(const char *file) {
 	}
 
 	printf("PE starts at: 0x%08x\n", s_pe.dos_header.e_lfanew);
+	FSEEK(s_pe.dos_header.e_lfanew);
 
-	if (fseek(s_pe.fd, s_pe.dos_header.e_lfanew, SEEK_SET) != 0) {
-		fprintf(stderr, "ERROR: %s\n", strerror(errno));
-		goto cleanup;
-	}
-
-	s = fread(&s_pe.header, sizeof(IMAGE_NT_HEADERS), 1, s_pe.fd);
-	if (ferror(s_pe.fd)) {
-		fprintf(stderr, "ERROR: %s\n", strerror(errno));
-		goto cleanup;
-	}
+	s = FREAD(&s_pe.header, sizeof(IMAGE_NT_HEADERS), 1);
 
 	if (s_pe.header.Signature != IMAGE_NT_SIGNATURE) {
 		fprintf(stderr, "ERROR: This is not a PE file: 0x%08x\n", s_pe.header.Signature);
@@ -66,23 +54,20 @@ void pe_reader(const char *file) {
 
 	int section_header_offset = s_pe.dos_header.e_lfanew + sizeof(s_pe.header.Signature) +
 			sizeof(s_pe.header.FileHeader) + s_pe.header.FileHeader.SizeOfOptionalHeader;
-	printf("section_header_offset=%08x\n", section_header_offset);
-	if (fseek(s_pe.fd, section_header_offset, SEEK_SET) != 0) {
-		fprintf(stderr, "ERROR: %s\n", strerror(errno));
-		goto cleanup;
-	}
+	FSEEK(section_header_offset);
 
 	size_t size = sizeof(IMAGE_SECTION_HEADER) * s_pe.header.FileHeader.NumberOfSections;
 	s_pe.section_table = (PIMAGE_SECTION_HEADER) malloc(size);
-	s = fread(s_pe.section_table, sizeof(IMAGE_SECTION_HEADER), s_pe.header.FileHeader.NumberOfSections, s_pe.fd);
-	if (ferror(s_pe.fd)) {
-		fprintf(stderr, "ERROR: %s\n", strerror(errno));
-		goto cleanup;
-	}
+	s = FREAD(s_pe.section_table, sizeof(IMAGE_SECTION_HEADER), s_pe.header.FileHeader.NumberOfSections);
 
 	pe_print_section_table();
 
 	pe_print_section_idata();
+	if (errno) {
+		goto cleanup;
+	}
+
+	pe_print_section_edata();
 	if (errno) {
 		goto cleanup;
 	}
@@ -95,6 +80,21 @@ cleanup:
 	if (s_pe.section_table) {
 		free(s_pe.section_table);
 		s_pe.section_table = NULL;
+	}
+
+	if (s_pe.export_address_table) {
+		free(s_pe.export_address_table);
+		s_pe.export_address_table = NULL;
+	}
+
+	if (s_pe.export_name_pointer_table) {
+		free(s_pe.export_name_pointer_table);
+		s_pe.export_name_pointer_table = NULL;
+	}
+
+	if (s_pe.export_ordinal_table) {
+		free(s_pe.export_ordinal_table);
+		s_pe.export_ordinal_table = NULL;
 	}
 }
 
@@ -173,7 +173,7 @@ void pe_print_optional_header_winspec() {
 		printf("MajorImageVersion: %d\n", p->MajorImageVersion);
 		printf("MinorImageVersion: %d\n", p->MinorImageVersion);
 		printf("MajorSubsystemVersion: %d\n", p->MajorSubsystemVersion);
-		printf("MinorSubsystemVersion: %s\n", p->MinorSubsystemVersion);
+		printf("MinorSubsystemVersion: %d\n", p->MinorSubsystemVersion);
 		printf("Win32VersionValue: %d\n", p->Win32VersionValue);
 		printf("SizeOfImage: %d bytes\n", p->SizeOfImage);
 		printf("SizeOfHeaders: %d bytes\n", p->SizeOfHeaders);
@@ -196,6 +196,9 @@ void pe_print_optional_header_data_directory() {
 	for (int i = 0; i < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; i++) {
 		printf("Name: %s (RVA: 0x%08x, Size: %d bytes)\n", map(SECTION_DATA_DIRECTORY, i), dd[i].VirtualAddress, dd[i].Size);
 	}
+
+	s_pe.idata_rva = s_pe.header.OptionalHeader.oh32.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
+	s_pe.edata_rva = s_pe.header.OptionalHeader.oh32.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
 }
 
 void pe_print_section_table() {
@@ -210,7 +213,7 @@ void pe_print_section_header(int index) {
 	char buf[IMAGE_SIZEOF_SHORT_NAME + 1];
 	memset(buf, 0, IMAGE_SIZEOF_SHORT_NAME + 1);
 	memcpy(buf, s_pe.section_table[index].Name, IMAGE_SIZEOF_SHORT_NAME);
-	printf("**Name: %s\n", buf);
+	printf("**Section name: %s\n", buf);
 	printf("  VirtualSize: %d bytes (0x%x)\n", p->Misc, p->Misc);
 	printf("  VirtualAddress: 0x%08x\n", p->VirtualAddress);
 	printf("  SizeOfRawData: %d bytes (0x%x)\n", p->SizeOfRawData, p->SizeOfRawData);
@@ -224,24 +227,24 @@ void pe_print_section_header(int index) {
 	printf("\n");
 
 	if (strcmp(buf, ".idata") == 0) {
-		printf(".idata_offset=%x\n", p->PointerToRawData);
-		s_pe.idata_offset = p->PointerToRawData;
+		s_pe.idata_rva = p->VirtualAddress;
+	} else if (strcmp(buf, ".edata") == 0) {
+		s_pe.edata_rva = p->VirtualAddress;
 	}
 }
 
 void pe_print_section_idata() {
 	title("Import table: .idata");
-	if (fseek(s_pe.fd, s_pe.idata_offset, SEEK_SET) != 0) {
-		fprintf(stderr, "ERROR: %s\n", strerror(errno));
-		goto cleanup;
-	}
+	rva_t rva = s_pe.idata_rva;
+	long offset = rva2offset(rva);
+	FSEEK(offset);
+
 	IMAGE_IMPORT_DESCRIPTOR import_descriptors_table;
-	while (1) {
-		size_t s = fread(&import_descriptors_table, sizeof(IMAGE_IMPORT_DESCRIPTOR), 1, s_pe.fd);
-		if (ferror(s_pe.fd)) {
-			fprintf(stderr, "ERROR: %s\n", strerror(errno));
-			goto cleanup;
-		}
+	int max = 3;
+	int n = 0;
+	while (max < 0 || n < max) {
+		n++;
+		size_t s = FREAD(&import_descriptors_table, sizeof(IMAGE_IMPORT_DESCRIPTOR), 1);
 		if (import_descriptors_table.Name == 0) {
 			break;
 		}
@@ -265,6 +268,79 @@ cleanup:
 	;
 }
 
+void pe_print_section_edata() {
+	rva_t rva = s_pe.edata_rva;
+	if (rva == 0) {
+		return;
+	}
+	title("Export directory table: .edata");
+
+	long offset = rva2offset(rva);
+	FSEEK(offset);
+
+	PIMAGE_EXPORT_DIRECTORY edtp = &s_pe.export_directory_table;
+	size_t s = FREAD(edtp, sizeof(IMAGE_EXPORT_DIRECTORY), 1);
+	printf("Export flag: %d\n", edtp->Characteristics);
+	printf("TimeDateStamp: %d\n", edtp->TimeDateStamp);
+	printf("MajorVersion: %d\n", edtp->MajorVersion);
+	printf("MinorVersion: %d\n", edtp->MinorVersion);
+	char buf[BUFFER_SIZE];
+	read_rva(buf, edtp->Name);
+	printf("Name: 0x%08x (%s)\n", edtp->Name, buf);
+	printf("Base: %d\n", edtp->Base);
+	printf("NumberOfFunctions: %d\n", edtp->NumberOfFunctions);
+	printf("NumberOfNames: %d\n", edtp->NumberOfNames);
+	printf("AddressOfFunctions: 0x%08x\n", edtp->AddressOfFunctions);
+	printf("AddressOfNames: 0x%08x\n", edtp->AddressOfNames);
+	printf("AddressOfNameOrdinals: 0x%08x\n", edtp->AddressOfNameOrdinals);
+
+
+	offset = rva2offset(edtp->AddressOfFunctions);
+	FSEEK(offset);
+	s_pe.export_address_table = (PIMAGE_THUNK_DATA32) malloc(sizeof(IMAGE_THUNK_DATA32) * edtp->NumberOfFunctions);
+	s = FREAD(s_pe.export_address_table, sizeof(IMAGE_THUNK_DATA32), edtp->NumberOfFunctions);
+
+	offset = rva2offset(edtp->AddressOfNames);
+	FSEEK(offset);
+	s_pe.export_name_pointer_table = (DWORD*) malloc(sizeof(DWORD) * edtp->NumberOfNames);
+	s = FREAD(s_pe.export_name_pointer_table, sizeof(DWORD), edtp->NumberOfNames);
+
+	FSEEK(rva2offset(edtp->AddressOfNameOrdinals));
+	s_pe.export_ordinal_table = (WORD*) malloc(sizeof(WORD) * edtp->NumberOfNames);
+	s = FREAD(s_pe.export_ordinal_table, sizeof(WORD), edtp->NumberOfNames);
+
+	for (int i = 0; i < edtp->NumberOfFunctions; i++) {
+		char buf[BUFFER_SIZE];
+		read_rva(buf, s_pe.export_name_pointer_table[i]);
+		printf("Symbol: %s (0x%08x), ", buf, s_pe.export_name_pointer_table[i]);
+
+		if (is_in_export_section(s_pe.export_address_table[i].u1.AddressOfData)) {
+			printf("Forwarder RVA: 0x%08x, ", s_pe.export_address_table[i].u1.ForwarderString);
+		} else if (is_in_code_section(s_pe.export_address_table[i].u1.AddressOfData)) {
+			printf("Function RVA: 0x%08x, ", s_pe.export_address_table[i].u1.Function);
+		} else {
+			printf("Variable RVA: 0x%08x, ", s_pe.export_address_table[i].u1.AddressOfData);
+		}
+		printf("Ordinal: %d\n", s_pe.export_ordinal_table[i] + edtp->Base);
+	}
+
+cleanup:
+	;
+}
+
+int is_in_export_section(rva_t rva) {
+	PIMAGE_DATA_DIRECTORY ddp = s_pe.header.OptionalHeader.oh32.DataDirectory;
+	DWORD address = ddp[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+	DWORD size = ddp[IMAGE_DIRECTORY_ENTRY_EXPORT].Size;
+	return rva >= address && rva <= address + size;
+}
+
+int is_in_code_section(rva_t rva) {
+	DWORD BaseOfCode = s_pe.header.OptionalHeader.oh32.standard.BaseOfCode;
+	DWORD SizeOfCode = s_pe.header.OptionalHeader.oh32.standard.SizeOfCode;
+	return rva >= BaseOfCode && rva <= BaseOfCode + SizeOfCode;
+}
+
 void pe_print_section_idata_lookup(const char *dll_name, rva_t rva) {
 	long previous_offset = ftell(s_pe.fd);
 	if (ferror(s_pe.fd)) {
@@ -273,24 +349,34 @@ void pe_print_section_idata_lookup(const char *dll_name, rva_t rva) {
 	}
 
 	long offset = rva2offset(rva);
-	if (fseek(s_pe.fd, offset, SEEK_SET) != 0) {
-		fprintf(stderr, "ERROR: %s\n", strerror(errno));
-		goto cleanup;
-	}
+	FSEEK(offset);
 
 	size_t size = sizeof(ULONGLONG);
 	if (s_pe.is_32bit) {
-		DWORD IMAGE_ORDINAL_FLAG = IMAGE_ORDINAL_FLAG32;
 		DWORD entry;
 		while(1) {
-			size_t s = fread(&entry, sizeof(DWORD), 1, s_pe.fd);
-			if (ferror(s_pe.fd)) {
-				fprintf(stderr, "ERROR: %s\n", strerror(errno));
-				goto cleanup;
-			}
+			size_t s = FREAD(&entry, sizeof(DWORD), 1);
+
 			if (entry == 0) {
 				break;
-			} else if (entry & IMAGE_ORDINAL_FLAG) {
+			} else if (entry & IMAGE_ORDINAL_FLAG32) {
+				printf("Look per ordinal: %d\n", entry & ((1 << 16) - 1));
+			} else {
+				char buf[BUFFER_SIZE];
+				read_rva(buf, entry + 2);
+				printf("%s: %s\n", dll_name, buf);
+			}
+		}
+	} else {
+		ULONGLONG entry;
+		int max = 100;
+		int n = 0;
+		while(max < 0 || n < max) {
+			n++;
+			size_t s = FREAD(&entry, sizeof(ULONGLONG), 1);
+			if (entry == 0) {
+				break;
+			} else if (entry & IMAGE_ORDINAL_FLAG64) {
 				printf("Look per ordinal: %d\n", entry & ((1 << 16) - 1));
 			} else {
 				char buf[BUFFER_SIZE];
@@ -300,10 +386,7 @@ void pe_print_section_idata_lookup(const char *dll_name, rva_t rva) {
 		}
 	}
 
-	if (fseek(s_pe.fd, previous_offset, SEEK_SET) != 0) {
-		fprintf(stderr, "ERROR: %s\n", strerror(errno));
-		goto cleanup;
-	}
+	FSEEK(previous_offset);
 
 cleanup:
 	;
@@ -317,21 +400,10 @@ void read_rva(char *buffer, rva_t address) {
 	}
 
 	long offset = rva2offset(address);
-	if (fseek(s_pe.fd, offset, SEEK_SET) != 0) {
-		fprintf(stderr, "ERROR: %s\n", strerror(errno));
-		goto cleanup;
-	}
+	FSEEK(offset);
 
-	size_t s = fread(buffer, BUFFER_SIZE, 1, s_pe.fd);
-	if (ferror(s_pe.fd)) {
-		fprintf(stderr, "ERROR: %s\n", strerror(errno));
-		goto cleanup;
-	}
-
-	if (fseek(s_pe.fd, previous_offset, SEEK_SET) != 0) {
-		fprintf(stderr, "ERROR: %s\n", strerror(errno));
-		goto cleanup;
-	}
+	size_t s = FREAD(buffer, BUFFER_SIZE, 1);
+	FSEEK(previous_offset);
 
 cleanup:
 	;
@@ -341,7 +413,7 @@ long rva2offset(rva_t address) {
 	long section_offset = 0;
 	int index = 0;
 	for (int i = 0; i < s_pe.header.FileHeader.NumberOfSections; i++) {
-		if (address > s_pe.section_table[i].VirtualAddress) {
+		if (address >= s_pe.section_table[i].VirtualAddress) {
 			section_offset = address - s_pe.section_table[i].VirtualAddress;
 			index = i;
 		} else {

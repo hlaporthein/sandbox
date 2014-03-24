@@ -1,0 +1,8 @@
+LIBRARY "mylib.dll" BASE=0x20000000
+
+EXPORTS
+coucou
+hello
+hello2 = hello
+hello3 = truc2.dll.kiki
+

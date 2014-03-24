@@ -307,13 +307,41 @@ typedef struct _IMAGE_IMPORT_DESCRIPTOR {
 	DWORD FirstThunk;
 } IMAGE_IMPORT_DESCRIPTOR, *PIMAGE_IMPORT_DESCRIPTOR;
 
+typedef struct _IMAGE_EXPORT_DIRECTORY {
+	DWORD	Characteristics;
+	DWORD	TimeDateStamp;
+	WORD	MajorVersion;
+	WORD	MinorVersion;
+	DWORD	Name;
+	DWORD	Base;
+	DWORD	NumberOfFunctions;
+	DWORD	NumberOfNames;
+	DWORD	AddressOfFunctions;
+	DWORD	AddressOfNames;
+	DWORD	AddressOfNameOrdinals;
+} IMAGE_EXPORT_DIRECTORY, *PIMAGE_EXPORT_DIRECTORY;
+
+typedef struct _IMAGE_THUNK_DATA32 {
+	union {
+		DWORD ForwarderString;
+		DWORD Function;
+		DWORD Ordinal;
+		DWORD AddressOfData;
+	} u1;
+} IMAGE_THUNK_DATA32, *PIMAGE_THUNK_DATA32;
+
 typedef struct {
 	int is_32bit;
 	FILE *fd;
-	long idata_offset;
+	rva_t idata_rva;
+	rva_t edata_rva;
 	IMAGE_DOS_HEADER dos_header;
 	IMAGE_NT_HEADERS header;
 	PIMAGE_SECTION_HEADER section_table;
+	IMAGE_EXPORT_DIRECTORY export_directory_table;
+	PIMAGE_THUNK_DATA32 export_address_table;
+	DWORD *export_name_pointer_table;
+	WORD *export_ordinal_table;
 } PE_FILE;
 
 #endif // MY_WINNT_H

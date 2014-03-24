@@ -13,4 +13,4 @@ dll:
 	gcc -shared -Wl,--strip-all -o bye.dll bye.c
 
 clean:
-	rm -f *.exe *.txt
+	rm -f *.exe *.txt *.dll
