@@ -328,9 +328,13 @@ void pe_print_section_edata() {
 	s = FREAD(s_pe.export_ordinal_table, sizeof(WORD), edtp->NumberOfNames);
 
 	for (int i = 0; i < edtp->NumberOfFunctions; i++) {
-		char buf[BUFFER_SIZE];
-		read_rva(buf, s_pe.export_name_pointer_table[i]);
-		printf("Symbol: %s (0x%08x), ", buf, s_pe.export_name_pointer_table[i]);
+		if (i < edtp->NumberOfNames) {
+			char buf[BUFFER_SIZE];
+			read_rva(buf, s_pe.export_name_pointer_table[i]);
+			printf("Symbol: %s (0x%08x), ", buf, s_pe.export_name_pointer_table[i]);
+		} else {
+			printf("Symbol: [Not defined], ");
+		}
 
 		if (is_in_export_section(s_pe.export_address_table[i].u1.AddressOfData)) {
 			read_rva(buf, s_pe.export_address_table[i].u1.ForwarderString);
@@ -416,11 +420,7 @@ char *get_section(rva_t rva) {
 }
 
 void pe_print_section_idata_lookup(const char *dll_name, rva_t rva) {
-	long previous_offset = ftell(s_pe.fd);
-	if (ferror(s_pe.fd)) {
-		fprintf(stderr, "ERROR: %s\n", strerror(errno));
-		goto cleanup;
-	}
+	long previous_offset = FTELL();
 
 	long offset = rva2offset(rva);
 	FSEEK(offset);
@@ -434,11 +434,14 @@ void pe_print_section_idata_lookup(const char *dll_name, rva_t rva) {
 			if (entry == 0) {
 				break;
 			} else if (entry & IMAGE_ORDINAL_FLAG32) {
-				printf("Look per ordinal: %d\n", entry & ((1 << 16) - 1));
+				printf("(Ordinal) %d\n", entry & ((1 << 16) - 1));
 			} else {
-				char buf[BUFFER_SIZE];
-				read_rva(buf, entry + 2);
-				printf("%s: %s\n", dll_name, buf);
+				PIMAGE_IMPORT_BY_NAME p = (PIMAGE_IMPORT_BY_NAME) malloc(1024);
+				long p_offset = FTELL();
+				FSEEK(rva2offset(entry));
+				s = FREAD(p, 1024, 1);
+				FSEEK(p_offset);
+				printf("(Name) %s: %s %d(0x%04x)\n", dll_name, p->Name, p->Hint, p->Hint);
 			}
 		}
 	} else {
@@ -451,11 +454,14 @@ void pe_print_section_idata_lookup(const char *dll_name, rva_t rva) {
 			if (entry == 0) {
 				break;
 			} else if (entry & IMAGE_ORDINAL_FLAG64) {
-				printf("Look per ordinal: %d\n", entry & ((1 << 16) - 1));
+				printf("(Ordinal) %d\n", entry & ((1 << 16) - 1));
 			} else {
-				char buf[BUFFER_SIZE];
-				read_rva(buf, entry + 2);
-				printf("%s: %s\n", dll_name, buf);
+				PIMAGE_IMPORT_BY_NAME p = (PIMAGE_IMPORT_BY_NAME) malloc(1024);
+				long p_offset = FTELL();
+				FSEEK(rva2offset(entry));
+				s = FREAD(p, 1024, 1);
+				FSEEK(p_offset);
+				printf("(Name) %s: %s %d(0x%04x)\n", dll_name, p->Name, p->Hint, p->Hint);
 			}
 		}
 	}

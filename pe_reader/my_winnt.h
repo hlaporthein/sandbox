@@ -343,6 +343,11 @@ typedef struct _IMAGE_BASE_RELOCATION {
 	DWORD SizeOfBlock;
 } IMAGE_BASE_RELOCATION, *PIMAGE_BASE_RELOCATION;
 
+typedef struct _IMAGE_IMPORT_BY_NAME {
+	WORD Hint;
+	BYTE Name[1];
+} IMAGE_IMPORT_BY_NAME, *PIMAGE_IMPORT_BY_NAME;
+
 typedef struct {
 	int is_32bit;
 	FILE *fd;
