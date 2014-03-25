@@ -9,11 +9,20 @@
 
 char s_buffer[BUFFER_SIZE];
 PE_FILE s_pe;
-
+char **section_list = NULL;
 
 void title(const char *title) {
 	printf("\n%s-----------------------\n", title);
 };
+
+void print_section_list(int max) {
+	if (max <= 0) {
+		max = s_pe.header.FileHeader.NumberOfSections;
+	}
+	for (int i = 0; i < max; i++) {
+		printf("section[%d]=%s\n", i, section_list[i]);
+	}
+}
 
 void pe_reader(const char *file) {
 	memset(&s_pe, 0, sizeof(PE_FILE));
@@ -68,6 +77,11 @@ void pe_reader(const char *file) {
 	}
 
 	pe_print_section_edata();
+	if (errno) {
+		goto cleanup;
+	}
+
+	pe_print_section_reloc();
 	if (errno) {
 		goto cleanup;
 	}
@@ -199,10 +213,12 @@ void pe_print_optional_header_data_directory() {
 
 	s_pe.idata_rva = s_pe.header.OptionalHeader.oh32.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
 	s_pe.edata_rva = s_pe.header.OptionalHeader.oh32.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+	s_pe.reloc_rva = s_pe.header.OptionalHeader.oh32.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress;
 }
 
 void pe_print_section_table() {
 	title("Section Table");
+	section_list = (char**) malloc(s_pe.header.FileHeader.NumberOfSections * sizeof(char*));
 	for (int i = 0; i < s_pe.header.FileHeader.NumberOfSections; i++) {
 		pe_print_section_header(i);
 	}
@@ -210,10 +226,10 @@ void pe_print_section_table() {
 
 void pe_print_section_header(int index) {
 	PIMAGE_SECTION_HEADER p = &(s_pe.section_table[index]);
-	char buf[IMAGE_SIZEOF_SHORT_NAME + 1];
-	memset(buf, 0, IMAGE_SIZEOF_SHORT_NAME + 1);
-	memcpy(buf, s_pe.section_table[index].Name, IMAGE_SIZEOF_SHORT_NAME);
-	printf("**Section name: %s\n", buf);
+	section_list[index] = (char*) malloc((IMAGE_SIZEOF_SHORT_NAME + 1) * sizeof(char));
+	memset(section_list[index], 0, IMAGE_SIZEOF_SHORT_NAME + 1);
+	memcpy(section_list[index], s_pe.section_table[index].Name, IMAGE_SIZEOF_SHORT_NAME);
+	printf("**Section name: %s\n", section_list[index]);
 	printf("  VirtualSize: %d bytes (0x%x)\n", p->Misc, p->Misc);
 	printf("  VirtualAddress: 0x%08x\n", p->VirtualAddress);
 	printf("  SizeOfRawData: %d bytes (0x%x)\n", p->SizeOfRawData, p->SizeOfRawData);
@@ -226,10 +242,12 @@ void pe_print_section_header(int index) {
 			list_flags(s_buffer, BUFFER_SIZE, SECTION_SECTION_CHARACTERISTICS, p->Characteristics));
 	printf("\n");
 
-	if (strcmp(buf, ".idata") == 0) {
+	if (strcmp(section_list[index], ".idata") == 0) {
 		s_pe.idata_rva = p->VirtualAddress;
-	} else if (strcmp(buf, ".edata") == 0) {
+	} else if (strcmp(section_list[index], ".edata") == 0) {
 		s_pe.edata_rva = p->VirtualAddress;
+	} else if (strcmp(section_list[index], ".reloc") == 0) {
+		s_pe.reloc_rva = p->VirtualAddress;
 	}
 }
 
@@ -315,7 +333,8 @@ void pe_print_section_edata() {
 		printf("Symbol: %s (0x%08x), ", buf, s_pe.export_name_pointer_table[i]);
 
 		if (is_in_export_section(s_pe.export_address_table[i].u1.AddressOfData)) {
-			printf("Forwarder RVA: 0x%08x, ", s_pe.export_address_table[i].u1.ForwarderString);
+			read_rva(buf, s_pe.export_address_table[i].u1.ForwarderString);
+			printf("Forwarder RVA: 0x%08x (%s), ", s_pe.export_address_table[i].u1.ForwarderString, buf);
 		} else if (is_in_code_section(s_pe.export_address_table[i].u1.AddressOfData)) {
 			printf("Function RVA: 0x%08x, ", s_pe.export_address_table[i].u1.Function);
 		} else {
@@ -339,6 +358,61 @@ int is_in_code_section(rva_t rva) {
 	DWORD BaseOfCode = s_pe.header.OptionalHeader.oh32.standard.BaseOfCode;
 	DWORD SizeOfCode = s_pe.header.OptionalHeader.oh32.standard.SizeOfCode;
 	return rva >= BaseOfCode && rva <= BaseOfCode + SizeOfCode;
+}
+
+void pe_print_section_reloc() {
+	title("Relocation table: .reloc");
+	rva_t rva = s_pe.reloc_rva;
+	if (rva == 0) {
+		printf("No relocation table.\n");
+		return;
+	}
+	long offset = rva2offset(rva);
+	FSEEK(offset);
+	size_t reloc_size = s_pe.header.OptionalHeader.oh32.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].Size;
+
+	char *reloc_buffer = (char*) malloc(reloc_size);
+	size_t s = FREAD(reloc_buffer, 1, reloc_size);
+	char *cursor = reloc_buffer;
+	while (cursor < reloc_buffer + s) {
+		PIMAGE_BASE_RELOCATION headerp = (PIMAGE_BASE_RELOCATION) cursor;
+		cursor += sizeof(IMAGE_BASE_RELOCATION);
+		printf("Page RVA: 0x%08x (%s)\n", headerp->VirtualAddress, get_section(headerp->VirtualAddress));
+		printf("Block size: %d bytes (0x%08x)\n", headerp->SizeOfBlock, headerp->SizeOfBlock);
+
+		int field_nbr = (headerp->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(WORD);
+		WORD *fields = (WORD*) cursor;
+		cursor += headerp->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION);
+
+		printf("Number of fields: %d\n", field_nbr);
+		for (int i = 0; i < field_nbr; i++) {
+			int type = (fields[i] & 0xf000) >> 12;
+			int offset = fields[i] & 0x0fff;
+			printf("Type: %s, Offset: 0x%04x\n", map(SECTION_RELOC, type), offset);
+		}
+
+//		printf("cursor=%x\n", cursor);
+//		printf("reloc_buffer=%x\n", reloc_buffer);
+//		printf("s=%x\n", s);
+//		printf("reloc_buffer + s=%x\n", reloc_buffer + s);
+		printf("\n");
+	}
+
+cleanup:
+	;
+}
+
+char *get_section(rva_t rva) {
+	long section_offset = 0;
+	int index = 0;
+	for (int i = 0; i < s_pe.header.FileHeader.NumberOfSections; i++) {
+		if (rva >= s_pe.section_table[i].VirtualAddress) {
+			if (rva <= s_pe.section_table[i].VirtualAddress + s_pe.section_table[i].SizeOfRawData) {
+				return section_list[i];
+			}
+		}
+	}
+	return "Unknown";
 }
 
 void pe_print_section_idata_lookup(const char *dll_name, rva_t rva) {

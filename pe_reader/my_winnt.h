@@ -8,6 +8,7 @@
 #define SECTION_DLL_CHARACTERISICS 4
 #define SECTION_DATA_DIRECTORY 5
 #define SECTION_SECTION_CHARACTERISTICS 6
+#define SECTION_RELOC 7
 
 // Flags for imgage's characteristics
 #define IMAGE_FILE_RELOCS_STRIPPED			1
@@ -145,6 +146,13 @@
 
 #define IMAGE_ORDINAL_FLAG32 0x80000000
 #define IMAGE_ORDINAL_FLAG64 0x8000000000000000ULL
+
+#define IMAGE_REL_BASED_ABSOLUTE		0
+#define IMAGE_REL_BASED_HIGH			1
+#define IMAGE_REL_BASED_LOW				2
+#define IMAGE_REL_BASED_HIGHLOW			3
+#define IMAGE_REL_BASED_HIGHADJ			4
+#define IMAGE_REL_BASED_MIPS_JMPADDR	5
 
 //typedef struct { unsigned char a[2]; } WORD;
 //typedef struct { unsigned char a[4]; } DWORD;
@@ -330,11 +338,17 @@ typedef struct _IMAGE_THUNK_DATA32 {
 	} u1;
 } IMAGE_THUNK_DATA32, *PIMAGE_THUNK_DATA32;
 
+typedef struct _IMAGE_BASE_RELOCATION {
+	DWORD VirtualAddress;
+	DWORD SizeOfBlock;
+} IMAGE_BASE_RELOCATION, *PIMAGE_BASE_RELOCATION;
+
 typedef struct {
 	int is_32bit;
 	FILE *fd;
 	rva_t idata_rva;
 	rva_t edata_rva;
+	rva_t reloc_rva;
 	IMAGE_DOS_HEADER dos_header;
 	IMAGE_NT_HEADERS header;
 	PIMAGE_SECTION_HEADER section_table;

@@ -33,6 +33,9 @@ long rva2offset(rva_t address);
 void pe_print_section_idata();
 void pe_print_section_idata_lookup(const char *dll_name, rva_t rva);
 void pe_print_section_edata();
+void pe_print_section_reloc();
+char *get_section(rva_t rva);
+void print_section_list(int max);
 
 int is_in_export_section(rva_t rva);
 int is_in_code_section(rva_t rva);

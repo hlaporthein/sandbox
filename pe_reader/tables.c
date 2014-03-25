@@ -141,6 +141,13 @@ void init_map() {
 	set_record(SECTION_SECTION_CHARACTERISTICS, IMAGE_SCN_MEM_EXECUTE			, "Can be executed as code");
 	set_record(SECTION_SECTION_CHARACTERISTICS, IMAGE_SCN_MEM_READ				, "Readable");
 	set_record(SECTION_SECTION_CHARACTERISTICS, IMAGE_SCN_MEM_WRITE				, "Writable");
+
+	set_record(SECTION_RELOC, IMAGE_REL_BASED_ABSOLUTE		, "ABSOLUTE");
+	set_record(SECTION_RELOC, IMAGE_REL_BASED_HIGH			, "HIGH");
+	set_record(SECTION_RELOC, IMAGE_REL_BASED_LOW			, "LOW");
+	set_record(SECTION_RELOC, IMAGE_REL_BASED_HIGHLOW		, "HIGHLOW");
+	set_record(SECTION_RELOC, IMAGE_REL_BASED_HIGHADJ		, "Not understood");
+	set_record(SECTION_RELOC, IMAGE_REL_BASED_MIPS_JMPADDR	, "Not understood");
 }
 
 char* map(int section, int code) {
