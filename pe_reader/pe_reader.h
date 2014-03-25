@@ -43,6 +43,7 @@ void pe_print_section_edata();
 void pe_print_section_reloc();
 char *get_section(rva_t rva);
 void print_section_list(int max);
+void pe_print_section_iat();
 
 int is_in_export_section(rva_t rva);
 int is_in_code_section(rva_t rva);

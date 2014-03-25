@@ -86,6 +86,11 @@ void pe_reader(const char *file) {
 		goto cleanup;
 	}
 
+	pe_print_section_iat();
+	if (errno) {
+		goto cleanup;
+	}
+
 cleanup:
 	if (s_pe.fd) {
 		fclose(s_pe.fd);
@@ -214,6 +219,7 @@ void pe_print_optional_header_data_directory() {
 	s_pe.idata_rva = s_pe.header.OptionalHeader.oh32.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
 	s_pe.edata_rva = s_pe.header.OptionalHeader.oh32.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
 	s_pe.reloc_rva = s_pe.header.OptionalHeader.oh32.DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress;
+	s_pe.iat_rva = s_pe.header.OptionalHeader.oh32.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].VirtualAddress;
 }
 
 void pe_print_section_table() {
@@ -252,7 +258,7 @@ void pe_print_section_header(int index) {
 }
 
 void pe_print_section_idata() {
-	title("Import table: .idata");
+	title("Import table");
 	rva_t rva = s_pe.idata_rva;
 	long offset = rva2offset(rva);
 	FSEEK(offset);
@@ -291,7 +297,7 @@ void pe_print_section_edata() {
 	if (rva == 0) {
 		return;
 	}
-	title("Export directory table: .edata");
+	title("Export directory table");
 
 	long offset = rva2offset(rva);
 	FSEEK(offset);
@@ -365,7 +371,7 @@ int is_in_code_section(rva_t rva) {
 }
 
 void pe_print_section_reloc() {
-	title("Relocation table: .reloc");
+	title("Relocation table");
 	rva_t rva = s_pe.reloc_rva;
 	if (rva == 0) {
 		printf("No relocation table.\n");
@@ -400,6 +406,39 @@ void pe_print_section_reloc() {
 //		printf("s=%x\n", s);
 //		printf("reloc_buffer + s=%x\n", reloc_buffer + s);
 		printf("\n");
+	}
+
+cleanup:
+	;
+}
+
+void pe_print_section_iat() {
+	title("Import Address Table (IAT)");
+	rva_t rva = s_pe.iat_rva;
+	if (rva == 0) {
+		printf("No IAT (bug?).\n");
+		return;
+	}
+	long offset = rva2offset(rva);
+	FSEEK(offset);
+	size_t iat_size = s_pe.header.OptionalHeader.oh32.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT].Size;
+	int iat_nbr = iat_size / sizeof(IMAGE_THUNK_DATA32);
+
+	PIMAGE_THUNK_DATA32 iatp = (PIMAGE_THUNK_DATA32) malloc(iat_size);
+	size_t s = FREAD(iatp, sizeof(IMAGE_THUNK_DATA32), iat_nbr);
+	for (int i = 0; i < iat_nbr; i++) {
+		rva_t key = rva + i * sizeof(IMAGE_THUNK_DATA32);
+		rva_t value = (rva_t) iatp[i].u1.Function;
+		if (value == 0) {
+			printf("RVA 0x%08x: 0x%08x\n", key, value);
+		} else {
+			PIMAGE_IMPORT_BY_NAME p = (PIMAGE_IMPORT_BY_NAME) malloc(1024);
+			long p_offset = FTELL();
+			FSEEK(rva2offset(value));
+			s = FREAD(p, 1024, 1);
+			FSEEK(p_offset);
+			printf("RVA 0x%08x: 0x%08x (Name: %s, Ordinal: %d)\n", key, value, p->Name, p->Hint);
+		}
 	}
 
 cleanup:

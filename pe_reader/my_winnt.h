@@ -354,6 +354,7 @@ typedef struct {
 	rva_t idata_rva;
 	rva_t edata_rva;
 	rva_t reloc_rva;
+	rva_t iat_rva;
 	IMAGE_DOS_HEADER dos_header;
 	IMAGE_NT_HEADERS header;
 	PIMAGE_SECTION_HEADER section_table;
