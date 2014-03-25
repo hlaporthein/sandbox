@@ -1,0 +1,1 @@
+LIBRARY "mylib2.dll" BASE=0x20000000
