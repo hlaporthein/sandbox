@@ -22,6 +22,7 @@ void version() {
 }
 
 int xflag = 0;
+int dflag = 0;
 char *file = NULL;
 
 void manage_options(int argc, char *argv[]) {
@@ -30,7 +31,7 @@ void manage_options(int argc, char *argv[]) {
 
 	opterr = 0;
 
-	while ((c = getopt(argc, argv, "vxh")) != -1) {
+	while ((c = getopt(argc, argv, "vxhd")) != -1) {
 		switch (c) {
 			case 'h':
 				help(0);
@@ -40,6 +41,9 @@ void manage_options(int argc, char *argv[]) {
 				break;
 			case 'v':
 				version();
+				break;
+			case 'd':
+				dflag = 1;
 				break;
 			case '?':
 				if (isprint(optopt)) {

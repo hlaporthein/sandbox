@@ -153,6 +153,7 @@
 #define IMAGE_REL_BASED_HIGHLOW			3
 #define IMAGE_REL_BASED_HIGHADJ			4
 #define IMAGE_REL_BASED_MIPS_JMPADDR	5
+#define IMAGE_REL_BASED_DIR64			10
 
 //typedef struct { unsigned char a[2]; } WORD;
 //typedef struct { unsigned char a[4]; } DWORD;
@@ -164,6 +165,8 @@ typedef unsigned int DWORD;
 typedef unsigned int LONG;
 typedef unsigned char BYTE;
 typedef unsigned long long ULONGLONG, *PULONGLONG;
+
+typedef void *PVOID, *LPVOID;
 
 typedef DWORD rva_t;
 
@@ -304,6 +307,7 @@ typedef struct _IMAGE_SECTION_HEADER {
 	DWORD Characteristics;
 } IMAGE_SECTION_HEADER, *PIMAGE_SECTION_HEADER;
 
+// IMPORT DIRECTORY TABLE
 typedef struct _IMAGE_IMPORT_DESCRIPTOR {
 	union {
 		DWORD Characteristics;
@@ -338,6 +342,15 @@ typedef struct _IMAGE_THUNK_DATA32 {
 	} u1;
 } IMAGE_THUNK_DATA32, *PIMAGE_THUNK_DATA32;
 
+typedef struct _IMAGE_THUNK_DATA64 {
+	union {
+		ULONGLONG ForwarderString;
+		ULONGLONG Function;
+		ULONGLONG Ordinal;
+		ULONGLONG AddressOfData;
+	} u1;
+} IMAGE_THUNK_DATA64, *PIMAGE_THUNK_DATA64;
+
 typedef struct _IMAGE_BASE_RELOCATION {
 	DWORD VirtualAddress;
 	DWORD SizeOfBlock;
@@ -348,6 +361,31 @@ typedef struct _IMAGE_IMPORT_BY_NAME {
 	BYTE Name[1];
 } IMAGE_IMPORT_BY_NAME, *PIMAGE_IMPORT_BY_NAME;
 
+typedef struct _IMAGE_RUNTIME_FUNCTION_ENTRY_MIPS {
+	DWORD BeginAddress;
+	DWORD EndAddress;
+	PVOID ExceptionHandler;
+	PVOID HandlerData;
+	DWORD PrologEndAddress;
+} IMAGE_RUNTIME_FUNCTION_ENTRY_MIPS, *PIMAGE_RUNTIME_FUNCTION_ENTRY_MIPS;
+
+typedef struct _IMAGE_PDATA_ENTRY {
+	DWORD StartingAddress;
+	DWORD EndingAddress;
+	DWORD UnwindInfo;
+} IMAGE_PDATA_ENTRY, *PIMAGE_PDATA_ENTRY;
+
+typedef struct _IMAGE_DELAY_IMPORT_DESCRIPTOR {
+	DWORD Attributes;
+	DWORD Name;
+	DWORD ModuleHandle;
+	DWORD DelayImportAddressTable;
+	DWORD DelayImportNameTable;
+	DWORD BoundDelayImportTable;
+	DWORD UnloadDelayImportTable;
+	DWORD Timestamp;
+} IMAGE_DELAY_IMPORT_DESCRIPTOR, *PIMAGE_DELAY_IMPORT_DESCRIPTOR;
+
 typedef struct {
 	int is_32bit;
 	FILE *fd;
@@ -355,6 +393,9 @@ typedef struct {
 	rva_t edata_rva;
 	rva_t reloc_rva;
 	rva_t iat_rva;
+	rva_t except_rva;
+	rva_t delay_rva;
+	size_t reloc_size;
 	IMAGE_DOS_HEADER dos_header;
 	IMAGE_NT_HEADERS header;
 	PIMAGE_SECTION_HEADER section_table;
@@ -362,6 +403,7 @@ typedef struct {
 	PIMAGE_THUNK_DATA32 export_address_table;
 	DWORD *export_name_pointer_table;
 	WORD *export_ordinal_table;
+	PIMAGE_DATA_DIRECTORY dd;
 } PE_FILE;
 
 #endif // MY_WINNT_H

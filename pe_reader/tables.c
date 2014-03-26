@@ -4,6 +4,8 @@
 #include "pe_reader.h"
 #include "my_winnt.h"
 
+extern char s_buffer[BUFFER_SIZE];
+
 typedef struct {
 	int code;
 	char *label;
@@ -148,6 +150,7 @@ void init_map() {
 	set_record(SECTION_RELOC, IMAGE_REL_BASED_HIGHLOW		, "HIGHLOW");
 	set_record(SECTION_RELOC, IMAGE_REL_BASED_HIGHADJ		, "Not understood");
 	set_record(SECTION_RELOC, IMAGE_REL_BASED_MIPS_JMPADDR	, "Not understood");
+	set_record(SECTION_RELOC, IMAGE_REL_BASED_DIR64			, "HIGHLOW64");
 }
 
 char* map(int section, int code) {
@@ -156,7 +159,8 @@ char* map(int section, int code) {
 			return hashmap[i].label;
 		}
 	}
-	return "Label to be defined.";
+	snprintf(s_buffer, BUFFER_SIZE, "Label to be defined: %d", code);
+	return s_buffer;
 }
 
 char* get_flags(char *buffer, size_t size, int section, int flags) {
