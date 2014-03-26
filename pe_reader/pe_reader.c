@@ -517,10 +517,14 @@ void pe_print_section_iat() {
 
 		PIMAGE_THUNK_DATA64 iatp = (PIMAGE_THUNK_DATA64) malloc(iat_size);
 		size_t s = FREAD(iatp, sizeof(IMAGE_THUNK_DATA64), iat_nbr);
-		iat_nbr = (iat_nbr > 10) ? 10 : iat_nbr;
+		//iat_nbr = (iat_nbr > 10) ? 10 : iat_nbr;
 		for (int i = 0; i < iat_nbr; i++) {
 			rva_t key = rva + i * sizeof(IMAGE_THUNK_DATA64);
 			ULONGLONG value = (ULONGLONG) iatp[i].u1.Function;
+			if (value > 0x00000000ffffffff) {
+				printf("IAT not parsable.\n");
+				break;
+			}
 			if (value == 0) {
 				printf("RVA 0x%08x: 0x%016llx\n", key, value);
 			} else {
