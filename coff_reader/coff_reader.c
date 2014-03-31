@@ -52,6 +52,7 @@ void coff_reader(const char *file) {
 	s = FREAD(s_coff.section_table, sizeof(IMAGE_SECTION_HEADER), s_coff.header.NumberOfSections);
 
 	coff_print_section_table();
+	coff_print_symbol_table();
 
 cleanup:
 	if (s_coff.fd) {
@@ -120,18 +121,20 @@ void print_relocation_table(PIMAGE_SECTION_HEADER p) {
 	long previous_offset = FTELL();
 	FSEEK(p->PointerToRelocations);
 	int size = p->NumberOfRelocations * sizeof(IMAGE_RELOCATION);
-	IMAGE_RELOCATION x;
-	printf("sizeof(IMAGE_RELOCATION)=%d\n", sizeof(x));
-	printf("sizeof(IMAGE_RELOCATION)=%d\n", sizeof(x.VirtualAddress));
-	printf("sizeof(IMAGE_RELOCATION)=%d\n", sizeof(x.SymbolTableIndex));
-	printf("sizeof(IMAGE_RELOCATION)=%d\n", sizeof(x.Type));
 	PIMAGE_RELOCATION reloc_entries = (PIMAGE_RELOCATION) malloc(size);
 	FREAD(reloc_entries, sizeof(IMAGE_RELOCATION), p->NumberOfRelocations);
 
 	for (int i = 0; i < p->NumberOfRelocations; i++) {
 		printf("  VirtualAddress: 0x%08x\n", reloc_entries[i].VirtualAddress);
 		printf("  SymbolTableIndex: %d\n", reloc_entries[i].SymbolTableIndex);
-		printf("  Type: 0x%04x (%s)\n", reloc_entries[i].Type, map(SECTION_COFF_RELOC, reloc_entries[i].Type));
+		switch(s_coff.header.Machine) {
+			case IMAGE_FILE_MACHINE_I386:
+				printf("  Type: 0x%04x (%s)\n", reloc_entries[i].Type, map(SECTION_COFF_RELOC_I386, reloc_entries[i].Type));
+				break;
+			case IMAGE_FILE_MACHINE_AMD64:
+				printf("  Type: 0x%04x (%s)\n", reloc_entries[i].Type, map(SECTION_COFF_RELOC_AMD64, reloc_entries[i].Type));
+				break;
+		}
 	}
 
 	FSEEK(previous_offset);
@@ -155,6 +158,60 @@ void coff_print_directive_section(PIMAGE_SECTION_HEADER p) {
 	printf("  Content: %s\n", directive_buffer);
 
 	FSEEK(previous_offset);
+}
+
+void coff_print_symbol_table() {
+	title("Symbols Table");
+	long previous_offset = FTELL();
+	FSEEK(s_coff.header.PointerToSymbolTable);
+
+	int size = s_coff.header.NumberOfSymbols * sizeof(IMAGE_SYMBOL);
+	PIMAGE_SYMBOL symbol_entries = (PIMAGE_SYMBOL) malloc(size);
+	FREAD(symbol_entries, sizeof(IMAGE_SYMBOL), s_coff.header.NumberOfSymbols);
+
+	int string_table_offset = s_coff.header.PointerToSymbolTable + size;
+
+	for (int i = 0; i < s_coff.header.NumberOfSymbols; i++) {
+		char buf[1024];
+		memset(buf, 0, 1024);
+		if (symbol_entries[i].N.Name.Short == 0) {
+			read_offset(buf, 1024, string_table_offset + symbol_entries[i].N.Name.Long);
+			printf("%d/Name: %s (long)\n", i, buf);
+		} else {
+			char buf[9];
+			strncpy(buf, symbol_entries[i].N.ShortName, 8);
+			buf[8] = 0;
+			printf("%d/Name: %s (short)\n", i, buf);
+		}
+
+		printf("  Value: 0x%08x\n", symbol_entries[i].Value);
+
+		if (symbol_entries[i].SectionNumber <= 0) {
+			printf("  SectionNumber: %d (%s)\n",
+				symbol_entries[i].SectionNumber, map(SECTION_SECTION_NUMBER_VALUE, symbol_entries[i].SectionNumber));
+		} else {
+			printf("  SectionNumber: %d (%s)\n",
+				symbol_entries[i].SectionNumber, s_coff.section_table[symbol_entries[i].SectionNumber - 1].Name);
+		}
+
+		printf("  Type: %s\n", map(SECTION_SYMBOL_TYPE, symbol_entries[i].Type));
+		printf("  StorageClass: %s\n", map(SECTION_STORAGE_CLASS, symbol_entries[i].StorageClass));
+		printf("  NumberOfAuxSymbols: %d\n", symbol_entries[i].NumberOfAuxSymbols);
+		printf("\n");
+	}
+
+	FSEEK(previous_offset);
+}
+
+void read_offset(char *buf, size_t size, int offset) {
+	long previous_offset = FTELL();
+	FSEEK(offset);
+
+	size_t s = FREAD(buf, size, 1);
+	FSEEK(previous_offset);
+
+cleanup:
+	;
 }
 
 int has_bom(const char *buffer) {

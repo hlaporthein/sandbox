@@ -33,7 +33,9 @@ void coff_print_standard_header();
 void coff_print_section_table();
 void coff_print_section_header(int index);
 void coff_print_directive_section(PIMAGE_SECTION_HEADER p);
+void coff_print_symbol_table();
 void print_section_list(int max);
+void read_offset(char *buf, size_t size, int offset);
 int has_bom(const char *buffer);
 void print_relocation_table(PIMAGE_SECTION_HEADER p);
 
@@ -41,7 +43,9 @@ char *get_flags(char *buffer, size_t size, int section, int flags);
 char* list_flags(char *buffer, size_t size, int section, int flags);
 int has_flags(int flag, int flags);
 
+#ifdef __MINGW32__
 size_t strlcat(char *dst, char *src, size_t size);
+#endif
 
 void set_record(int section, int code, char *label);
 void init_map();
