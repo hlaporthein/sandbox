@@ -22,7 +22,7 @@ int main() {
 	}
 
 	int status = 0;
-	int thread_nb = 2;
+	int thread_nb = 10;
 	pthread_t threads[thread_nb];
 	int id[thread_nb];
 
