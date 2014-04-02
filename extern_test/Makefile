@@ -14,5 +14,7 @@ all:
 	$(MASM32_DIR)/bin/ml //c //coff //Foextern.o //Cp extern.asm
 	ld extern.o libasm.dll $(DRIVE_C)/Windows/System32/kernel32.dll -o extern.exe
 
+	ld libasm.dll --out-implib
+
 clean:
 	rm -f *.exe *.o *.dll
