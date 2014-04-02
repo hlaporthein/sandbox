@@ -12,3 +12,6 @@ pe_reader.exe: $(OBJECTS)
 
 clean:
 	rm -f *.exe *.o
+
+install: all
+	cp -f pe_reader.exe /usr/local/bin
