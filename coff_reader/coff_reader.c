@@ -124,15 +124,16 @@ void print_relocation_table(PIMAGE_SECTION_HEADER p) {
 	PIMAGE_RELOCATION reloc_entries = (PIMAGE_RELOCATION) malloc(size);
 	FREAD(reloc_entries, sizeof(IMAGE_RELOCATION), p->NumberOfRelocations);
 
+	printf("  Relocations:\n");
 	for (int i = 0; i < p->NumberOfRelocations; i++) {
-		printf("  VirtualAddress: 0x%08x\n", reloc_entries[i].VirtualAddress);
-		printf("  SymbolTableIndex: %d\n", reloc_entries[i].SymbolTableIndex);
+		printf("    VirtualAddress: 0x%08x\n", reloc_entries[i].VirtualAddress);
+		printf("    SymbolTableIndex: %d\n", reloc_entries[i].SymbolTableIndex);
 		switch(s_coff.header.Machine) {
 			case IMAGE_FILE_MACHINE_I386:
-				printf("  Type: 0x%04x (%s)\n", reloc_entries[i].Type, map(SECTION_COFF_RELOC_I386, reloc_entries[i].Type));
+				printf("    Type: 0x%04x (%s)\n", reloc_entries[i].Type, map(SECTION_COFF_RELOC_I386, reloc_entries[i].Type));
 				break;
 			case IMAGE_FILE_MACHINE_AMD64:
-				printf("  Type: 0x%04x (%s)\n", reloc_entries[i].Type, map(SECTION_COFF_RELOC_AMD64, reloc_entries[i].Type));
+				printf("    Type: 0x%04x (%s)\n", reloc_entries[i].Type, map(SECTION_COFF_RELOC_AMD64, reloc_entries[i].Type));
 				break;
 		}
 	}
