@@ -2,7 +2,7 @@
 #include <windows.h>
 
 LONG WINAPI e(LPEXCEPTION_POINTERS ExceptionInfo) {
-	printf("Exception Handled ...\n");
+	printf("Exception Handled...\n");
 	char buf[8192];
 	memset(buf, 0, 8192);
 
@@ -14,7 +14,9 @@ LONG WINAPI e(LPEXCEPTION_POINTERS ExceptionInfo) {
 	HMODULE Hand = LoadLibrary("NTDLL.DLL");
 	int res = FormatMessage(
 		FORMAT_MESSAGE_FROM_SYSTEM |
-		FORMAT_MESSAGE_FROM_HMODULE,
+		FORMAT_MESSAGE_FROM_HMODULE |
+		FORMAT_MESSAGE_ARGUMENT_ARRAY |
+		FORMAT_MESSAGE_IGNORE_INSERTS,
 		Hand,
 		ExceptionInfo->ExceptionRecord->ExceptionCode,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
@@ -38,6 +40,16 @@ LONG WINAPI e(LPEXCEPTION_POINTERS ExceptionInfo) {
 
 int main() {
 	LPTOP_LEVEL_EXCEPTION_FILTER p = SetUnhandledExceptionFilter(e);
+//	asm volatile (
+//		"movl %cr0, %eax\n\t"
+//		"or %eax, 1\n\t"
+//		"movl %eax, %cr0\n\t"
+//	);
+//
+//	asm volatile (
+//		"cli\n\t"
+//	);
+
 	for (int i = 10; i < 256; i++) {
 		int *p = (int *) i;
 		printf("address pointed by p = 0x%08x\n", *p);
