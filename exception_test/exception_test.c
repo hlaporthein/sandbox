@@ -40,7 +40,7 @@ LONG WINAPI e(LPEXCEPTION_POINTERS ExceptionInfo) {
 	printf("ExceptionFlags=%d\n", ExceptionInfo->ExceptionRecord->ExceptionFlags);
 	printf("ExceptionAddress=0x%08x\n", ExceptionInfo->ExceptionRecord->ExceptionAddress);
 	printf("ExceptionInformation=%s\n", ExceptionInfo->ExceptionRecord->ExceptionInformation);
-
+	printf("NumberParameters=%s\n", ExceptionInfo->ExceptionRecord->NumberParameters);
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
