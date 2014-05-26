@@ -2,8 +2,10 @@
 #define SYNCHRO_H
 
 int is_dir(const char* file);
-void copy_file(const char* srcpath, const char* destpath, int buffer_size);
+int exists(const char* file);
+void cp(const char* srcpath, const char* destpath, int buffer_size);
 void copy_dir(const char* src, const char* dest);
-void rmfile(const char* file);
+void sync_dir(const char* src, const char* dest);
+int is_more_recent(const char* src, const char* dst);
 
 #endif
