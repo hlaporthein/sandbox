@@ -49,7 +49,7 @@ int main() {
 	if (p == NULL) {
 		printf("Exception Handling Default behavior.\n");
 	} else {
-		printf("Exception Handling Function = 0x%08x.\n");
+		printf("Exception Handling Function = 0x%08x.\n", p);
 	}
 
 	int i = 0;
