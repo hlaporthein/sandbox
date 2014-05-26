@@ -5,9 +5,9 @@
 
 LOAD_SEGMENT = 0x1000             # load the boot loader to segment 1000h
 
-.global main
+.global my_main
 
-main:
+my_main:
   jmp short start                 # jump to beginning of code
   nop
 
@@ -94,5 +94,5 @@ loadmsg:          .asciz "Loading OS...\r\n"
 diskerror:        .asciz "Disk error. "
 rebootmsg:        .asciz "Press any key to reboot.\r\n"
 
-.fill (510 - (. - main)), 1, 0  # Pad with nulls up to 510 bytes (excl. boot magic)
+.fill (510 - (. - my_main)), 1, 0  # Pad with nulls up to 510 bytes (excl. boot magic)
 BootMagic:  .int 0xAA55     # magic word for BIOS
