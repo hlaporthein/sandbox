@@ -11,38 +11,48 @@ __asm__(
 	"mov bp, 0x7c00\n\t"
 	"mov sp, 0x7c00\n\t"
 	"sti\n\t"
-
-	// clear screen
-	"mov al, 0x02\n\t"
-	"mov ah, 0x00\n\t"
-	"int 0x10\n\t"
-
-	// show cursor
-	"mov cx, 0x0007\n\t"
-	"mov ah, 0x01\n\t"
-	"int 0x10\n\t"
-
-	// print msg
-	"lea si, msg\n\t"
-"putloop:\n\t"
-	"mov al,[si]\n\t"
-	"add si,1\n\t"
-	"cmp al,0\n\t"
-	"je end_printing\n\t"
-	"mov ah, 0x0e\n\t"
-	"mov bx, 15\n\t"
-	"int 0x10\n\t"
-	"jmp putloop\n\t"
-"end_printing:\n\t"
-
-"finish:\n\t"
-	"hlt\n\t"
-	"jmp finish\n\t"
-"msg: .asciz \"Hello SUPER OS! \"\n\t"
+	"call start\n\t"
 );
 
-//__asm__(
-//".fill (510 - (. - debut)), 1, 0\n\t"
-//"BootMagic:  .int 0xAA55\n\t"
-//);
+#define __NOINLINE  __attribute__((noinline))
+#define __REGPARM   __attribute__ ((regparm(3)))
+#define __NORETURN  __attribute__((noreturn))
+
+/* BIOS interrupts must be done with inline assembly */
+void __NOINLINE __REGPARM print(const char *s) {
+	while(*s){
+		__asm__ __volatile__ ("int  0x10" : : "a"(0x0E00 | *s), "b"(7));
+		s++;
+	}
+}
+
+void __NOINLINE __REGPARM show_cursor(int cursor_shape) {
+	__asm__ __volatile__ ("int  0x10" : : "a"(0x0100), "c"(cursor_shape));
+}
+
+void __NOINLINE __REGPARM clean_screen() {
+	__asm__ __volatile__ ("int  0x10" : : "a"(0x0002));
+}
+
+void __NOINLINE __REGPARM wait_key() {
+	__asm__ __volatile__ ("int  0x16" : : "a"(0x0000));
+}
+
+void __NOINLINE __REGPARM reboot(const char *s) {
+	print(s);
+	wait_key();
+	__asm__ __volatile__ (
+		".byte  0xEA\n\t"
+		".word  0x0000\n\t"
+		".word  0xFFFF\n\t"
+	);
+}
+
+void start() {
+	clean_screen();
+	show_cursor(0x0607);
+	print("Hello JLG...\n\r");
+	print("Hello Suzana GUENEGO...\n\r");
+	reboot("Press any key to reboot...");
+}
 
