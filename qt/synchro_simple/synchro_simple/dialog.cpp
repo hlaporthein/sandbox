@@ -1,5 +1,5 @@
-#include <QFileDialog>
-#include <QMessageBox>
+#include <QtWidgets>
+#include <QApplication>
 
 #include "dialog.h"
 #include "ui_dialog.h"
@@ -11,15 +11,18 @@ extern Ui::Dialog* g_uip;
 
 Dialog::Dialog(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::Dialog)
+    ui(new Ui::Dialog),
+    tray(new QSystemTrayIcon(this))
 {
     ui->setupUi(this);
     g_uip = ui;
+    createTrayIcon();
 }
 
 Dialog::~Dialog()
 {
     delete ui;
+    delete tray;
 }
 
 void Dialog::on_srcBrowseButton_clicked()
@@ -38,10 +41,6 @@ void Dialog::on_dstBrowseButton_clicked()
                         "/home",
                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     ui->dstLineEdit->setText(dir);
-}
-
-void print() {
-
 }
 
 void Dialog::on_syncButton_clicked()
@@ -64,4 +63,48 @@ void Dialog::on_syncButton_clicked()
     QByteArray dst_b = dst.toLocal8Bit();
 
     sync_dir(src_b.data(), dst_b.data());
+}
+
+void Dialog::createTrayIcon() {
+    QMenu* trayMenu = new QMenu(this);
+
+    QAction* hideShowAction = new QAction("&Hide/Show", this);
+    connect(hideShowAction, SIGNAL(triggered()), this, SLOT(hideShow()));
+    trayMenu->addAction(hideShowAction);
+
+    trayMenu->addSeparator();
+    QAction* quitAction = new QAction("&Quit", this);
+    connect(quitAction, SIGNAL(triggered()), this, SLOT(quit()));
+    trayMenu->addAction(quitAction);
+
+    tray->setContextMenu(trayMenu);
+    tray->setIcon(QIcon(":/icon/ocp_icon.png"));
+    tray->setToolTip("Synchro");
+    tray->show();
+
+    connect(tray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+            this, SLOT(showNormalOnDblClick(QSystemTrayIcon::ActivationReason)));
+}
+
+void Dialog::showNormalOnDblClick(QSystemTrayIcon::ActivationReason reason) {
+    if (reason == QSystemTrayIcon::DoubleClick) {
+        showNormal();
+    }
+}
+
+void Dialog::hideShow() {
+    if (isVisible()) {
+        hide();
+    } else {
+        showNormal();
+    }
+}
+
+void Dialog::closeEvent(QCloseEvent * e) {
+    e->ignore();
+    hide();
+}
+
+void Dialog::quit() {
+    QApplication::quit();
 }

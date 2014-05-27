@@ -23,3 +23,6 @@ unix|win32: LIBS += -L$$PWD/../../../copy_struct_test/ -llibsynchro
 
 INCLUDEPATH += $$PWD/../../../copy_struct_test
 DEPENDPATH += $$PWD/../../../copy_struct_test
+
+RESOURCES += \
+    resources.qrc
