@@ -13,9 +13,11 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        dialog.cpp
+        dialog.cpp \
+    synchronizer.cpp
 
-HEADERS  += dialog.h
+HEADERS  += dialog.h \
+    synchronizer.h
 
 FORMS    += dialog.ui
 

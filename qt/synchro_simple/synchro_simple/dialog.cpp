@@ -3,6 +3,7 @@
 
 #include "dialog.h"
 #include "ui_dialog.h"
+#include "synchronizer.h"
 extern "C" {
     #include "../../../copy_struct_test/synchro.h"
 }
@@ -59,10 +60,33 @@ void Dialog::on_syncButton_clicked()
         msgBox.exec();
         return;
     }
+
+    //ui->traceTextEdit->clear();
+
     QByteArray src_b = src.toLocal8Bit();
     QByteArray dst_b = dst.toLocal8Bit();
 
-    sync_dir(src_b.data(), dst_b.data());
+    //sync_dir(src_b.data(), dst_b.data());
+    ui->syncButton->setEnabled(false);
+
+    QThread* thread = new QThread;
+    Synchronizer* synchronizer = new Synchronizer(this);
+    synchronizer->moveToThread(thread);
+    connect(synchronizer, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
+    connect(thread, SIGNAL(started()), synchronizer, SLOT(process()));
+    connect(synchronizer, SIGNAL(finished()), thread, SLOT(quit()));
+    connect(synchronizer, SIGNAL(finished()), synchronizer, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), this, SLOT(enableSyncButton()));
+    thread->start();
+}
+
+void Dialog::enableSyncButton() {
+    ui->syncButton->setEnabled(true);
+}
+
+void Dialog::errorString(QString str) {
+
 }
 
 void Dialog::createTrayIcon() {

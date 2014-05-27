@@ -5,6 +5,8 @@
 #include <QMenu>
 #include <QSystemTrayIcon>
 
+void my_print(const char* buf);
+
 namespace Ui {
 class Dialog;
 }
@@ -17,6 +19,7 @@ public:
     explicit Dialog(QWidget *parent = 0);
     ~Dialog();
     void closeEvent(QCloseEvent * e);
+    Ui::Dialog *ui;
 
 private slots:
     void on_srcBrowseButton_clicked();
@@ -25,9 +28,10 @@ private slots:
     void showNormalOnDblClick(QSystemTrayIcon::ActivationReason reason);
     void hideShow();
     void quit();
+    void errorString(QString str);
+    void enableSyncButton();
 
 private:
-    Ui::Dialog *ui;
     QSystemTrayIcon* tray;
 
     void createTrayIcon();

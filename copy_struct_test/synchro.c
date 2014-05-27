@@ -2,6 +2,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <stdarg.h>
+#include <windows.h>
 
 #include "synchro.h"
 
@@ -94,6 +95,7 @@ void copy_dir(const char* src, const char* dest) {
 }
 
 void sync_dir(const char* src, const char* dst) {
+	Sleep(10000);
 	synchro_log("Starting sync dir: %s => %s\n", src, dst);
 
 	DIR *d;
