@@ -4,12 +4,17 @@
 
 #include "synchro.h"
 
+void my_print(const char* buf) {
+	printf("%s", buf);
+}
+
 int main (int argc, char **argv) {
 	if (argc != 3) {
 		printf("Usage: %s src dest\n", argv[0]);
 		return 1;
 	}
 
+	set_print(my_print);
 	sync_dir(argv[1], argv[2]);
 
 //	int buf_sizes[] = {128, 512, 1024, 2048, 4096, 1<<13, 1<<14, 1<<15, 1<<16, 1<<17, 1<<18, 1<<19, 1<<20};

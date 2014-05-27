@@ -8,8 +8,16 @@ void copy_dir(const char* src, const char* dest);
 void sync_dir(const char* src, const char* dest);
 int is_more_recent(const char* src, const char* dst);
 
-void hello();
-void hello2(const char* src, const char* dst);
-int add(int a, int b);
+
+typedef void (*print_t)(const char* buf);
+void set_print(print_t print);
+
+void synchro_log(const char* format, ...);
+
+#ifdef DEBUG_MODE
+#define DEBUG(format, ...) synchro_log(format, ##__VA_ARGS__)
+#else
+#define DEBUG(format, ...)
+#endif
 
 #endif

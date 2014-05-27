@@ -1,5 +1,9 @@
 CFLAGS = -Wall -Werror -O
 
+ifdef DEBUG
+CFLAGS += -DDEBUG_MODE
+endif
+
 all:
 	gcc -c $(CFLAGS) -std=gnu99 synchro.c -o synchro.o
 	gcc -c $(CFLAGS) -std=gnu99 main.c -o main.o
@@ -15,7 +19,12 @@ install:
 	install -c libsynchro.a /usr/local/lib/libsynchro.a
 
 clean:
-	rm -f *.o *.exe *.dll *.a
+	rm -rf *.o *.exe *.dll *.a ./src ./dst
 
 test:
-	./synchro ./src ./dest
+	mkdir -p ./src/test ./src/kiki/toto
+	cp -f *.a ./src
+	cp -f *.dll ./src/test
+	cp -f *.a ./src/kiki
+	cp -f *.c ./src/kiki/toto
+	./synchro ./src ./dst
