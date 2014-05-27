@@ -5,11 +5,17 @@ all:
 	gcc -c $(CFLAGS) -std=gnu99 main.c -o main.o
 
 	gcc -shared -o synchro.dll $(CFLAGS) synchro.o
-	gcc -o synchro $(CFLAGS) main.o synchro.dll
+	ar cru libsynchro.a synchro.o
+	gcc -o synchro $(CFLAGS) main.o libsynchro.a
 
+install:
+	mkdir -p /usr/local/include
+	install -c synchro.h /usr/local/include/synchro.h
+	mkdir -p /usr/local/lib
+	install -c libsynchro.a /usr/local/lib/libsynchro.a
 
 clean:
-	rm -f *.o *.exe *.dll
+	rm -f *.o *.exe *.dll *.a
 
 test:
 	./synchro ./src ./dest
