@@ -4,7 +4,7 @@ all:
 	gcc -c $(CFLAGS) -std=gnu99 synchro.c -o synchro.o
 	gcc -c $(CFLAGS) -std=gnu99 main.c -o main.o
 
-	gcc -shared -o synchro.dll $(CFLAGS) synchro.o
+	gcc -shared -o synchro.dll $(CFLAGS) synchro.o -Wl,--out-implib=libsynchro.dll.a
 	ar cru libsynchro.a synchro.o
 	gcc -o synchro $(CFLAGS) main.o libsynchro.a
 

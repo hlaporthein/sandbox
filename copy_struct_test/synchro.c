@@ -4,6 +4,8 @@
 
 #include "synchro.h"
 
+#define PATH_SIZE 1<<16
+
 int exists(const char* file) {
 	struct stat statbuf;
 	if (stat(file, &statbuf) == -1) {
@@ -23,6 +25,7 @@ int is_dir(const char* file) {
 }
 
 void cp(const char* srcpath, const char* destpath, int buffer_size) {
+	printf("Copying: %s => %s\n", srcpath, destpath);
 	char buf[buffer_size];
 
 	FILE* source = fopen(srcpath, "rb");
@@ -58,10 +61,10 @@ void copy_dir(const char* src, const char* dest) {
 			continue;
 		}
 
-		char src_filepath[256];
-		sprintf(src_filepath, "%s/%s", src, fname);
-		char dest_filepath[256];
-		sprintf(dest_filepath, "%s/%s", dest, fname);
+		char src_filepath[PATH_SIZE];
+		snprintf(src_filepath, PATH_SIZE, "%s/%s", src, fname);
+		char dest_filepath[PATH_SIZE];
+		snprintf(dest_filepath, PATH_SIZE, "%s/%s", dest, fname);
 
 		if (is_dir(src_filepath)) {
 			copy_dir(src_filepath, dest_filepath);
@@ -74,15 +77,17 @@ void copy_dir(const char* src, const char* dest) {
 }
 
 void sync_dir(const char* src, const char* dst) {
-	if (!is_dir(dst)) {
-		copy_dir(src, dst);
-		return;
-	}
+	printf("Starting sync dir: %s => %s\n", src, dst);
 
 	DIR *d;
 	d = opendir(src);
 	if (!d) {
 		printf("Source does not exist: %s\n", src);
+		return;
+	}
+
+	if (!is_dir(dst)) {
+		copy_dir(src, dst);
 		return;
 	}
 
@@ -93,16 +98,15 @@ void sync_dir(const char* src, const char* dst) {
 			continue;
 		}
 
-		char src_filepath[256];
-		sprintf(src_filepath, "%s/%s", src, fname);
-		char dest_filepath[256];
-		sprintf(dest_filepath, "%s/%s", dst, fname);
+		char src_filepath[PATH_SIZE];
+		snprintf(src_filepath, PATH_SIZE, "%s/%s", src, fname);
+		char dest_filepath[PATH_SIZE];
+		snprintf(dest_filepath, PATH_SIZE, "%s/%s", dst, fname);
 
 		if (is_dir(src_filepath)) {
 			sync_dir(src_filepath, dest_filepath);
 		} else {
 			if (!exists(dest_filepath) || is_more_recent(src_filepath, dest_filepath)) {
-				printf("Copying: %s => %s\n", src_filepath, dest_filepath);
 				cp(src_filepath, dest_filepath, 1<<16);
 			}
 		}
@@ -130,4 +134,51 @@ int is_more_recent(const char* src, const char* dst) {
 
 	printf("is src more recent (%s)? %s\n", src, c);
 	return src_statbuf.st_mtime > dst_statbuf.st_mtime;
+}
+
+int add(int a, int b) {
+	return a + b;
+}
+
+void hello() {
+	printf("Hello\n");
+}
+
+void hello2(const char* src, const char* dst) {
+	printf("Starting sync dir: %s => %s\n", src, dst);
+
+	DIR *d;
+	d = opendir(src);
+	if (!d) {
+		printf("Source does not exist: %s\n", src);
+		return;
+	}
+
+	if (!is_dir(dst)) {
+		copy_dir(src, dst);
+		return;
+	}
+
+	struct dirent *dir;
+	while ((dir = readdir(d)) != NULL) {
+		char* fname = dir->d_name;
+		if (strcmp(fname, ".") == 0 || strcmp(fname, "..") == 0) {
+			continue;
+		}
+
+		char src_filepath[PATH_SIZE];
+		snprintf(src_filepath, PATH_SIZE, "%s/%s", src, fname);
+		char dest_filepath[PATH_SIZE];
+		snprintf(dest_filepath, PATH_SIZE, "%s/%s", dst, fname);
+
+		if (is_dir(src_filepath)) {
+			sync_dir(src_filepath, dest_filepath);
+		} else {
+			if (!exists(dest_filepath) || is_more_recent(src_filepath, dest_filepath)) {
+				cp(src_filepath, dest_filepath, 1<<16);
+			}
+		}
+	}
+
+	closedir(d);
 }

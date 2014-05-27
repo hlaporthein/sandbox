@@ -8,4 +8,8 @@ void copy_dir(const char* src, const char* dest);
 void sync_dir(const char* src, const char* dest);
 int is_more_recent(const char* src, const char* dst);
 
+void hello();
+void hello2(const char* src, const char* dst);
+int add(int a, int b);
+
 #endif

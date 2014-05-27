@@ -6,6 +6,8 @@
 
 QT       += core gui
 
+CONFIG   += console
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = synchro_simple
@@ -19,10 +21,7 @@ HEADERS  += dialog.h
 
 FORMS    += dialog.ui
 
-unix|win32: LIBS += -L$$PWD/../ -lsynchro
+unix|win32: LIBS += -L$$PWD/../../../copy_struct_test/ -llibsynchro
 
-INCLUDEPATH += $$PWD/../
-DEPENDPATH += $$PWD/../
-
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../synchro.lib
-else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../libsynchro.a
+INCLUDEPATH += $$PWD/../../../copy_struct_test
+DEPENDPATH += $$PWD/../../../copy_struct_test
