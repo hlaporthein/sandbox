@@ -1,5 +1,6 @@
 #include <QtWidgets>
 #include <QApplication>
+#include <QMetaType>
 
 #include "dialog.h"
 #include "ui_dialog.h"
@@ -15,6 +16,7 @@ Dialog::Dialog(QWidget *parent) :
     ui(new Ui::Dialog),
     tray(new QSystemTrayIcon(this))
 {
+    qRegisterMetaType<QTextCursor>("QTextCursor");
     ui->setupUi(this);
     g_uip = ui;
     createTrayIcon();
@@ -28,20 +30,32 @@ Dialog::~Dialog()
 
 void Dialog::on_srcBrowseButton_clicked()
 {
+    QString src = ui->srcLineEdit->text();
+    if (src.isEmpty()) {
+        src = "/home";
+    }
     QString dir = QFileDialog::getExistingDirectory(this,
                         "Choose directory to synchonise",
-                        "/home",
+                        src,
                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-    ui->srcLineEdit->setText(dir);
+    if (!dir.isEmpty()) {
+        ui->srcLineEdit->setText(dir);
+    }
 }
 
 void Dialog::on_dstBrowseButton_clicked()
 {
+    QString dst = ui->dstLineEdit->text();
+    if (dst.isEmpty()) {
+        dst = "/home";
+    }
     QString dir = QFileDialog::getExistingDirectory(this,
                         "Choose destination directory",
-                        "/home",
+                        dst,
                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-    ui->dstLineEdit->setText(dir);
+    if (!dir.isEmpty()) {
+        ui->dstLineEdit->setText(dir);
+    }
 }
 
 void Dialog::on_syncButton_clicked()
@@ -86,7 +100,8 @@ void Dialog::enableSyncButton() {
 }
 
 void Dialog::errorString(QString str) {
-
+    ui->traceTextEdit->moveCursor(QTextCursor::End);
+    ui->traceTextEdit->insertHtml("<font color=\"red\">" + str + "</font>");
 }
 
 void Dialog::createTrayIcon() {
@@ -125,8 +140,8 @@ void Dialog::hideShow() {
 }
 
 void Dialog::closeEvent(QCloseEvent * e) {
-    e->ignore();
-    hide();
+//    e->ignore();
+//    hide();
 }
 
 void Dialog::quit() {

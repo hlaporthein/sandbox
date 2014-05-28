@@ -19,6 +19,7 @@ public slots:
 
 private:
     Dialog* dialog;
+    void printMsg(const char* buf);
 };
 
 #endif // SYNCHRONIZER_H

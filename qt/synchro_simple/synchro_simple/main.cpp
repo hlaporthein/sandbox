@@ -2,6 +2,7 @@
 #include "ui_dialog.h"
 #include <QApplication>
 #include <QScrollBar>
+#include <QDebug>
 extern "C" {
     #include "../../../copy_struct_test/synchro.h"
 }
@@ -9,9 +10,10 @@ extern "C" {
 Ui::Dialog* g_uip;
 
 void my_print(const char* buf) {
-    g_uip->traceTextEdit->insertPlainText(buf);
-    QScrollBar* sb = g_uip->traceTextEdit->verticalScrollBar();
-    sb->setValue(sb->maximum());
+    qDebug() << "buf=" << buf;
+    g_uip->traceTextEdit->moveCursor(QTextCursor::End);
+    g_uip->traceTextEdit->insertPlainText(QString(buf));
+    QCoreApplication::processEvents();
 }
 
 int main(int argc, char *argv[])
