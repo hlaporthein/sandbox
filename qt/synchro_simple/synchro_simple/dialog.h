@@ -4,8 +4,7 @@
 #include <QWidget>
 #include <QMenu>
 #include <QSystemTrayIcon>
-
-void my_print(const char* buf);
+#include <QWaitCondition>
 
 namespace Ui {
 class Dialog;
@@ -19,7 +18,7 @@ public:
     explicit Dialog(QWidget *parent = 0);
     ~Dialog();
     void closeEvent(QCloseEvent * e);
-    Ui::Dialog *ui;
+    Ui::Dialog* getUi() { return ui; }
 
 private slots:
     void on_srcBrowseButton_clicked();
@@ -30,9 +29,12 @@ private slots:
     void quit();
     void errorString(QString str);
     void enableSyncButton();
+    void print(const char* buf);
 
 private:
+    Ui::Dialog *ui;
     QSystemTrayIcon* tray;
+    QWaitCondition canContinue;
 
     void createTrayIcon();
 };

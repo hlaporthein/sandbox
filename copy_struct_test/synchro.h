@@ -1,6 +1,9 @@
 #ifndef SYNCHRO_H
 #define SYNCHRO_H
 
+#define PATH_SIZE 1<<16
+#define BUFFER_SIZE 1<<16
+
 int is_dir(const char* file);
 int exists(const char* file);
 void cp(const char* srcpath, const char* destpath, int buffer_size);

@@ -4,12 +4,7 @@
 
 #include "dialog.h"
 #include "ui_dialog.h"
-#include "synchronizer.h"
-extern "C" {
-    #include "../../../copy_struct_test/synchro.h"
-}
-
-extern Ui::Dialog* g_uip;
+#include "worker.h"
 
 Dialog::Dialog(QWidget *parent) :
     QWidget(parent),
@@ -18,7 +13,6 @@ Dialog::Dialog(QWidget *parent) :
 {
     qRegisterMetaType<QTextCursor>("QTextCursor");
     ui->setupUi(this);
-    g_uip = ui;
     createTrayIcon();
 }
 
@@ -60,6 +54,9 @@ void Dialog::on_dstBrowseButton_clicked()
 
 void Dialog::on_syncButton_clicked()
 {
+    ui->traceTextEdit->clear();
+
+    // Checking
     QString src = ui->srcLineEdit->text();
     QString dst = ui->dstLineEdit->text();
     if (src.isEmpty()) {
@@ -75,23 +72,23 @@ void Dialog::on_syncButton_clicked()
         return;
     }
 
-    //ui->traceTextEdit->clear();
-
-    QByteArray src_b = src.toLocal8Bit();
-    QByteArray dst_b = dst.toLocal8Bit();
-
-    //sync_dir(src_b.data(), dst_b.data());
+    // Starting synchronizing (long asynchrone operation)
     ui->syncButton->setEnabled(false);
+    QCoreApplication::processEvents();
 
-    QThread* thread = new QThread;
-    Synchronizer* synchronizer = new Synchronizer(this);
-    synchronizer->moveToThread(thread);
-    connect(synchronizer, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
-    connect(thread, SIGNAL(started()), synchronizer, SLOT(process()));
-    connect(synchronizer, SIGNAL(finished()), thread, SLOT(quit()));
-    connect(synchronizer, SIGNAL(finished()), synchronizer, SLOT(deleteLater()));
+    QThread* thread = new QThread();
+    Worker* worker = new Worker(this, &canContinue);
+    worker->moveToThread(thread);
+
+    connect(worker, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
+    connect(thread, SIGNAL(started()), worker, SLOT(process()));
+    connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
+    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), this, SLOT(enableSyncButton()));
+
+    connect(worker, SIGNAL(print(const char*)), this, SLOT(print(const char*)));
+
     thread->start();
 }
 
@@ -146,4 +143,10 @@ void Dialog::closeEvent(QCloseEvent * e) {
 
 void Dialog::quit() {
     QApplication::quit();
+}
+
+void Dialog::print(const char* buf) {
+    ui->traceTextEdit->insertPlainText(buf);
+    ui->traceTextEdit->moveCursor(QTextCursor::End);
+    canContinue.wakeAll();
 }

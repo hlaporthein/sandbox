@@ -14,17 +14,17 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         dialog.cpp \
-    synchronizer.cpp
+    worker.cpp
 
 HEADERS  += dialog.h \
-    synchronizer.h
+    worker.h
 
 FORMS    += dialog.ui
+
+RESOURCES += \
+    resources.qrc
 
 unix|win32: LIBS += -L$$PWD/../../../copy_struct_test/ -llibsynchro
 
 INCLUDEPATH += $$PWD/../../../copy_struct_test
 DEPENDPATH += $$PWD/../../../copy_struct_test
-
-RESOURCES += \
-    resources.qrc

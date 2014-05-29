@@ -6,9 +6,6 @@
 
 #include "synchro.h"
 
-#define PATH_SIZE 1<<16
-#define BUFFER_SIZE 1<<16
-
 print_t g_print = NULL;
 
 void set_print(print_t print) {
