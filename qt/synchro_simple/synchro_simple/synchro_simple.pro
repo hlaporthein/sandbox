@@ -17,7 +17,8 @@ SOURCES += main.cpp\
     worker.cpp
 
 HEADERS  += dialog.h \
-    worker.h
+    worker.h \
+    version.h
 
 FORMS    += dialog.ui
 
@@ -28,3 +29,5 @@ unix|win32: LIBS += -L$$PWD/../../../copy_struct_test/ -llibsynchro
 
 INCLUDEPATH += $$PWD/../../../copy_struct_test
 DEPENDPATH += $$PWD/../../../copy_struct_test
+
+RC_FILE = resources.rc
