@@ -3,6 +3,7 @@
 #include "ui_dialog.h"
 
 #include <QThread>
+#include <QtDebug>
 
 extern "C" {
 #include "../../../copy_struct_test/synchro.h"
@@ -14,7 +15,8 @@ void worker_print(const char* buf) {
     g_worker->printMsg(buf);
 }
 
-Worker::Worker(Dialog* d, QWaitCondition* c) : dialog(d), canContinue(c)
+Worker::Worker(Dialog* d, QWaitCondition* c, QMutex* m) :
+    dialog(d), canContinue(c), mutex(m)
 {
 }
 
@@ -43,8 +45,10 @@ void Worker::process() {
 }
 
 void Worker::printMsg(const char* buf) {
-    mutex.lock();
+    mutex->lock();
     emit print(buf);
-    canContinue->wait(&mutex);
-    mutex.unlock();
+    //qDebug() << "1. thread->about to wait.";
+    canContinue->wait(mutex);
+    //qDebug() << "4. thread->just waked up.";
+    mutex->unlock();
 }

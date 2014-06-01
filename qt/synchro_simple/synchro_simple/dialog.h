@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QSystemTrayIcon>
 #include <QWaitCondition>
+#include <QMutex>
 
 namespace Ui {
 class Dialog;
@@ -35,8 +36,11 @@ private:
     Ui::Dialog *ui;
     QSystemTrayIcon* tray;
     QWaitCondition canContinue;
+    QMutex mutex;
 
     void createTrayIcon();
+
+
 };
 
 #endif // DIALOG_H

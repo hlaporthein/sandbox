@@ -68,7 +68,7 @@ border-width: 1.2px;
 border-style: inset;</string>
          </property>
          <property name="text">
-          <string>../synchro_simple_copy</string>
+          <string>C:\kiki</string>
          </property>
          <property name="readOnly">
           <bool>true</bool>
@@ -84,7 +84,7 @@ border-width: 1.2px;
 border-style: inset;</string>
          </property>
          <property name="text">
-          <string>../synchro_simple</string>
+          <string>C:\masm32</string>
          </property>
          <property name="readOnly">
           <bool>true</bool>

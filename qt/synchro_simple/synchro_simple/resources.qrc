@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/icon/1">
+    <qresource prefix="/icon">
         <file>ocp_icon.png</file>
     </qresource>
 </RCC>

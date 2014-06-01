@@ -77,7 +77,7 @@ void Dialog::on_syncButton_clicked()
     QCoreApplication::processEvents();
 
     QThread* thread = new QThread();
-    Worker* worker = new Worker(this, &canContinue);
+    Worker* worker = new Worker(this, &canContinue, &mutex);
     worker->moveToThread(thread);
 
     connect(worker, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
@@ -146,7 +146,11 @@ void Dialog::quit() {
 }
 
 void Dialog::print(const char* buf) {
+    mutex.lock();
     ui->traceTextEdit->insertPlainText(buf);
     ui->traceTextEdit->moveCursor(QTextCursor::End);
+    //qDebug() << "2. ui: about to wakeall.";
     canContinue.wakeAll();
+    //qDebug() << "3. ui: just waked all.";
+    mutex.unlock();
 }
