@@ -129,6 +129,7 @@ void Dialog::createTrayIcon() {
 
 void Dialog::showNormalOnDblClick(QSystemTrayIcon::ActivationReason reason) {
     if (reason == QSystemTrayIcon::DoubleClick) {
+        setWindowState(Qt::WindowActive);
         showNormal();
     }
 }
