@@ -15,6 +15,10 @@ void worker_print(const char* buf) {
     g_worker->printMsg(buf);
 }
 
+void worker_progress_value(int i) {
+    g_worker->sendValue(i);
+}
+
 Worker::Worker(Dialog* d, QWaitCondition* c, QMutex* m) :
     dialog(d), canContinue(c), mutex(m)
 {
@@ -30,13 +34,20 @@ void Worker::process() {
     char* dst = dialog->getUi()->dstLineEdit->text().toLocal8Bit().data();
     strncpy(dstBuf, dst, PATH_SIZE);
 
-    printMsg(srcBuf);
-    printMsg("\n");
-    printMsg(dstBuf);
-    printMsg("\n");
     g_worker = this;
+
     set_print(worker_print);
+    set_progress_value(worker_progress_value);
+    set_progress_min_delay(0);
+
+    set_mode(PREVIEW_MODE);
     int status = sync_dir(srcBuf, dstBuf);
+
+    progressTotal = get_total_step();
+
+    set_mode(REAL_MODE);
+    status = sync_dir(srcBuf, dstBuf);
+
     reset_abort();
 
     if (status == 0) {
@@ -52,6 +63,15 @@ void Worker::process() {
 void Worker::printMsg(const char* buf) {
     mutex->lock();
     emit print(buf);
+    //qDebug() << "1. thread->about to wait.";
+    canContinue->wait(mutex);
+    //qDebug() << "4. thread->just waked up.";
+    mutex->unlock();
+}
+
+void Worker::sendValue(const int val) {
+    mutex->lock();
+    emit progressBar(progressTotal, val);
     //qDebug() << "1. thread->about to wait.";
     canContinue->wait(mutex);
     //qDebug() << "4. thread->just waked up.";

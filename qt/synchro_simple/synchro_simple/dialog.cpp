@@ -18,6 +18,8 @@ Dialog::Dialog(QWidget *parent) :
     qRegisterMetaType<QTextCursor>("QTextCursor");
     ui->setupUi(this);
     createTrayIcon();
+    ui->progressBar->setVisible(false);
+    ui->remainingLabel->setVisible(false);
 }
 
 Dialog::~Dialog()
@@ -77,17 +79,37 @@ void Dialog::on_syncButton_clicked()
     }
 
     // Starting synchronizing (long asynchrone operation)
-    ui->syncButton->setEnabled(false);
-    ui->abortButton->setEnabled(true);
+    enableProcess(true);
+    ui->remainingLabel->setText("Remaining time: TODO");
+    //start_t = clock();
     QCoreApplication::processEvents();
 
     Worker* worker = new Worker(this, &canContinue, &mutex);
 
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
-    connect(worker, SIGNAL(finished()), this, SLOT(enableSyncButton()));
+    connect(worker, SIGNAL(finished()), this, SLOT(finishedProcess()));
     connect(worker, SIGNAL(print(const char*)), this, SLOT(print(const char*)));
+    connect(worker, SIGNAL(progressBar(int,int)), this, SLOT(progressBar(int, int)));
 
     QtConcurrent::run(worker, &Worker::process);
+}
+
+void Dialog::progressBar(int total, int val) {
+    mutex.lock();
+    ui->progressBar->setRange(0, total);
+    ui->progressBar->setValue(val);
+
+    //double speed = val / (clock() - start_t);
+    int remaining = 0;
+    ui->remainingLabel->setText("Remaining: " + remaining);
+    //qDebug() << "2. ui: about to wakeall.";
+    canContinue.wakeAll();
+    //qDebug() << "3. ui: just waked all.";
+    mutex.unlock();
+}
+
+void Dialog::finishedProcess() {
+    enableProcess(false);
 }
 
 void Dialog::on_abortButton_clicked()
@@ -96,9 +118,13 @@ void Dialog::on_abortButton_clicked()
     set_abort();
 }
 
-void Dialog::enableSyncButton() {
-    ui->syncButton->setEnabled(true);
-    ui->abortButton->setEnabled(false);
+void Dialog::enableProcess(bool enabled) {
+    ui->syncButton->setEnabled(!enabled);
+    ui->abortButton->setEnabled(enabled);
+    ui->remainingLabel->setText("");
+    ui->remainingLabel->setVisible(enabled);
+    ui->progressBar->setValue(0);
+    ui->progressBar->setVisible(enabled);
 }
 
 void Dialog::errorString(QString str) {

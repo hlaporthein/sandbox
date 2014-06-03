@@ -30,8 +30,9 @@ private slots:
     void hideShow();
     void quit();
     void errorString(QString str);
-    void enableSyncButton();
     void print(const char* buf);
+    void finishedProcess();
+    void progressBar(int total, int val);
 
 
 private:
@@ -39,8 +40,10 @@ private:
     QSystemTrayIcon* tray;
     QWaitCondition canContinue;
     QMutex mutex;
+    //clock_t start_t;
 
     void createTrayIcon();
+    void enableProcess(bool enabled);
 
 
 };

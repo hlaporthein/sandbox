@@ -3,14 +3,36 @@
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <windows.h>
+#include <errno.h>
+#include <string.h>
+#include <time.h>
 
 #include "synchro.h"
 
+char* mode_map[] = {
+	"preview", "real"
+};
+
 print_t g_print = NULL;
+progress_value_t g_progress_value = NULL;
 int g_abort = 0;
+int g_total_estimated_step = 0;
+int g_current_step = 0;
+int g_mode = REAL_MODE;
+clock_t g_last_call = 0;
+clock_t g_min_delay = 300;
+int g_log_level = 0;
 
 void set_print(print_t print) {
 	g_print = print;
+}
+
+void set_progress_value(progress_value_t progress_value) {
+	g_progress_value = progress_value;
+}
+
+void set_progress_min_delay(int min_delay) {
+	g_min_delay = (clock_t) min_delay;
 }
 
 void set_abort() {
@@ -19,6 +41,18 @@ void set_abort() {
 
 void reset_abort() {
 	g_abort = 0;
+}
+
+void set_mode(int mode) {
+	g_mode = mode;
+	if (mode == PREVIEW_MODE) {
+		g_total_estimated_step = 0;
+		g_current_step = 0;
+	}
+}
+
+int get_total_step() {
+	return g_total_estimated_step;
 }
 
 int is_aborted() {
@@ -37,9 +71,9 @@ void synchro_log(const char* format, ...) {
 int exists(const char* file) {
 	struct stat statbuf;
 	if (stat(file, &statbuf) == -1) {
-		DEBUG("%s does not exist\n", file);
+		DEBUG_LOG("%s does not exist\n", file);
 	} else {
-		DEBUG("%s exists\n", file);
+		DEBUG_LOG("%s exists\n", file);
 	}
 	return stat(file, &statbuf) != -1;
 }
@@ -53,7 +87,7 @@ int is_dir(const char* file) {
 }
 
 void cp(const char* srcpath, const char* destpath, int buffer_size) {
-	DEBUG("Copying: %s => %s\n", srcpath, destpath);
+	INFO_LOG("Copying: %s => %s\n", srcpath, destpath);
 	char buf[buffer_size];
 
 	FILE* source = fopen(srcpath, "rb");
@@ -78,15 +112,20 @@ void cp(const char* srcpath, const char* destpath, int buffer_size) {
 	}
 }
 
-void copy_dir(const char* src, const char* dest) {
+int copy_dir(const char* src, const char* dest) {
+	int result = 0;
+
+	DEBUG_LOG("Starting copy dir in mode %s: %s => %s\n", mode_map[g_mode], src, dest);
 	if (!is_dir(dest)) {
-		mkdir(dest);
+		REAL_MODE_EXEC(mkdir(dest));
 	}
+
 	DIR *d;
 	d = opendir(src);
 	if (!d) {
-		DEBUG("Source does not exist: %s\n", src);
-		return;
+		ERROR_LOG("Cannot open directory for copy %s. Error(%d): %s\n", src, errno, strerror(errno));
+		result = -1;
+		goto cleanup;
 	}
 
 	struct dirent *dir;
@@ -107,27 +146,34 @@ void copy_dir(const char* src, const char* dest) {
 		if (is_dir(src_filepath)) {
 			copy_dir(src_filepath, dest_filepath);
 		} else {
-			cp(src_filepath, dest_filepath, 1<<16);
+			REAL_MODE_EXEC(cp(src_filepath, dest_filepath, 1<<16));
 		}
 	}
 
-	closedir(d);
+cleanup:
+	if (d) {
+		closedir(d);
+	}
+
+	return result;
 }
 
 int sync_dir(const char* src, const char* dst) {
-	synchro_log("Starting sync dir: %s => %s\n", src, dst);
+	DEBUG_LOG("Starting sync dir in mode %s: %s => %s\n", mode_map[g_mode], src, dst);
+
+	int result = 0;
 
 	DIR *d = NULL;
-
-	if (!is_dir(dst)) {
-		copy_dir(src, dst);
+	d = opendir(src);
+	if (!d) {
+		ERROR_LOG("Cannot open directory for sync %s. Error(%d): %s\n", src, errno, strerror(errno));
+		result = -1;
 		goto cleanup;
 	}
 
-	d = opendir(src);
-	if (!d) {
-		DEBUG("Source does not exist: %s\n", src);
-		return 0;
+	if (!is_dir(dst)) {
+		result = copy_dir(src, dst);
+		goto cleanup;
 	}
 
 	struct dirent *dir;
@@ -149,7 +195,7 @@ int sync_dir(const char* src, const char* dst) {
 			sync_dir(src_filepath, dest_filepath);
 		} else {
 			if (!exists(dest_filepath) || is_more_recent(src_filepath, dest_filepath)) {
-				cp(src_filepath, dest_filepath, 1<<16);
+				REAL_MODE_EXEC(cp(src_filepath, dest_filepath, 1<<16));
 			}
 		}
 	}
@@ -160,9 +206,9 @@ cleanup:
 	}
 
 	if (g_abort) {
-		return 1;
+		result = 1;
 	}
-	return 0;
+	return result;
 }
 
 int is_more_recent(const char* src, const char* dst) {
@@ -184,6 +230,14 @@ int is_more_recent(const char* src, const char* dst) {
 	}
 #endif
 
-	DEBUG("Is src more recent (%s)? %s\n", src, c);
+	DEBUG_LOG("Is src more recent (%s)? %s\n", src, c);
 	return src_statbuf.st_mtime > dst_statbuf.st_mtime;
+}
+
+void inform_progress() {
+	if (clock() - g_last_call < g_min_delay) {
+		return;
+	}
+	g_last_call = clock();
+	g_progress_value(g_current_step);
 }

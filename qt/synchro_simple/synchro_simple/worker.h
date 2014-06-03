@@ -13,11 +13,13 @@ class Worker : public QObject
 public:
     explicit Worker(Dialog* w, QWaitCondition* c, QMutex* m);
     void printMsg(const char* buf);
+    void sendValue(const int val);
 
 signals:
     void finished();
     void error(QString err);
     void print(const char* buf);
+    void progressBar(int total, int val);
 
 public slots:
     void process();
@@ -26,7 +28,7 @@ private:
     QMutex* mutex;
     Dialog* dialog;
     QWaitCondition* canContinue;
-
+    int progressTotal;
 };
 
 #endif // WORKER_H
