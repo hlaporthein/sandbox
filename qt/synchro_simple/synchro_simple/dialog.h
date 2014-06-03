@@ -25,12 +25,14 @@ private slots:
     void on_srcBrowseButton_clicked();
     void on_dstBrowseButton_clicked();
     void on_syncButton_clicked();
+    void on_abortButton_clicked();
     void showNormalOnDblClick(QSystemTrayIcon::ActivationReason reason);
     void hideShow();
     void quit();
     void errorString(QString str);
     void enableSyncButton();
     void print(const char* buf);
+
 
 private:
     Ui::Dialog *ui;

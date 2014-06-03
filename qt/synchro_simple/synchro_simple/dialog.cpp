@@ -1,10 +1,14 @@
 #include <QtWidgets>
 #include <QApplication>
 #include <QMetaType>
+#include <QtConcurrent/QtConcurrent>
 
 #include "dialog.h"
 #include "ui_dialog.h"
 #include "worker.h"
+extern "C" {
+#include "../../../copy_struct_test/synchro.h"
+}
 
 Dialog::Dialog(QWidget *parent) :
     QWidget(parent),
@@ -74,26 +78,27 @@ void Dialog::on_syncButton_clicked()
 
     // Starting synchronizing (long asynchrone operation)
     ui->syncButton->setEnabled(false);
+    ui->abortButton->setEnabled(true);
     QCoreApplication::processEvents();
 
-    QThread* thread = new QThread();
     Worker* worker = new Worker(this, &canContinue, &mutex);
-    worker->moveToThread(thread);
 
-    connect(worker, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
-    connect(thread, SIGNAL(started()), worker, SLOT(process()));
-    connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    connect(thread, SIGNAL(finished()), this, SLOT(enableSyncButton()));
-
+    connect(worker, SIGNAL(finished()), this, SLOT(enableSyncButton()));
     connect(worker, SIGNAL(print(const char*)), this, SLOT(print(const char*)));
 
-    thread->start();
+    QtConcurrent::run(worker, &Worker::process);
+}
+
+void Dialog::on_abortButton_clicked()
+{
+    ui->abortButton->setEnabled(false);
+    set_abort();
 }
 
 void Dialog::enableSyncButton() {
     ui->syncButton->setEnabled(true);
+    ui->abortButton->setEnabled(false);
 }
 
 void Dialog::errorString(QString str) {

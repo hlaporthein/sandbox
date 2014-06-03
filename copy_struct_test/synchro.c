@@ -7,9 +7,22 @@
 #include "synchro.h"
 
 print_t g_print = NULL;
+int g_abort = 0;
 
 void set_print(print_t print) {
 	g_print = print;
+}
+
+void set_abort() {
+	g_abort = 1;
+}
+
+void reset_abort() {
+	g_abort = 0;
+}
+
+int is_aborted() {
+	return g_abort;
 }
 
 void synchro_log(const char* format, ...) {
@@ -91,23 +104,26 @@ void copy_dir(const char* src, const char* dest) {
 	closedir(d);
 }
 
-void sync_dir(const char* src, const char* dst) {
+int sync_dir(const char* src, const char* dst) {
 	synchro_log("Starting sync dir: %s => %s\n", src, dst);
+
+	if (!is_dir(dst)) {
+		copy_dir(src, dst);
+		return 0;
+	}
 
 	DIR *d;
 	d = opendir(src);
 	if (!d) {
 		DEBUG("Source does not exist: %s\n", src);
-		return;
-	}
-
-	if (!is_dir(dst)) {
-		copy_dir(src, dst);
-		return;
+		return 0;
 	}
 
 	struct dirent *dir;
 	while ((dir = readdir(d)) != NULL) {
+		if (g_abort) {
+			break;
+		}
 		char* fname = dir->d_name;
 		if (strcmp(fname, ".") == 0 || strcmp(fname, "..") == 0) {
 			continue;
@@ -128,6 +144,11 @@ void sync_dir(const char* src, const char* dst) {
 	}
 
 	closedir(d);
+
+	if (g_abort) {
+		return 1;
+	}
+	return 0;
 }
 
 int is_more_recent(const char* src, const char* dst) {

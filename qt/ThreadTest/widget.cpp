@@ -2,6 +2,7 @@
 #include "ui_widget.h"
 #include "async.h"
 #include <QThread>
+#include <QtConcurrent/QtConcurrent>
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -18,22 +19,14 @@ Widget::~Widget()
 void Widget::on_pushButton_clicked()
 {
     ui->pushButton->setEnabled(false);
-    QCoreApplication::processEvents();
 
-    QThread* thread = new QThread();
-    Async* async = new Async(this, &canContinue);
+    Async* async = new Async(this);
 
-    async->moveToThread(thread);
-    connect(async, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
-    connect(thread, SIGNAL(started()), async, SLOT(process()));
-    connect(async, SIGNAL(finished()), thread, SLOT(quit()));
     connect(async, SIGNAL(finished()), async, SLOT(deleteLater()));
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    connect(thread, SIGNAL(finished()), this, SLOT(enableSyncButton()));
-
+    connect(async, SIGNAL(finished()), this, SLOT(enableSyncButton()));
     connect(async, SIGNAL(print(const char*)), this, SLOT(print(const char*)));
 
-    thread->start();
+    QtConcurrent::run(async, &Async::process());
 }
 
 void Widget::enableSyncButton() {

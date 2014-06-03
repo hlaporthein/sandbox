@@ -36,9 +36,14 @@ void Worker::process() {
     printMsg("\n");
     g_worker = this;
     set_print(worker_print);
-    sync_dir(srcBuf, dstBuf);
+    int status = sync_dir(srcBuf, dstBuf);
+    reset_abort();
 
-    strncpy(buf, "Finished.\n", 1024);
+    if (status == 0) {
+        strncpy(buf, "Finished with success.\n", 1024);
+    } else {
+        strncpy(buf, "Aborted.\n", 1024);
+    }
     printMsg(buf);
 
     emit finished();
