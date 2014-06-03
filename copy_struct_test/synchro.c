@@ -63,12 +63,19 @@ void cp(const char* srcpath, const char* destpath, int buffer_size) {
 
 	size_t size = 0;
 	while ((size = fread(buf, 1, buffer_size, source))) {
+		if (g_abort) {
+			break;
+		}
 		fwrite(buf, 1, size, dest);
 		counter += size;
 	}
 
 	fclose(source);
 	fclose(dest);
+
+	if (g_abort) {
+		unlink(destpath);
+	}
 }
 
 void copy_dir(const char* src, const char* dest) {
@@ -84,6 +91,9 @@ void copy_dir(const char* src, const char* dest) {
 
 	struct dirent *dir;
 	while ((dir = readdir(d)) != NULL) {
+		if (g_abort) {
+			break;
+		}
 		char* fname = dir->d_name;
 		if (strcmp(fname, ".") == 0 || strcmp(fname, "..") == 0) {
 			continue;
@@ -107,12 +117,13 @@ void copy_dir(const char* src, const char* dest) {
 int sync_dir(const char* src, const char* dst) {
 	synchro_log("Starting sync dir: %s => %s\n", src, dst);
 
+	DIR *d = NULL;
+
 	if (!is_dir(dst)) {
 		copy_dir(src, dst);
-		return 0;
+		goto cleanup;
 	}
 
-	DIR *d;
 	d = opendir(src);
 	if (!d) {
 		DEBUG("Source does not exist: %s\n", src);
@@ -143,7 +154,10 @@ int sync_dir(const char* src, const char* dst) {
 		}
 	}
 
-	closedir(d);
+cleanup:
+	if (d) {
+		closedir(d);
+	}
 
 	if (g_abort) {
 		return 1;
