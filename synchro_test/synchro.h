@@ -10,11 +10,24 @@
 #define TRUE 1
 #define FALSE 0
 
+#define DO(statement) \
+	if ((result = statement)) { \
+		goto cleanup; \
+	}
+
+#define TRY(statement, condition, error_message, ...) \
+	statement; \
+	if (condition) { \
+		synchro_log(error_message, ##__VA_ARGS__); \
+		result = 1; \
+		goto cleanup; \
+	}
+
 extern int g_total_step;
 
 int is_dir(const char* file);
 int exists(const char* file);
-void cp(const char* srcpath, const char* destpath, int buffer_size);
+int cp(const char* srcpath, const char* destpath, int buffer_size);
 int sync_dir_build_cmd(const char* src, const char* dst, int level);
 int is_more_recent(const char* src, const char* dst);
 void inform_progress();

@@ -96,13 +96,13 @@ int run_file() {
 		if (strcmp(line, "D") == 0) {
 			fgets(line, LINE_SIZE, g_fd);
 			chomp(line);
-			mkdir(line);
+			int res = TRY(mkdir(line), res != 0, "mkdir error: (%d) %s\n", errno, strerror(errno));
 		} else if (strcmp(line, "F") == 0) {
 			fgets(line, LINE_SIZE, g_fd);
 			chomp(line);
 			fgets(line2, LINE_SIZE, g_fd);
 			chomp(line2);
-			cp(line, line2, BUFFER_SIZE);
+			DO(cp(line, line2, BUFFER_SIZE));
 		}
 		g_current_step++;
 		inform_progress();

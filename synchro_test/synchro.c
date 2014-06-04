@@ -78,30 +78,37 @@ void set_temp_dir(const char* tmp_dir) {
 	g_tmp_dir = tmp_dir;
 }
 
-void cp(const char* srcpath, const char* destpath, int buffer_size) {
+int cp(const char* srcpath, const char* destpath, int buffer_size) {
+	int result = 0;
 	INFO_LOG("Copying: %s => %s\n", srcpath, destpath);
 	char buf[buffer_size];
 
 	FILE* source = fopen(srcpath, "rb");
 	FILE* dest = fopen(destpath, "wb");
 
-	int counter = 0;
-
 	size_t size = 0;
 	while ((size = fread(buf, 1, buffer_size, source))) {
 		if (g_abort) {
 			break;
 		}
-		fwrite(buf, 1, size, dest);
-		counter += size;
+
+		size_t s = fwrite(buf, 1, size, dest);
+		if (s != size) {
+			ERROR_LOG("Cannot write data. Error(%d): %s\n", errno, strerror(errno));
+			result = 1;
+			goto cleanup;
+		}
 	}
 
+cleanup:
 	fclose(source);
 	fclose(dest);
 
 	if (g_abort) {
 		unlink(destpath);
 	}
+
+	return result;
 }
 
 int sync_dir_build_cmd(const char* src, const char* dst, int level) {

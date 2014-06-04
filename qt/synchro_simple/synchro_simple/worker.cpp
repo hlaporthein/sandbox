@@ -64,9 +64,9 @@ void Worker::printMsg(const char* buf) {
     }
     g_mutex.lock();
     emit print(buf);
-    qDebug() << "1. thread->about to wait.";
+    //qDebug() << "1. thread->about to wait.";
     g_canContinue.wait(&g_mutex);
-    qDebug() << "4. thread->just waked up.";
+    //qDebug() << "4. thread->just waked up.";
     g_mutex.unlock();
 }
 
