@@ -41,12 +41,12 @@ void Worker::process() {
     set_progress_min_delay(0);
 
     set_mode(PREVIEW_MODE);
-    int status = sync_dir(srcBuf, dstBuf);
+    int status = sync_dir(srcBuf, dstBuf, 0);
 
     progressTotal = get_total_step();
 
     set_mode(REAL_MODE);
-    status = sync_dir(srcBuf, dstBuf);
+    status = sync_dir(srcBuf, dstBuf, 0);
 
     reset_abort();
 

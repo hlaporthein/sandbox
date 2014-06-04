@@ -26,14 +26,14 @@ int main (int argc, char **argv) {
 	set_progress_min_delay(0);
 	set_mode(PREVIEW_MODE);
 	printf("total step: %d\n", get_total_step());
-	int result = sync_dir(argv[1], argv[2]);
+	int result = sync_dir(argv[1], argv[2], 0);
 	if (result) {
 		goto cleanup;
 	}
 	g_total_step = get_total_step();
 	printf("total step: %d\n", get_total_step());
 	set_mode(REAL_MODE);
-	result = sync_dir(argv[1], argv[2]);
+	result = sync_dir(argv[1], argv[2], 0);
 
 cleanup:
 	return (unsigned char) result;

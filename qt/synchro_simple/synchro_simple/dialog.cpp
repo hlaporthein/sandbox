@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QMetaType>
 #include <QtConcurrent/QtConcurrent>
+#include <ctime>
 
 #include "dialog.h"
 #include "ui_dialog.h"
@@ -80,8 +81,7 @@ void Dialog::on_syncButton_clicked()
 
     // Starting synchronizing (long asynchrone operation)
     enableProcess(true);
-    ui->remainingLabel->setText("Remaining time: TODO");
-    //start_t = clock();
+    start_t = time(NULL);
     QCoreApplication::processEvents();
 
     Worker* worker = new Worker(this, &canContinue, &mutex);
@@ -99,9 +99,15 @@ void Dialog::progressBar(int total, int val) {
     ui->progressBar->setRange(0, total);
     ui->progressBar->setValue(val);
 
-    //double speed = val / (clock() - start_t);
-    int remaining = 0;
-    ui->remainingLabel->setText("Remaining: " + remaining);
+    int elapsed = time(NULL) - start_t;
+    double speed = val / ((double) elapsed);
+    int remaining = (total - val) / speed;
+
+    char buf[BUFFER_SIZE];
+    snprintf(buf, BUFFER_SIZE, "Remaining: %ds", remaining);
+    ui->remainingLabel->setText(buf);
+    ui->remainingLabel->repaint();
+
     //qDebug() << "2. ui: about to wakeall.";
     canContinue.wakeAll();
     //qDebug() << "3. ui: just waked all.";
@@ -121,8 +127,9 @@ void Dialog::on_abortButton_clicked()
 void Dialog::enableProcess(bool enabled) {
     ui->syncButton->setEnabled(!enabled);
     ui->abortButton->setEnabled(enabled);
-    ui->remainingLabel->setText("");
+    ui->remainingLabel->setText("Prepare to sync...");
     ui->remainingLabel->setVisible(enabled);
+    ui->progressBar->setRange(0, 0);
     ui->progressBar->setValue(0);
     ui->progressBar->setVisible(enabled);
 }

@@ -40,7 +40,7 @@ private:
     QSystemTrayIcon* tray;
     QWaitCondition canContinue;
     QMutex mutex;
-    //clock_t start_t;
+    unsigned int start_t;
 
     void createTrayIcon();
     void enableProcess(bool enabled);

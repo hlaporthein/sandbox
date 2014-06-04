@@ -158,9 +158,11 @@ cleanup:
 	return result;
 }
 
-int sync_dir(const char* src, const char* dst) {
+int sync_dir(const char* src, const char* dst, int level) {
 	DEBUG_LOG("Starting sync dir in mode %s: %s => %s\n", mode_map[g_mode], src, dst);
-
+	if (level == 0) {
+		REAL_MODE_EXEC();
+	}
 	int result = 0;
 
 	DIR *d = NULL;
@@ -192,7 +194,7 @@ int sync_dir(const char* src, const char* dst) {
 		snprintf(dest_filepath, PATH_SIZE, "%s/%s", dst, fname);
 
 		if (is_dir(src_filepath)) {
-			sync_dir(src_filepath, dest_filepath);
+			sync_dir(src_filepath, dest_filepath, level + 1);
 		} else {
 			if (!exists(dest_filepath) || is_more_recent(src_filepath, dest_filepath)) {
 				REAL_MODE_EXEC(cp(src_filepath, dest_filepath, 1<<16));

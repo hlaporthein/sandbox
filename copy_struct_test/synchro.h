@@ -8,7 +8,7 @@ int is_dir(const char* file);
 int exists(const char* file);
 void cp(const char* srcpath, const char* destpath, int buffer_size);
 int copy_dir(const char* src, const char* dest);
-int sync_dir(const char* src, const char* dst);
+int sync_dir(const char* src, const char* dst, int level);
 int is_more_recent(const char* src, const char* dst);
 void inform_progress();
 
