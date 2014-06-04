@@ -4,9 +4,10 @@
 
 #include <QThread>
 #include <QtDebug>
+#include <QDir>
 
 extern "C" {
-#include "../../../copy_struct_test/synchro.h"
+#include "../../../synchro_test/synchro.h"
 }
 
 Worker *g_worker = NULL;
@@ -37,15 +38,14 @@ void Worker::process() {
     set_print(worker_print);
     set_progress_value(worker_progress_value);
     set_progress_min_delay(0);
+    set_temp_dir(QDir::tempPath().toLocal8Bit().data());
     reset_abort();
 
-    set_mode(PREVIEW_MODE);
-    int status = sync_dir(srcBuf, dstBuf, 0);
+    int status = sync_dir_build_cmd(srcBuf, dstBuf, 0);
 
-    progressTotal = get_total_step();
+    progressTotal = g_total_step;
 
-    set_mode(REAL_MODE);
-    status = sync_dir(srcBuf, dstBuf, 0);
+    status = run_file();
 
     if (status == 0) {
         strncpy(buf, "Finished with success.\n", 1024);
@@ -54,7 +54,7 @@ void Worker::process() {
     }
     printMsg(buf);
 
-cleanup:
+//cleanup:
     emit finished();
 }
 

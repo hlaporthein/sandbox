@@ -25,9 +25,9 @@ FORMS    += dialog.ui
 RESOURCES += \
     resources.qrc
 
-unix|win32: LIBS += -L$$PWD/../../../copy_struct_test/ -llibsynchro
+unix|win32: LIBS += -L$$PWD/../../../synchro_test/ -llibsynchro
 
-INCLUDEPATH += $$PWD/../../../copy_struct_test
-DEPENDPATH += $$PWD/../../../copy_struct_test
+INCLUDEPATH += $$PWD/../../../synchro_test
+DEPENDPATH += $$PWD/../../../synchro_test
 
 RC_FILE = resources.rc

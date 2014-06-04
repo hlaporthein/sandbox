@@ -8,7 +8,7 @@
 #include "ui_dialog.h"
 #include "worker.h"
 extern "C" {
-#include "../../../copy_struct_test/synchro.h"
+#include "../../../synchro_test/synchro.h"
 }
 
 Dialog::Dialog(QWidget *parent) :

@@ -8,6 +8,8 @@
 
 int g_file_full = FALSE;
 const char* g_tmp_dir = NULL;
+extern int g_abort;
+extern int g_current_step;
 
 char g_filename[PATH_SIZE];
 FILE* g_fd = NULL;
@@ -87,6 +89,9 @@ int run_file() {
 	char line[LINE_SIZE];
 	char line2[LINE_SIZE];
 	while (fgets(line, LINE_SIZE, g_fd)) {
+		if (g_abort) {
+			break;
+		}
 		chomp(line);
 		if (strcmp(line, "D") == 0) {
 			fgets(line, LINE_SIZE, g_fd);
@@ -99,6 +104,8 @@ int run_file() {
 			chomp(line2);
 			cp(line, line2, BUFFER_SIZE);
 		}
+		g_current_step++;
+		inform_progress();
 	}
 
 cleanup:
