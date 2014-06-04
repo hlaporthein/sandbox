@@ -6,6 +6,10 @@
 #include <QSystemTrayIcon>
 #include <QWaitCondition>
 #include <QMutex>
+#include <QSettings>
+
+#define CONF_SRC_DIR "src_dir"
+#define CONF_DST_DIR "dst_dir"
 
 extern bool g_quit;
 extern QWaitCondition g_canContinue;
@@ -43,6 +47,7 @@ private:
     Ui::Dialog *ui;
     QSystemTrayIcon* tray;
     unsigned int start_t;
+    QSettings settings;
 
     void createTrayIcon();
     void enableProcess(bool enabled);

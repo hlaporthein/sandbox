@@ -21,6 +21,9 @@ Dialog::Dialog(QWidget *parent) :
     createTrayIcon();
     ui->progressBar->setVisible(false);
     ui->remainingLabel->setVisible(false);
+
+    ui->srcLineEdit->setText(settings.value(CONF_SRC_DIR, "").toString());
+    ui->dstLineEdit->setText(settings.value(CONF_DST_DIR, "").toString());
 }
 
 Dialog::~Dialog()
@@ -41,6 +44,7 @@ void Dialog::on_srcBrowseButton_clicked()
                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (!dir.isEmpty()) {
         ui->srcLineEdit->setText(dir);
+        settings.setValue(CONF_SRC_DIR, dir);
     }
 }
 
@@ -56,6 +60,7 @@ void Dialog::on_dstBrowseButton_clicked()
                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (!dir.isEmpty()) {
         ui->dstLineEdit->setText(dir);
+        settings.setValue(CONF_DST_DIR, dir);
     }
 }
 
