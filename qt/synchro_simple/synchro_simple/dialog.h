@@ -7,6 +7,10 @@
 #include <QWaitCondition>
 #include <QMutex>
 
+extern bool g_quit;
+extern QWaitCondition g_canContinue;
+extern QMutex g_mutex;
+
 namespace Ui {
 class Dialog;
 }
@@ -38,8 +42,6 @@ private slots:
 private:
     Ui::Dialog *ui;
     QSystemTrayIcon* tray;
-    QWaitCondition canContinue;
-    QMutex mutex;
     unsigned int start_t;
 
     void createTrayIcon();

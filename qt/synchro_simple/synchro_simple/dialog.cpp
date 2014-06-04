@@ -84,7 +84,7 @@ void Dialog::on_syncButton_clicked()
     start_t = time(NULL);
     QCoreApplication::processEvents();
 
-    Worker* worker = new Worker(this, &canContinue, &mutex);
+    Worker* worker = new Worker(this);
 
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     connect(worker, SIGNAL(finished()), this, SLOT(finishedProcess()));
@@ -95,7 +95,7 @@ void Dialog::on_syncButton_clicked()
 }
 
 void Dialog::progressBar(int total, int val) {
-    mutex.lock();
+    g_mutex.lock();
     ui->progressBar->setRange(0, total);
     ui->progressBar->setValue(val);
 
@@ -109,9 +109,9 @@ void Dialog::progressBar(int total, int val) {
     ui->remainingLabel->repaint();
 
     //qDebug() << "2. ui: about to wakeall.";
-    canContinue.wakeAll();
+    g_canContinue.wakeAll();
     //qDebug() << "3. ui: just waked all.";
-    mutex.unlock();
+    g_mutex.unlock();
 }
 
 void Dialog::finishedProcess() {
@@ -176,20 +176,26 @@ void Dialog::hideShow() {
 }
 
 void Dialog::closeEvent(QCloseEvent * e) {
+    quit();
 //    e->ignore();
 //    hide();
 }
 
 void Dialog::quit() {
+    g_mutex.lock();
+    g_quit = true;
+    set_abort();
+    g_canContinue.wakeAll();
     QApplication::quit();
+    g_mutex.unlock();
 }
 
 void Dialog::print(const char* buf) {
-    mutex.lock();
+    g_mutex.lock();
     ui->traceTextEdit->insertPlainText(buf);
     ui->traceTextEdit->moveCursor(QTextCursor::End);
     //qDebug() << "2. ui: about to wakeall.";
-    canContinue.wakeAll();
+    g_canContinue.wakeAll();
     //qDebug() << "3. ui: just waked all.";
-    mutex.unlock();
+    g_mutex.unlock();
 }

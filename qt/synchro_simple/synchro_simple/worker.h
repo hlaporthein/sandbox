@@ -11,7 +11,7 @@ class Worker : public QObject
 {
     Q_OBJECT
 public:
-    explicit Worker(Dialog* w, QWaitCondition* c, QMutex* m);
+    explicit Worker(Dialog* w);
     void printMsg(const char* buf);
     void sendValue(const int val);
 
@@ -25,9 +25,7 @@ public slots:
     void process();
 
 private:
-    QMutex* mutex;
     Dialog* dialog;
-    QWaitCondition* canContinue;
     int progressTotal;
 };
 

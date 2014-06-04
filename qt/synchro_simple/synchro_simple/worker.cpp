@@ -19,9 +19,7 @@ void worker_progress_value(int i) {
     g_worker->sendValue(i);
 }
 
-Worker::Worker(Dialog* d, QWaitCondition* c, QMutex* m) :
-    dialog(d), canContinue(c), mutex(m)
-{
+Worker::Worker(Dialog* d) : dialog(d) {
 }
 
 void Worker::process() {
@@ -39,6 +37,7 @@ void Worker::process() {
     set_print(worker_print);
     set_progress_value(worker_progress_value);
     set_progress_min_delay(0);
+    reset_abort();
 
     set_mode(PREVIEW_MODE);
     int status = sync_dir(srcBuf, dstBuf, 0);
@@ -48,8 +47,6 @@ void Worker::process() {
     set_mode(REAL_MODE);
     status = sync_dir(srcBuf, dstBuf, 0);
 
-    reset_abort();
-
     if (status == 0) {
         strncpy(buf, "Finished with success.\n", 1024);
     } else {
@@ -57,23 +54,30 @@ void Worker::process() {
     }
     printMsg(buf);
 
+cleanup:
     emit finished();
 }
 
 void Worker::printMsg(const char* buf) {
-    mutex->lock();
+    if (g_quit) {
+        return;
+    }
+    g_mutex.lock();
     emit print(buf);
-    //qDebug() << "1. thread->about to wait.";
-    canContinue->wait(mutex);
-    //qDebug() << "4. thread->just waked up.";
-    mutex->unlock();
+    qDebug() << "1. thread->about to wait.";
+    g_canContinue.wait(&g_mutex);
+    qDebug() << "4. thread->just waked up.";
+    g_mutex.unlock();
 }
 
 void Worker::sendValue(const int val) {
-    mutex->lock();
+    if (g_quit) {
+        return;
+    }
+    g_mutex.lock();
     emit progressBar(progressTotal, val);
-    //qDebug() << "1. thread->about to wait.";
-    canContinue->wait(mutex);
-    //qDebug() << "4. thread->just waked up.";
-    mutex->unlock();
+    //qDebug() << "1. send value thread->about to wait.";
+    g_canContinue.wait(&g_mutex);
+    //qDebug() << "4. send value thread->just waked up.";
+    g_mutex.unlock();
 }
