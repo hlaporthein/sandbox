@@ -5,6 +5,7 @@
 
 #define PATH_SIZE 1<<16
 #define BUFFER_SIZE 1<<16
+#define LINE_SIZE 1<<16
 
 #define TRUE 1
 #define FALSE 0

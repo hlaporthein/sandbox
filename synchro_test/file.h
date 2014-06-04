@@ -9,5 +9,7 @@ void file_close();
 int file_push_mkdir(const char* dir);
 int file_push_cp(const char* src, const char* dst);
 int file_append(const char* format, ...);
+int run_file();
+void chomp(char* s);
 
 #endif

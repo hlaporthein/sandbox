@@ -30,7 +30,7 @@ int main (int argc, char **argv) {
 	}
 
 	printf("total step: %d\n", g_total_step);
-	//result = sync_dir(argv[1], argv[2], 0);
+	result = run_file(argv[1], argv[2], 0);
 
 cleanup:
 	return (unsigned char) result;

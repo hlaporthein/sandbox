@@ -2,13 +2,14 @@
 #include <errno.h>
 #include <string.h>
 #include <stdarg.h>
+#include <dirent.h>
 
 #include "synchro.h"
 
 int g_file_full = FALSE;
 const char* g_tmp_dir = NULL;
 
-char g_filename[BUFFER_SIZE];
+char g_filename[PATH_SIZE];
 FILE* g_fd = NULL;
 
 int file_reset(int remove) {
@@ -16,7 +17,7 @@ int file_reset(int remove) {
 
 	file_close();
 
-	snprintf(g_filename, BUFFER_SIZE, "%s/synchro_simple.txt", g_tmp_dir);
+	snprintf(g_filename, PATH_SIZE, "%s/synchro_simple.txt", g_tmp_dir);
 	if (remove) {
 		unlink(g_filename);
 	}
@@ -70,4 +71,47 @@ int file_append(const char* format, ...) {
 	g_total_step++;
 cleanup:
 	return result;
+}
+
+int run_file() {
+	int result = 0;
+	file_close();
+
+	g_fd = fopen(g_filename, "rb");
+	if (!g_fd) {
+		ERROR_LOG("Cannot open file %s. Error(%d): %s\n", g_filename, errno, strerror(errno));
+		result = errno;
+		goto cleanup;
+	}
+
+	char line[LINE_SIZE];
+	char line2[LINE_SIZE];
+	while (fgets(line, LINE_SIZE, g_fd)) {
+		chomp(line);
+		if (strcmp(line, "D") == 0) {
+			fgets(line, LINE_SIZE, g_fd);
+			chomp(line);
+			mkdir(line);
+		} else if (strcmp(line, "F") == 0) {
+			fgets(line, LINE_SIZE, g_fd);
+			chomp(line);
+			fgets(line2, LINE_SIZE, g_fd);
+			chomp(line2);
+			cp(line, line2, BUFFER_SIZE);
+		}
+	}
+
+cleanup:
+	if (g_fd) {
+		fclose(g_fd);
+		g_fd = NULL;
+	}
+	return result;
+}
+
+void chomp(char* s) {
+	int len = strlen(s);
+	if (s[len-1] == '\n') {
+		s[len-1] = '\0';
+	}
 }
