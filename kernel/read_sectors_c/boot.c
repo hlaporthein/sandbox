@@ -1,3 +1,17 @@
+#define STRING(x) STRING2(x)
+#define STRING2(x) #x
+
+#define SECTORS_PER_TRACK 18
+#define HEAD_NBR 2
+
+#define __NOINLINE  __attribute__((noinline))
+#define __REGPARM   __attribute__ ((regparm(3)))
+#define __NORETURN  __attribute__((noreturn))
+
+#define __MBR_SECTION __attribute__ ((section (".boot")))
+#define __MBR_SECTION_DATA __attribute__ ((section (".bootd")))
+
+
 __asm__(
 ".code16gcc\n\t"
 ".section .boot,\"x\" \n\t"
@@ -17,34 +31,65 @@ __asm__(
 	"iBootDrive: .byte  0\n\t"
 );
 
-#define __NOINLINE  __attribute__((noinline))
-#define __REGPARM   __attribute__ ((regparm(3)))
-#define __NORETURN  __attribute__((noreturn))
-#define __MBR_SECTION __attribute__ ((section (".boot")))
+void __MBR_SECTION __NOINLINE __REGPARM load_sectors(int lba, int dest) {
+	__asm__ __volatile__ (
+		"xor cx, cx\n\t"
+		"readsect:\n\t"
+		"push ax\n\t"
+		"push cx\n\t"
+		"push bx\n\t"
+		"mov bx, " STRING(SECTORS_PER_TRACK) "\n\t"
+		"xor dx, dx\n\t"
+		"div bx\n\t"
+		"inc dx\n\t"
+		"mov cl, dl\n\t"
+		"mov bx," STRING(HEAD_NBR) "\n\t"
+		"xor dx, dx\n\t"
+		"div bx\n\t"
+		"mov ch, al\n\t"
+		"xchg dl, dh\n\t"
+		"mov ax, 0x0201\n\t"
+		"mov dl, iBootDrive\n\t"
+		"pop bx\n\t"
+		"int 0x13\n\t"
+		"jc readfail\n\t"
+		"pop cx\n\t"
+		"pop ax\n\t"
+		"jmp readsect_end\n\t"
+		"readfail:\n\t"
+		"pop cx\n\t"
+		"inc cx\n\t"
+		"cmp cx, word ptr 4\n\t"
+		"je bootFailure\n\t"
+		"xor ax, ax\n\t"
+		"int 0x13\n\t"
+		"pop ax\n\t"
+		"jmp readsect\n\t"
+		"readsect_end:\n\t"
+		: : "a"(lba), "b"(dest));
 
+}
 
-/* BIOS interrupts must be done with inline assembly */
-void __NOINLINE __REGPARM print(const char *s) {
-	while(*s){
+void __MBR_SECTION __NOINLINE reset_hard_drive() {
+	__asm__ __volatile__ (
+		"xor ax, ax\n\t"
+		"int 0x13\n\t"
+		"jc bootFailure\n\t");
+}
+
+void __MBR_SECTION __NOINLINE __REGPARM print(const char *s) {
+	while(*s) {
 		__asm__ __volatile__ ("int  0x10" : : "a"(0x0E00 | *s), "b"(7));
 		s++;
 	}
 }
 
-void __NOINLINE __REGPARM show_cursor(int cursor_shape) {
-	__asm__ __volatile__ ("int  0x10" : : "a"(0x0100), "c"(cursor_shape));
-}
-
-void __NOINLINE __REGPARM clean_screen() {
-	__asm__ __volatile__ ("int  0x10" : : "a"(0x0002));
-}
-
-void __NOINLINE __REGPARM wait_key() {
+void __MBR_SECTION __NOINLINE __REGPARM wait_key() {
 	__asm__ __volatile__ ("int  0x16" : : "a"(0x0000));
 }
 
-void __NOINLINE __REGPARM reboot(const char *s) {
-	print(s);
+void __MBR_SECTION __NOINLINE __REGPARM reboot() {
+	print("Press any key to reboot...");
 	wait_key();
 	__asm__ __volatile__ (
 		".byte  0xEA\n\t"
@@ -53,44 +98,28 @@ void __NOINLINE __REGPARM reboot(const char *s) {
 	);
 }
 
-void __MBR_SECTION __NOINLINE __REGPARM reset_hard_drive() {
-	__asm__ __volatile__ (
-		"mov  dl, iBootDrive\n\t"
-		"int  0x13" : : "a"(0x0000));
+void __MBR_SECTION __NOINLINE __REGPARM bootFailure() {
+	print("Disk Error...\n");
+	reboot();
 }
 
-#define SECTORS_PER_TRACK 18
-#define HEAD_NBR 2
-
-int __MBR_SECTION __NOINLINE get_hard_drive() {
-	int result;
-	__asm__ __volatile__ (
-		"xor dx,dx\n\t"
-		"mov dl, iBootDrive\n\t" :
-			"=d"(result)
-	);
-	return result;
+void __MBR_SECTION __NOINLINE __REGPARM show_cursor(int cursor_shape) {
+	__asm__ __volatile__ ("int  0x10" : : "a"(0x0100), "c"(cursor_shape));
 }
 
-void __MBR_SECTION __NOINLINE __REGPARM load_sectors(int lba) {
-	int cylinder_ch = (lba / SECTORS_PER_TRACK) / HEAD_NBR;
-	int head_dh = (lba / SECTORS_PER_TRACK) % HEAD_NBR;
-	int sector_cl = (lba % SECTORS_PER_TRACK) + 1;
-	int drive_dl = get_hard_drive();
-	int dx = (head_dh << 8) | drive_dl;
-	int cx = (cylinder_ch << 8) | sector_cl;
-	__asm__ __volatile__ ("int  0x13" : : "a"(0x0201), "b"(0x7c00 + 0x200*lba),
-		"c" (cx),
-		"d"(dx) );
+void __NOINLINE __REGPARM clean_screen() {
+	__asm__ __volatile__ ("int  0x10" : : "a"(0x0002));
 }
 
-void __MBR_SECTION start() {
+
+
+
+void __NOINLINE __MBR_SECTION start() {
 	reset_hard_drive();
-	load_sectors(1);
+	load_sectors(1, 0x7c00 + 0x200);
 	clean_screen();
 	show_cursor(0x0007);
-	print("Hello JLG...\n\r");
-	print("Hello Suzana GUENEGO...\n\r");
-	reboot("Press any key to reboot...");
+	print("Hello from sector 1...\n\r");
+	reboot();
 }
 

@@ -1,5 +1,5 @@
 all:
-	gcc -S -masm=intel -fno-leading-underscore -ffreestanding -Wall -Werror -o boot.s boot.c
+	gcc -S -masm=intel -fno-asynchronous-unwind-tables -fno-leading-underscore -ffreestanding -Wall -Werror -o boot.s boot.c
 	as -o boot.o boot.s
 	ld -o boot.out -T linker.ld boot.o
 	objcopy -O binary boot.out boot.bin
