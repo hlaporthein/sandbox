@@ -26,7 +26,7 @@ cp "${QT_MINGW_BIN}/icuuc51.dll" "${DEST_DIR}"
 cp "${QT_TOOLS_BIN}/libgcc_s_dw2-1.dll" "${DEST_DIR}"
 cp "${QT_TOOLS_BIN}/libstdc++-6.dll" "${DEST_DIR}"
 cp "${QT_TOOLS_BIN}/libwinpthread-1.dll" "${DEST_DIR}"
-cp "../../copy_struct_test/synchro.dll" "${DEST_DIR}"
+cp "../../synchro_test/synchro.dll" "${DEST_DIR}"
 
 # Run the NSIS script to do the setup.exe
 makensis setup.nsi
