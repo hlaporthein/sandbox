@@ -22,7 +22,7 @@ void __NOINLINE __REGPARM display(const char *s) {
 	}
 }
 
-void run_second_stage() {
+void __NOINLINE __REGPARM run_second_stage() {
 	display("This is the second stage.\n\r");
 	print("It is working...\n\r");
 	display("Coucou JL\n\r");

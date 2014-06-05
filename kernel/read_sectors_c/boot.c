@@ -65,7 +65,7 @@ void __NOINLINE __REGPARM load_sectors(int lba, int dest) {
 
 }
 
-void __NOINLINE reset_hard_drive() {
+void __NOINLINE __REGPARM reset_hard_drive() {
 	__asm__ __volatile__ (
 		"xor ax, ax\n\t"
 		"int 0x13\n\t"
@@ -94,7 +94,7 @@ void __NOINLINE __REGPARM reboot() {
 }
 
 void __NOINLINE __REGPARM bootFailure() {
-	print("Disk Error...\n");
+	print("Disk Error...\n\r");
 	reboot();
 }
 
@@ -107,11 +107,11 @@ void __NOINLINE __REGPARM clean_screen() {
 }
 
 
-void run_second_stage();
+void __NOINLINE __REGPARM run_second_stage();
 
-void __NOINLINE start() {
-	clean_screen();
-	show_cursor(0x0007);
+void __NOINLINE __REGPARM start() {
+	//clean_screen();
+	//show_cursor(0x0007);
 	print("Starting...\n\r");
 	print("Hey\n\r");
 	reset_hard_drive();
