@@ -8,13 +8,8 @@
 #define __REGPARM   __attribute__ ((regparm(3)))
 #define __NORETURN  __attribute__((noreturn))
 
-#define __MBR_SECTION __attribute__ ((section (".boot")))
-#define __MBR_SECTION_DATA __attribute__ ((section (".bootd")))
-
-
 __asm__(
 ".code16gcc\n\t"
-".section .boot,\"x\" \n\t"
 ".org 0x0\n\t"
 ".global debut\n\t"
 "debut:\n\t"
@@ -31,7 +26,7 @@ __asm__(
 	"iBootDrive: .byte  0\n\t"
 );
 
-void __MBR_SECTION __NOINLINE __REGPARM load_sectors(int lba, int dest) {
+void __NOINLINE __REGPARM load_sectors(int lba, int dest) {
 	__asm__ __volatile__ (
 		"xor cx, cx\n\t"
 		"readsect:\n\t"
@@ -70,25 +65,25 @@ void __MBR_SECTION __NOINLINE __REGPARM load_sectors(int lba, int dest) {
 
 }
 
-void __MBR_SECTION __NOINLINE reset_hard_drive() {
+void __NOINLINE reset_hard_drive() {
 	__asm__ __volatile__ (
 		"xor ax, ax\n\t"
 		"int 0x13\n\t"
 		"jc bootFailure\n\t");
 }
 
-void __MBR_SECTION __NOINLINE __REGPARM print(const char *s) {
+void __NOINLINE __REGPARM print(const char *s) {
 	while(*s) {
 		__asm__ __volatile__ ("int  0x10" : : "a"(0x0E00 | *s), "b"(7));
 		s++;
 	}
 }
 
-void __MBR_SECTION __NOINLINE __REGPARM wait_key() {
+void __NOINLINE __REGPARM wait_key() {
 	__asm__ __volatile__ ("int  0x16" : : "a"(0x0000));
 }
 
-void __MBR_SECTION __NOINLINE __REGPARM reboot() {
+void __NOINLINE __REGPARM reboot() {
 	print("Press any key to reboot...");
 	wait_key();
 	__asm__ __volatile__ (
@@ -98,12 +93,12 @@ void __MBR_SECTION __NOINLINE __REGPARM reboot() {
 	);
 }
 
-void __MBR_SECTION __NOINLINE __REGPARM bootFailure() {
+void __NOINLINE __REGPARM bootFailure() {
 	print("Disk Error...\n");
 	reboot();
 }
 
-void __MBR_SECTION __NOINLINE __REGPARM show_cursor(int cursor_shape) {
+void __NOINLINE __REGPARM show_cursor(int cursor_shape) {
 	__asm__ __volatile__ ("int  0x10" : : "a"(0x0100), "c"(cursor_shape));
 }
 
@@ -112,14 +107,16 @@ void __NOINLINE __REGPARM clean_screen() {
 }
 
 
+void run_second_stage();
 
-
-void __NOINLINE __MBR_SECTION start() {
-	reset_hard_drive();
-	load_sectors(1, 0x7c00 + 0x200);
+void __NOINLINE start() {
 	clean_screen();
 	show_cursor(0x0007);
-	print("Hello from sector 1...\n\r");
+	print("Starting...\n\r");
+	print("Hey\n\r");
+	reset_hard_drive();
+	load_sectors(1, 0x7c00 + 0x200);
+	run_second_stage();
 	reboot();
 }
 
