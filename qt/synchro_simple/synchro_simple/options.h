@@ -26,6 +26,8 @@ public slots:
 private slots:
     void on_buttonBox_clicked(QAbstractButton *button);
 
+    void on_periodCheckBox_toggled(bool checked);
+
 private:
     Ui::Options *ui;
     QSettings settings;

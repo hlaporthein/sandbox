@@ -28,6 +28,7 @@ public:
     ~Dialog();
     void closeEvent(QCloseEvent * e);
     Ui::Dialog* getUi() { return ui; }
+    void useTray(bool useTray);
 
 private slots:
     void on_srcBrowseButton_clicked();
@@ -49,7 +50,7 @@ private:
     QSystemTrayIcon* tray;
     unsigned int start_t;
     QSettings settings;
-    Options o;
+    Options* o;
 
     void createTrayIcon();
     void enableProcess(bool enabled);

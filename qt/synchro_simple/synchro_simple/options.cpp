@@ -14,6 +14,7 @@ Options::Options(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->maxOpLineEdit->setValidator(new QIntValidator(0, 1000000, this));
+    ui->periodLineEdit->setValidator(new QIntValidator(0, 3600*24, this));
 
 #ifdef __WIN32__
     ui->priorityComboBox->addItem("Low", QVariant(IDLE_PRIORITY_CLASS));
@@ -35,6 +36,11 @@ void Options::load() {
     qDebug() << "load";
     ui->maxOpLineEdit->setText(settings.value(CONF_MAX_OP, CONF_DEF_MAX_OP).toString());
 
+    bool usePeriod = settings.value(CONF_USE_PERIOD, CONF_DEF_USE_PERIOD).toBool();
+    ui->periodLineEdit->setText(settings.value(CONF_PERIOD, CONF_DEF_PERIOD).toString());
+    ui->periodLineEdit->setEnabled(usePeriod);
+    ui->periodCheckBox->setChecked(usePeriod);
+
 #ifdef __WIN32__
     int index = ui->priorityComboBox->findData(settings.value(CONF_PRIORITY, CONF_DEF_PRIORITY).toInt());
     ui->priorityComboBox->setCurrentIndex(index);
@@ -44,6 +50,10 @@ void Options::load() {
 void Options::save() {
     qDebug() << "save";
     settings.setValue(CONF_MAX_OP, ui->maxOpLineEdit->text().toInt());
+    settings.setValue(CONF_USE_PERIOD, ui->periodCheckBox->isChecked());
+    settings.setValue(CONF_PERIOD, ui->periodLineEdit->text().toInt());
+
+    ((Dialog*) parent())->useTray(ui->periodCheckBox->isChecked());
 
 #ifdef __WIN32__
     int priority = ui->priorityComboBox->currentData().toInt();
@@ -55,6 +65,8 @@ void Options::save() {
 void Options::reset() {
     qDebug() << "reset";
     ui->maxOpLineEdit->setText(QString::number(CONF_DEF_MAX_OP));
+    ui->periodLineEdit->setText(QString::number(CONF_DEF_PERIOD));
+    ui->periodCheckBox->setChecked(false);
 #ifdef __WIN32__
     int index = ui->priorityComboBox->findData(CONF_DEF_PRIORITY);
     ui->priorityComboBox->setCurrentIndex(index);
@@ -93,4 +105,8 @@ void Options::on_buttonBox_clicked(QAbstractButton *button) {
     default:
         break;
     }
+}
+
+void Options::on_periodCheckBox_toggled(bool checked) {
+    ui->periodLineEdit->setEnabled(checked);
 }

@@ -8,6 +8,7 @@
 #include "ui_dialog.h"
 #include "worker.h"
 #include "options.h"
+#include "version.h"
 
 extern "C" {
 #include "../../../synchro_test/synchro.h"
@@ -16,7 +17,8 @@ extern "C" {
 Dialog::Dialog(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Dialog),
-    tray(new QSystemTrayIcon(this))
+    tray(new QSystemTrayIcon(this)),
+    o(new Options(this))
 {
     qRegisterMetaType<QTextCursor>("QTextCursor");
     ui->setupUi(this);
@@ -28,14 +30,13 @@ Dialog::Dialog(QWidget *parent) :
     ui->dstLineEdit->setText(settings.value(CONF_DST_DIR, "").toString());
 }
 
-Dialog::~Dialog()
-{
+Dialog::~Dialog() {
     delete ui;
     delete tray;
+    delete o;
 }
 
-void Dialog::on_srcBrowseButton_clicked()
-{
+void Dialog::on_srcBrowseButton_clicked() {
     QString src = ui->srcLineEdit->text();
     if (src.isEmpty()) {
         src = "/home";
@@ -50,8 +51,7 @@ void Dialog::on_srcBrowseButton_clicked()
     }
 }
 
-void Dialog::on_dstBrowseButton_clicked()
-{
+void Dialog::on_dstBrowseButton_clicked() {
     QString dst = ui->dstLineEdit->text();
     if (dst.isEmpty()) {
         dst = "/home";
@@ -66,8 +66,7 @@ void Dialog::on_dstBrowseButton_clicked()
     }
 }
 
-void Dialog::on_syncButton_clicked()
-{
+void Dialog::on_syncButton_clicked() {
     ui->traceTextEdit->clear();
 
     // Checking
@@ -125,8 +124,7 @@ void Dialog::finishedProcess() {
     enableProcess(false);
 }
 
-void Dialog::on_abortButton_clicked()
-{
+void Dialog::on_abortButton_clicked() {
     ui->abortButton->setEnabled(false);
     set_abort();
 }
@@ -160,8 +158,9 @@ void Dialog::createTrayIcon() {
 
     tray->setContextMenu(trayMenu);
     tray->setIcon(QIcon(":/icon/ocp_icon.png"));
-    tray->setToolTip("Synchro");
-    tray->show();
+    tray->setToolTip(VER_PRODUCTNAME_STR);
+
+    tray->setVisible(settings.value(CONF_USE_PERIOD, CONF_DEF_USE_PERIOD).toBool());
 
     connect(tray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(showNormalOnDblClick(QSystemTrayIcon::ActivationReason)));
@@ -183,9 +182,12 @@ void Dialog::hideShow() {
 }
 
 void Dialog::closeEvent(QCloseEvent * e) {
-    quit();
-//    e->ignore();
-//    hide();
+    if (settings.value(CONF_USE_PERIOD, CONF_DEF_USE_PERIOD).toBool()) {
+        e->ignore();
+        hide();
+    } else {
+        quit();
+    }
 }
 
 void Dialog::quit() {
@@ -208,9 +210,13 @@ void Dialog::print(const char* buf) {
 }
 
 void Dialog::on_moreButton_clicked() {
-    o.show();
+    o->show();
 }
 
 void Dialog::on_clearButton_clicked() {
     ui->traceTextEdit->clear();
+}
+
+void Dialog::useTray(bool useTray) {
+    tray->setVisible(useTray);
 }

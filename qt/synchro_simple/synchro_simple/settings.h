@@ -5,8 +5,12 @@
 #define CONF_DST_DIR "dst_dir"
 #define CONF_MAX_OP "max_op"
 #define CONF_OPTIONS_GEOMETRY "geometry"
+#define CONF_USE_PERIOD "use_period"
+#define CONF_PERIOD "period"
 
 #define CONF_DEF_MAX_OP 2000
+#define CONF_DEF_USE_PERIOD false
+#define CONF_DEF_PERIOD 120
 
 #ifdef __WIN32__
 #include "windows.h"
