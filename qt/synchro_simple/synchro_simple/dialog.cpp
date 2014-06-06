@@ -3,6 +3,7 @@
 #include <QMetaType>
 #include <QtConcurrent/QtConcurrent>
 #include <ctime>
+#include <sstream>
 
 #include "dialog.h"
 #include "ui_dialog.h"
@@ -69,6 +70,7 @@ void Dialog::on_dstBrowseButton_clicked() {
 }
 
 void Dialog::on_syncButton_clicked() {
+    time.restart();
     ui->traceTextEdit->clear();
 
     // Checking
@@ -89,7 +91,6 @@ void Dialog::on_syncButton_clicked() {
 
     // Starting synchronizing (long asynchrone operation)
     enableProcess(true);
-    start_t = time(NULL);
     QCoreApplication::processEvents();
 
     Worker* worker = new Worker(this);
@@ -107,7 +108,7 @@ void Dialog::progressBar(int total, int val) {
     ui->progressBar->setRange(0, total);
     ui->progressBar->setValue(val);
 
-    int elapsed = time(NULL) - start_t;
+    int elapsed = time.elapsed() / 1000;
     double speed = val / ((double) elapsed);
     int remaining = (total - val) / speed;
 
@@ -227,6 +228,7 @@ void Dialog::setBackgroundMode(bool isBackground) {
     tray->setVisible(isBackground);
     if (isBackground) {
         timer.start(settings.value(CONF_PERIOD, CONF_DEF_PERIOD).toInt() * 1000);
+        time.start();
     } else {
         timer.stop();
     }

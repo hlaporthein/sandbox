@@ -8,6 +8,7 @@
 #include <QMutex>
 #include <QSettings>
 #include <QTimer>
+#include <QTime>
 
 #include "options.h"
 #include "settings.h"
@@ -46,14 +47,13 @@ private slots:
     void finishedProcess();
     void progressBar(int total, int val);
     void backgroundSync();
-
 private:
     Ui::Dialog *ui;
     QSystemTrayIcon* tray;
-    unsigned int start_t;
     QSettings settings;
     Options* o;
     QTimer timer;
+    QTime time;
 
     void createTrayIcon();
     void enableProcess(bool enabled);
