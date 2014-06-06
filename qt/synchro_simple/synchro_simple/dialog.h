@@ -7,6 +7,7 @@
 #include <QWaitCondition>
 #include <QMutex>
 #include <QSettings>
+#include <QTimer>
 
 #include "options.h"
 #include "settings.h"
@@ -28,7 +29,7 @@ public:
     ~Dialog();
     void closeEvent(QCloseEvent * e);
     Ui::Dialog* getUi() { return ui; }
-    void useTray(bool useTray);
+    void setBackgroundMode(bool isBackground);
 
 private slots:
     void on_srcBrowseButton_clicked();
@@ -44,6 +45,7 @@ private slots:
     void print(const char* buf);
     void finishedProcess();
     void progressBar(int total, int val);
+    void backgroundSync();
 
 private:
     Ui::Dialog *ui;
@@ -51,6 +53,7 @@ private:
     unsigned int start_t;
     QSettings settings;
     Options* o;
+    QTimer timer;
 
     void createTrayIcon();
     void enableProcess(bool enabled);

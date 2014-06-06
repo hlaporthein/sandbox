@@ -23,11 +23,14 @@ Dialog::Dialog(QWidget *parent) :
     qRegisterMetaType<QTextCursor>("QTextCursor");
     ui->setupUi(this);
     createTrayIcon();
+    setBackgroundMode(settings.value(CONF_USE_PERIOD, CONF_DEF_USE_PERIOD).toBool());
     ui->progressBar->setVisible(false);
     ui->remainingLabel->setVisible(false);
 
     ui->srcLineEdit->setText(settings.value(CONF_SRC_DIR, "").toString());
     ui->dstLineEdit->setText(settings.value(CONF_DST_DIR, "").toString());
+
+    connect(&timer, SIGNAL(timeout()), this, SLOT(backgroundSync()));
 }
 
 Dialog::~Dialog() {
@@ -114,6 +117,10 @@ void Dialog::progressBar(int total, int val) {
     ui->remainingLabel->setText(buf);
     ui->remainingLabel->repaint();
 
+    snprintf(buf, BUFFER_SIZE, "Sync. data: %d of %d KB", val / 1024, total / 1024);
+    ui->bytesDoneLabel->setText(buf);
+    ui->bytesDoneLabel->repaint();
+
     //qDebug() << "2. ui: about to wakeall.";
     g_canContinue.wakeAll();
     //qDebug() << "3. ui: just waked all.";
@@ -133,6 +140,7 @@ void Dialog::enableProcess(bool enabled) {
     ui->syncButton->setEnabled(!enabled);
     ui->abortButton->setEnabled(enabled);
     ui->remainingLabel->setText("Prepare to sync...");
+    ui->bytesDoneLabel->setText("");
     ui->remainingLabel->setVisible(enabled);
     ui->progressBar->setRange(0, 0);
     ui->progressBar->setValue(0);
@@ -159,8 +167,6 @@ void Dialog::createTrayIcon() {
     tray->setContextMenu(trayMenu);
     tray->setIcon(QIcon(":/icon/ocp_icon.png"));
     tray->setToolTip(VER_PRODUCTNAME_STR);
-
-    tray->setVisible(settings.value(CONF_USE_PERIOD, CONF_DEF_USE_PERIOD).toBool());
 
     connect(tray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(showNormalOnDblClick(QSystemTrayIcon::ActivationReason)));
@@ -217,6 +223,17 @@ void Dialog::on_clearButton_clicked() {
     ui->traceTextEdit->clear();
 }
 
-void Dialog::useTray(bool useTray) {
-    tray->setVisible(useTray);
+void Dialog::setBackgroundMode(bool isBackground) {
+    tray->setVisible(isBackground);
+    if (isBackground) {
+        timer.start(settings.value(CONF_PERIOD, CONF_DEF_PERIOD).toInt() * 1000);
+    } else {
+        timer.stop();
+    }
+}
+
+void Dialog::backgroundSync() {
+    if (ui->syncButton->isEnabled()) {
+        on_syncButton_clicked();
+    }
 }

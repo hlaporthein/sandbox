@@ -53,7 +53,7 @@ void Options::save() {
     settings.setValue(CONF_USE_PERIOD, ui->periodCheckBox->isChecked());
     settings.setValue(CONF_PERIOD, ui->periodLineEdit->text().toInt());
 
-    ((Dialog*) parent())->useTray(ui->periodCheckBox->isChecked());
+    ((Dialog*) parent())->setBackgroundMode(ui->periodCheckBox->isChecked());
 
 #ifdef __WIN32__
     int priority = ui->priorityComboBox->currentData().toInt();

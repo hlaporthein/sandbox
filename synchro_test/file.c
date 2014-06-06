@@ -79,6 +79,7 @@ cleanup:
 
 int run_file() {
 	int result = 0;
+	g_current_step = 0;
 	file_close();
 
 	g_fd = fopen(g_filename, "rb");
