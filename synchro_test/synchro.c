@@ -120,7 +120,7 @@ cleanup:
 }
 
 int sync_dir_build_cmd(const char* src, const char* dst, int level) {
-	DEBUG_LOG("Starting sync_dir_build_cmd in mode %s: %s => %s\n", mode_map[g_mode], src, dst);
+	DEBUG_LOG("Starting sync_dir_build_cmd: %s => %s\n", src, dst);
 	if (level == 0) {
 		file_reset(TRUE);
 	}
@@ -156,13 +156,21 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level) {
 		if (is_dir(src_filepath)) {
 			sync_dir_build_cmd(src_filepath, dest_filepath, level + 1);
 		} else {
-
+			int do_copy = FALSE;
 			struct stat src_statbuf;
-			result = TRY(stat(src, &src_statbuf), result == -1, "stat error(%d): %s\n", errno, strerror(errno));
-			struct stat dst_statbuf;
-			result = TRY(stat(src, &dst_statbuf), result == -1, "stat error(%d): %s\n", errno, strerror(errno));
+			result = TRY(stat(src_filepath, &src_statbuf), result == -1, "stat error(%d): %s\n", errno, strerror(errno));
 
-			if (!exists(dest_filepath) || src_statbuf.st_mtime > dst_statbuf.st_mtime) {
+			if (!exists(dest_filepath)) {
+				do_copy = TRUE;
+			} else {
+				struct stat dst_statbuf;
+				result = TRY(stat(dest_filepath, &dst_statbuf), result == -1, "stat error(%d): %s\n", errno, strerror(errno));
+				if (src_statbuf.st_mtime > dst_statbuf.st_mtime) {
+					do_copy = TRUE;
+				}
+			}
+
+			if (do_copy) {
 				file_push_cp(src_filepath, dest_filepath);
 				g_total_step += src_statbuf.st_size;
 			}

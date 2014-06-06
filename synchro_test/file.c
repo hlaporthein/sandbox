@@ -73,7 +73,6 @@ int file_append(const char* format, ...) {
 	if (g_total_op >= g_max_op && g_max_op > 0) {
 		g_file_full = TRUE;
 	}
-	g_total_step++;
 cleanup:
 	return result;
 }

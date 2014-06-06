@@ -27,11 +27,13 @@ void Worker::process() {
     //QThread::msleep(1000);
     char srcBuf[PATH_SIZE];
     char dstBuf[PATH_SIZE];
+    char tmpBuf[PATH_SIZE];
     char buf[PATH_SIZE];
     char* str = dialog->getUi()->srcLineEdit->text().toLocal8Bit().data();
     strncpy(srcBuf, str, PATH_SIZE);
     char* dst = dialog->getUi()->dstLineEdit->text().toLocal8Bit().data();
     strncpy(dstBuf, dst, PATH_SIZE);
+    strncpy(tmpBuf, QDir::tempPath().toLocal8Bit().data(), PATH_SIZE);
 
     g_worker = this;
 
@@ -39,7 +41,8 @@ void Worker::process() {
     set_print(worker_print);
     set_progress_value(worker_progress_value);
     set_progress_min_delay(0);
-    set_temp_dir(QDir::tempPath().toLocal8Bit().data());
+    set_temp_dir(tmpBuf);
+    qDebug() << "tmp_dir=" << tmpBuf;
     reset_abort();
 
     int status = sync_dir_build_cmd(srcBuf, dstBuf, 0);

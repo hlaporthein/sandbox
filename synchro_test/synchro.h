@@ -58,7 +58,8 @@ void synchro_log(const char* format, ...);
 #define DEBUG_LOG(format, ...)
 #endif
 
-#define ERROR_LOG(format, ...) synchro_log(format, ##__VA_ARGS__)
+#define ERROR_LOG(format, ...) synchro_log("file: %s, line: %d ", __FILE__, __LINE__); \
+	synchro_log(format, ##__VA_ARGS__)
 #define INFO_LOG(format, ...) synchro_log(format, ##__VA_ARGS__)
 
 
