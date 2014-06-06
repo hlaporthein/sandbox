@@ -34,6 +34,8 @@ private slots:
     void on_dstBrowseButton_clicked();
     void on_syncButton_clicked();
     void on_abortButton_clicked();
+    void on_moreButton_clicked();
+    void on_clearButton_clicked();
     void showNormalOnDblClick(QSystemTrayIcon::ActivationReason reason);
     void hideShow();
     void quit();
@@ -41,9 +43,6 @@ private slots:
     void print(const char* buf);
     void finishedProcess();
     void progressBar(int total, int val);
-
-
-    void on_moreButton_clicked();
 
 private:
     Ui::Dialog *ui;

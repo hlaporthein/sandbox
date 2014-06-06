@@ -210,3 +210,7 @@ void Dialog::print(const char* buf) {
 void Dialog::on_moreButton_clicked() {
     o.show();
 }
+
+void Dialog::on_clearButton_clicked() {
+    ui->traceTextEdit->clear();
+}

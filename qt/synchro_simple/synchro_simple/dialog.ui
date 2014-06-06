@@ -103,6 +103,10 @@ border-style: inset;</string>
          <property name="text">
           <string>Synchronize</string>
          </property>
+         <property name="icon">
+          <iconset resource="resources.qrc">
+           <normaloff>:/icon/sync_icon.png</normaloff>:/icon/sync_icon.png</iconset>
+         </property>
         </widget>
        </item>
        <item>
@@ -113,10 +117,31 @@ border-style: inset;</string>
          <property name="text">
           <string>Abort</string>
          </property>
+         <property name="icon">
+          <iconset resource="resources.qrc">
+           <normaloff>:/icon/cancel_icon.png</normaloff>:/icon/cancel_icon.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="clearButton">
+         <property name="text">
+          <string>Clear</string>
+         </property>
+         <property name="icon">
+          <iconset resource="resources.qrc">
+           <normaloff>:/icon/clear_icon.png</normaloff>:/icon/clear_icon.png</iconset>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="moreButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string>More &gt;&gt;</string>
          </property>
