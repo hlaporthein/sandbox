@@ -29,9 +29,9 @@ void Worker::process() {
     char dstBuf[PATH_SIZE];
     char tmpBuf[PATH_SIZE];
     char buf[PATH_SIZE];
-    char* str = dialog->getUi()->srcLineEdit->text().toLocal8Bit().data();
+    char* str = settings.value(CONF_SRC_DIR).toString().toLocal8Bit().data();
     strncpy(srcBuf, str, PATH_SIZE);
-    char* dst = dialog->getUi()->dstLineEdit->text().toLocal8Bit().data();
+    char* dst = settings.value(CONF_DST_DIR).toString().toLocal8Bit().data();
     strncpy(dstBuf, dst, PATH_SIZE);
     strncpy(tmpBuf, QDir::tempPath().toLocal8Bit().data(), PATH_SIZE);
 
