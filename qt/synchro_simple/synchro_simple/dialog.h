@@ -8,9 +8,8 @@
 #include <QMutex>
 #include <QSettings>
 
-#define CONF_SRC_DIR "src_dir"
-#define CONF_DST_DIR "dst_dir"
-#define CONF_MAX_OP "max_op"
+#include "options.h"
+#include "settings.h"
 
 extern bool g_quit;
 extern QWaitCondition g_canContinue;
@@ -46,13 +45,12 @@ private slots:
 
     void on_moreButton_clicked();
 
-    void on_maxOpLineEdit_editingFinished();
-
 private:
     Ui::Dialog *ui;
     QSystemTrayIcon* tray;
     unsigned int start_t;
     QSettings settings;
+    Options o;
 
     void createTrayIcon();
     void enableProcess(bool enabled);

@@ -26,6 +26,7 @@ public slots:
 
 private:
     Dialog* dialog;
+    QSettings settings;
     int progressTotal;
 };
 

@@ -35,7 +35,7 @@ void Worker::process() {
 
     g_worker = this;
 
-    set_max_op(dialog->getUi()->maxOpLineEdit->text().toInt());
+    set_max_op(settings.value(CONF_MAX_OP, CONF_DEF_MAX_OP).toInt());
     set_print(worker_print);
     set_progress_value(worker_progress_value);
     set_progress_min_delay(0);
