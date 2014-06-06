@@ -117,12 +117,12 @@ cleanup:
 		g_fd = NULL;
 	}
 
-	if (g_abort) {
-		result = 1;
-	}
-
 	if (g_file_full) {
 		result = 2;
+	}
+
+	if (g_abort) {
+		result = 1;
 	}
 	return result;
 }

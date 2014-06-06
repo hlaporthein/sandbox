@@ -24,8 +24,7 @@ Dialog::Dialog(QWidget *parent) :
     ui->setupUi(this);
     createTrayIcon();
     setBackgroundMode(settings.value(CONF_USE_PERIOD, CONF_DEF_USE_PERIOD).toBool());
-    ui->progressBar->setVisible(false);
-    ui->remainingLabel->setVisible(false);
+    enableProcess(false);
 
     ui->srcLineEdit->setText(settings.value(CONF_SRC_DIR, "").toString());
     ui->dstLineEdit->setText(settings.value(CONF_DST_DIR, "").toString());
@@ -140,8 +139,9 @@ void Dialog::enableProcess(bool enabled) {
     ui->syncButton->setEnabled(!enabled);
     ui->abortButton->setEnabled(enabled);
     ui->remainingLabel->setText("Prepare to sync...");
-    ui->bytesDoneLabel->setText("");
     ui->remainingLabel->setVisible(enabled);
+    ui->bytesDoneLabel->setText("");
+    ui->bytesDoneLabel->setVisible(enabled);
     ui->progressBar->setRange(0, 0);
     ui->progressBar->setValue(0);
     ui->progressBar->setVisible(enabled);
