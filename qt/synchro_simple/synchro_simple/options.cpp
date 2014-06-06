@@ -4,12 +4,27 @@
 #include "dialog.h"
 #include "ui_options.h"
 
+#ifdef __WIN32__
+#include "windows.h"
+#endif
+
 Options::Options(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Options)
 {
     ui->setupUi(this);
     ui->maxOpLineEdit->setValidator(new QIntValidator(0, 1000000, this));
+
+#ifdef __WIN32__
+    ui->priorityComboBox->addItem("Low", QVariant(IDLE_PRIORITY_CLASS));
+    ui->priorityComboBox->addItem("Below Normal", QVariant(BELOW_NORMAL_PRIORITY_CLASS));
+    ui->priorityComboBox->addItem("Normal", QVariant(NORMAL_PRIORITY_CLASS));
+    ui->priorityComboBox->addItem("Above Normal", QVariant(ABOVE_NORMAL_PRIORITY_CLASS));
+    ui->priorityComboBox->addItem("Hight", QVariant(HIGH_PRIORITY_CLASS));
+    ui->priorityComboBox->addItem("Real Time", QVariant(REALTIME_PRIORITY_CLASS));
+#else
+    ui->priorityComboBox->setEnabled(false);
+#endif
 }
 
 Options::~Options() {
@@ -19,16 +34,31 @@ Options::~Options() {
 void Options::load() {
     qDebug() << "load";
     ui->maxOpLineEdit->setText(settings.value(CONF_MAX_OP, CONF_DEF_MAX_OP).toString());
+
+#ifdef __WIN32__
+    int index = ui->priorityComboBox->findData(settings.value(CONF_PRIORITY, CONF_DEF_PRIORITY).toInt());
+    ui->priorityComboBox->setCurrentIndex(index);
+#endif
 }
 
 void Options::save() {
     qDebug() << "save";
     settings.setValue(CONF_MAX_OP, ui->maxOpLineEdit->text().toInt());
+
+#ifdef __WIN32__
+    int priority = ui->priorityComboBox->currentData().toInt();
+    settings.setValue(CONF_PRIORITY, priority);
+    SetPriorityClass(GetCurrentProcess(), priority);
+#endif
 }
 
 void Options::reset() {
     qDebug() << "reset";
     ui->maxOpLineEdit->setText(QString::number(CONF_DEF_MAX_OP));
+#ifdef __WIN32__
+    int index = ui->priorityComboBox->findData(CONF_DEF_PRIORITY);
+    ui->priorityComboBox->setCurrentIndex(index);
+#endif
 }
 
 void Options::show() {

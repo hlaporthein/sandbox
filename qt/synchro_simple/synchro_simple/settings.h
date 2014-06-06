@@ -8,4 +8,10 @@
 
 #define CONF_DEF_MAX_OP 2000
 
+#ifdef __WIN32__
+#include "windows.h"
+#define CONF_PRIORITY "priority"
+#define CONF_DEF_PRIORITY BELOW_NORMAL_PRIORITY_CLASS
+#endif
+
 #endif // SETTINGS_H
