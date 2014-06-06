@@ -105,6 +105,8 @@ int cp(const char* srcpath, const char* destpath, int buffer_size) {
 			result = 1;
 			goto cleanup;
 		}
+		g_current_step += size;
+		inform_progress();
 	}
 
 cleanup:
@@ -155,8 +157,15 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level) {
 		if (is_dir(src_filepath)) {
 			sync_dir_build_cmd(src_filepath, dest_filepath, level + 1);
 		} else {
-			if (!exists(dest_filepath) || is_more_recent(src_filepath, dest_filepath)) {
+
+			struct stat src_statbuf;
+			result = TRY(stat(src, &src_statbuf), res == -1, "stat error(%d): %s\n", errno, strerrno(errno));
+			struct stat dst_statbuf;
+			result = TRY(stat(src, &dst_statbuf), res == -1, "stat error(%d): %s\n", errno, strerrno(errno));
+
+			if (!exists(dest_filepath) || src_statbuf.st_mtime > dst_statbuf.st_mtime) {
 				file_push_cp(src_filepath, dest_filepath);
+				g_total_step += src_statbuf.st_size;
 			}
 		}
 	}
@@ -174,29 +183,6 @@ cleanup:
 		file_close();
 	}
 	return result;
-}
-
-int is_more_recent(const char* src, const char* dst) {
-	struct stat src_statbuf;
-	stat(src, &src_statbuf);
-//	if(stat(src, &src_statbuf) == -1) {
-//		return 0;
-//	}
-	struct stat dst_statbuf;
-	stat(dst, &dst_statbuf);
-//	if(stat(dst, &dst_statbuf) == -1) {
-//		return 0;
-//	}
-
-#ifdef DEBUG_MODE
-	char *c = "no";
-	if (src_statbuf.st_mtime > dst_statbuf.st_mtime) {
-		c = "yes";
-	}
-#endif
-
-	DEBUG_LOG("Is src more recent (%s)? %s\n", src, c);
-	return src_statbuf.st_mtime > dst_statbuf.st_mtime;
 }
 
 void inform_progress() {

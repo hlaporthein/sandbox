@@ -100,6 +100,8 @@ int run_file() {
 			fgets(line, LINE_SIZE, g_fd);
 			chomp(line);
 			int res = TRY(mkdir(line), res != 0, "mkdir error: (%d) %s\n", errno, strerror(errno));
+			g_current_step += MKDIR_STEP;
+			inform_progress();
 		} else if (strcmp(line, "F") == 0) {
 			fgets(line, LINE_SIZE, g_fd);
 			chomp(line);
@@ -107,8 +109,6 @@ int run_file() {
 			chomp(line2);
 			DO(cp(line, line2, BUFFER_SIZE));
 		}
-		g_current_step++;
-		inform_progress();
 	}
 
 cleanup:

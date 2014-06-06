@@ -10,6 +10,8 @@
 #define TRUE 1
 #define FALSE 0
 
+#define MKDIR_STEP 100
+
 #define DO(statement) \
 	if ((result = statement)) { \
 		goto cleanup; \
@@ -34,7 +36,6 @@ int is_dir(const char* file);
 int exists(const char* file);
 int cp(const char* srcpath, const char* destpath, int buffer_size);
 int sync_dir_build_cmd(const char* src, const char* dst, int level);
-int is_more_recent(const char* src, const char* dst);
 void inform_progress();
 
 
@@ -60,7 +61,5 @@ void synchro_log(const char* format, ...);
 #define ERROR_LOG(format, ...) synchro_log(format, ##__VA_ARGS__)
 #define INFO_LOG(format, ...) synchro_log(format, ##__VA_ARGS__)
 
-#define PREVIEW_MODE 0
-#define REAL_MODE 1
 
 #endif

@@ -19,6 +19,13 @@ void print_statbuf(struct stat statbuf) {
 	my_strmode(buf, 1024, statbuf.st_mode);
 	printf("---------------\n");
 	printf("mode=%s\n", buf);
+	printf("size=%d\n", statbuf.st_size);
+	int blocks = statbuf.st_size / 512;
+	if (statbuf.st_size % 512) {
+		blocks++;
+	}
+	printf("blocks=%d\n", blocks);
+	printf("size on disk=%d\n", (blocks*512));
 	printf("sizeof(mode)=%d\n", sizeof(statbuf.st_mode));
 	printf("isDir? %s\n", (S_ISDIR(statbuf.st_mode))? "yes" : "no");
 	printf("isFile? %s\n", (S_ISREG(statbuf.st_mode))? "yes" : "no");
@@ -30,7 +37,7 @@ void print_statbuf(struct stat statbuf) {
 
 int print_stat(const char* name) {
 	struct stat statbuf;
-	int result = lstat(name, &statbuf);
+	int result = stat(name, &statbuf);
 	if (result == -1) {
 		fprintf(stderr, "Error stating \"%s\"(%d): %s\n", name, errno, strerror(errno));
 		goto cleanup;
