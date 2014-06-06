@@ -6,10 +6,7 @@
 
 #include "synchro.h"
 
-int g_file_full = FALSE;
 const char* g_tmp_dir = NULL;
-extern int g_abort;
-extern int g_current_step;
 
 char g_filename[PATH_SIZE];
 FILE* g_fd = NULL;
@@ -23,6 +20,8 @@ int file_reset(int remove) {
 	if (remove) {
 		unlink(g_filename);
 	}
+	g_file_full = FALSE;
+	g_total_op = 0;
 	g_fd = fopen(g_filename, "ab");
 	if (!g_fd) {
 		ERROR_LOG("Cannot open file %s. Error(%d): %s\n", g_filename, errno, strerror(errno));
@@ -70,6 +69,10 @@ int file_append(const char* format, ...) {
 		result = 1;
 		goto cleanup;
 	}
+	g_total_op++;
+	if (g_total_op >= g_max_op && g_max_op > 0) {
+		g_file_full = TRUE;
+	}
 	g_total_step++;
 cleanup:
 	return result;
@@ -112,6 +115,14 @@ cleanup:
 	if (g_fd) {
 		fclose(g_fd);
 		g_fd = NULL;
+	}
+
+	if (g_abort) {
+		result = 1;
+	}
+
+	if (g_file_full) {
+		result = 2;
 	}
 	return result;
 }

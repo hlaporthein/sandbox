@@ -10,6 +10,7 @@
 
 #define CONF_SRC_DIR "src_dir"
 #define CONF_DST_DIR "dst_dir"
+#define CONF_MAX_OP "max_op"
 
 extern bool g_quit;
 extern QWaitCondition g_canContinue;
@@ -42,6 +43,10 @@ private slots:
     void finishedProcess();
     void progressBar(int total, int val);
 
+
+    void on_moreButton_clicked();
+
+    void on_maxOpLineEdit_editingFinished();
 
 private:
     Ui::Dialog *ui;

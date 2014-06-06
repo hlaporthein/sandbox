@@ -23,7 +23,12 @@
 		goto cleanup; \
 	}
 
+extern int g_abort;
 extern int g_total_step;
+extern int g_current_step;
+extern int g_max_op;
+extern int g_total_op;
+extern int g_file_full;
 
 int is_dir(const char* file);
 int exists(const char* file);
@@ -42,6 +47,7 @@ void reset_abort();
 int is_aborted();
 void set_progress_min_delay(int min_delay);
 void set_temp_dir(const char* tmp_dir);
+void set_max_op(int max_op);
 
 void synchro_log(const char* format, ...);
 

@@ -21,9 +21,12 @@ Dialog::Dialog(QWidget *parent) :
     createTrayIcon();
     ui->progressBar->setVisible(false);
     ui->remainingLabel->setVisible(false);
+    ui->optionsGroupBox->setVisible(false);
 
     ui->srcLineEdit->setText(settings.value(CONF_SRC_DIR, "").toString());
     ui->dstLineEdit->setText(settings.value(CONF_DST_DIR, "").toString());
+    ui->maxOpLineEdit->setText(settings.value(CONF_MAX_OP, "2000").toString());
+    ui->maxOpLineEdit->setValidator(new QIntValidator(0, 1000000, this));
 }
 
 Dialog::~Dialog()
@@ -203,4 +206,19 @@ void Dialog::print(const char* buf) {
     g_canContinue.wakeAll();
     //qDebug() << "3. ui: just waked all.";
     g_mutex.unlock();
+}
+
+void Dialog::on_moreButton_clicked() {
+    bool visible = ui->optionsGroupBox->isVisible();
+    ui->optionsGroupBox->setVisible(!visible);
+    if (visible) {
+        ui->moreButton->setText("More >>");
+    } else {
+        ui->moreButton->setText("Less <<");
+    }
+}
+
+void Dialog::on_maxOpLineEdit_editingFinished() {
+    QString max_op = ui->maxOpLineEdit->text();
+    settings.setValue(CONF_MAX_OP, max_op.toInt());
 }

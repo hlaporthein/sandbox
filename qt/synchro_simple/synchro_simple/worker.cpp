@@ -35,6 +35,7 @@ void Worker::process() {
 
     g_worker = this;
 
+    set_max_op(dialog->getUi()->maxOpLineEdit->text().toInt());
     set_print(worker_print);
     set_progress_value(worker_progress_value);
     set_progress_min_delay(0);
@@ -47,10 +48,21 @@ void Worker::process() {
 
     status = run_file();
 
-    if (status == 0) {
-        strncpy(buf, "Finished with success.\n", 1024);
-    } else {
-        strncpy(buf, "Aborted.\n", 1024);
+    switch(status) {
+        case 0:
+            strncpy(buf, "Finished with success.\n", 1024);
+            break;
+        case 1:
+            strncpy(buf, "Aborted.\n", 1024);
+            break;
+        case 2:
+            strncpy(buf, "Finished partially with success.\n", 1024);
+            break;
+        case -1:
+            strncpy(buf, "Error.\n", 1024);
+            break;
+        default:
+            snprintf(buf, 1024, "Error, staus unknowns: %d.\n", status);
     }
     printMsg(buf);
 

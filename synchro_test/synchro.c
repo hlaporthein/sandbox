@@ -22,6 +22,9 @@ int g_mode = REAL_MODE;
 clock_t g_last_call = 0;
 clock_t g_min_delay = 300;
 int g_log_level = 0;
+int g_max_op = 0;
+int g_file_full = FALSE;
+int g_total_op = 0;
 
 void set_print(print_t print) {
 	g_print = print;
@@ -76,6 +79,10 @@ int is_dir(const char* file) {
 
 void set_temp_dir(const char* tmp_dir) {
 	g_tmp_dir = tmp_dir;
+}
+
+void set_max_op(int max_op) {
+	g_max_op = max_op;
 }
 
 int cp(const char* srcpath, const char* destpath, int buffer_size) {
