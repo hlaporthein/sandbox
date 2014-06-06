@@ -18,7 +18,6 @@ progress_value_t g_progress_value = NULL;
 int g_abort = FALSE;
 int g_total_step = 0;
 int g_current_step = 0;
-int g_mode = REAL_MODE;
 clock_t g_last_call = 0;
 clock_t g_min_delay = 300;
 int g_log_level = 0;
@@ -159,9 +158,9 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level) {
 		} else {
 
 			struct stat src_statbuf;
-			result = TRY(stat(src, &src_statbuf), res == -1, "stat error(%d): %s\n", errno, strerrno(errno));
+			result = TRY(stat(src, &src_statbuf), result == -1, "stat error(%d): %s\n", errno, strerror(errno));
 			struct stat dst_statbuf;
-			result = TRY(stat(src, &dst_statbuf), res == -1, "stat error(%d): %s\n", errno, strerrno(errno));
+			result = TRY(stat(src, &dst_statbuf), result == -1, "stat error(%d): %s\n", errno, strerror(errno));
 
 			if (!exists(dest_filepath) || src_statbuf.st_mtime > dst_statbuf.st_mtime) {
 				file_push_cp(src_filepath, dest_filepath);
