@@ -21,7 +21,7 @@
 	statement; \
 	if (condition) { \
 		synchro_log(error_message, ##__VA_ARGS__); \
-		result = 1; \
+		result = -1; \
 		goto cleanup; \
 	}
 

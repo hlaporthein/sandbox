@@ -183,7 +183,7 @@ cleanup:
 		closedir(d);
 	}
 
-	if (g_abort) {
+	if (result == 0 && g_abort) {
 		result = 1;
 	}
 

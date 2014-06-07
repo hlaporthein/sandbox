@@ -51,7 +51,7 @@ void Worker::process() {
 
     status = run_file();
 
-    switch(status) {
+    switch (status) {
         case 0:
             strncpy(buf, "Finished with success.\n", 1024);
             break;

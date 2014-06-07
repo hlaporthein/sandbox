@@ -117,11 +117,11 @@ cleanup:
 		g_fd = NULL;
 	}
 
-	if (g_file_full) {
+	if (result == 0 && g_file_full) {
 		result = 2;
 	}
 
-	if (g_abort) {
+	if (result == 0 && g_abort) {
 		result = 1;
 	}
 	return result;
