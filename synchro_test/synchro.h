@@ -3,9 +3,10 @@
 
 #include "file.h"
 
-#define PATH_SIZE 1<<16
+#define PATH_SIZE 1<<15
 #define BUFFER_SIZE 1<<16
 #define LINE_SIZE 1<<16
+#define CP_BUFFER_SIZE 1 << 16
 
 #define TRUE 1
 #define FALSE 0

@@ -120,7 +120,7 @@ cleanup:
 }
 
 int sync_dir_build_cmd(const char* src, const char* dst, int level) {
-	DEBUG_LOG("Starting sync_dir_build_cmd: %s => %s\n", src, dst);
+	DEBUG_LOG("Starting sync_dir_build_cmd(level %d): %s => %s\n", level, src, dst);
 	if (level == 0) {
 		g_total_step = 0;
 		file_reset(TRUE);

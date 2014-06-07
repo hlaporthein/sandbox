@@ -107,7 +107,7 @@ int run_file() {
 			chomp(line);
 			fgets(line2, LINE_SIZE, g_fd);
 			chomp(line2);
-			DO(cp(line, line2, BUFFER_SIZE));
+			DO(cp(line, line2, CP_BUFFER_SIZE));
 		}
 	}
 
