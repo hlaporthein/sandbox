@@ -186,7 +186,7 @@ void pe_print_optional_header_winspec() {
 		printf("Win32VersionValue: %d\n", p->Win32VersionValue);
 		printf("SizeOfImage: %d bytes\n", p->SizeOfImage);
 		printf("SizeOfHeaders: %d bytes\n", p->SizeOfHeaders);
-		printf("CheckSum: %d\n", p->CheckSum);
+		printf("CheckSum: 0x%08X\n", p->CheckSum);
 		printf("Subsystem: %s\n", map(SECTION_SUBSYSTEM, p->Subsystem));
 		printf("DllCharacteristics: %s\n",
 				list_flags(s_buffer, BUFFER_SIZE, SECTION_DLL_CHARACTERISICS, p->DllCharacteristics));
@@ -408,9 +408,9 @@ void pe_print_section_edata() {
 		if (i < edtp->NumberOfNames) {
 			char buf[BUFFER_SIZE];
 			read_rva(buf, s_pe.export_name_pointer_table[i]);
-			printf("Symbol: %s (0x%08x), ", buf, s_pe.export_name_pointer_table[i]);
+			printf("ExportSymbol: %s (0x%08x), ", buf, s_pe.export_name_pointer_table[i]);
 		} else {
-			printf("Symbol: [Not defined], ");
+			printf("ExportSymbol: [Not defined], ");
 		}
 
 		if (is_in_export_section(s_pe.export_address_table[i].u1.AddressOfData)) {
