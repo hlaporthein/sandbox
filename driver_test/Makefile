@@ -3,6 +3,8 @@ all:
 	# need for a RELOCATABLE DLL (ie a dll that can be loaded at any virtual address)
 	# so the command are a little bit more complex than 'gcc -shared ... driver.o' which produces a
 	# not relocatable dll.
+	# bug mingw: we choose to not use -lntoskrnl.
+	# instead we rebuild the stcall dll import lib.
 
 	# first generate the base file (it contains relocation information)
 	gcc -Wl,--base-file,driver.base \
@@ -10,7 +12,7 @@ all:
 		-nostartfiles -nostdlib \
 		-o junk.tmp \
 		driver.o \
-		-lntoskrnl -lhal
+		ntoskrnl.dll.a -lhal
 	# remove the PE executable generated (not relocatable executable image)
 	rm junk.tmp
 	# second generate the export file (contains the relocation info, the export symbol and the dll name)
@@ -30,16 +32,16 @@ all:
 		-nostdlib -nostartfiles \
 		-o my_hello_driver.sys \
 		driver.o \
-		-lntoskrnl -lhal
+		ntoskrnl.dll.a -lhal
 
 clean:
 	rm -f *sys *o *base *tmp *pe *exp *def *dll.a
 
 
 dll_import:
-	# THIS DOES NOT WORK BECAUSE WE NEED STDCALL SYMBOLS...
 	#dlltool -z ntoskrnl.def --export-all-symbol "C:/WINDOWS/system32/ntoskrnl.exe"
 	echo NAME ntoskrnl > ntoskrnl.def
 	echo EXPORTS >> ntoskrnl.def
+	echo DbgPrint >> ntoskrnl.def
 	pe_reader "C:/WINDOWS/system32/ntoskrnl.exe" | grep "ExportSymbol" | perl -pe "s/^ExportSymbol: (.*) \\(0x.*$$/\\1/g" >> ntoskrnl.def
-	dlltool -d ntoskrnl.def -l ntoskrnl.dll.a
+	dlltool --add-stdcall-underscore -d ntoskrnl.def -l ntoskrnl.dll.a
