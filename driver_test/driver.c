@@ -14,7 +14,7 @@ my_unload(PDRIVER_OBJECT DriverObject) {
 NTSTATUS STDCALL DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 {
 	DbgPrint("Hello, World\n");
-
+	DbgPrint("RegistryPath=%wZ\n", RegistryPath);
 	// support for service stopping
 	DriverObject->DriverUnload = my_unload;
 
