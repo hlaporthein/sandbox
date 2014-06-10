@@ -4,5 +4,6 @@
         <file>sync_icon.png</file>
         <file>cancel_icon.png</file>
         <file>clear_icon.png</file>
+        <file>setting.png</file>
     </qresource>
 </RCC>

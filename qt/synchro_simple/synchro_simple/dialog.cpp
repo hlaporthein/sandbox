@@ -11,9 +11,7 @@
 #include "options.h"
 #include "version.h"
 
-extern "C" {
 #include "../../../synchro_test/synchro.h"
-}
 
 Dialog::Dialog(QWidget *parent) :
     QWidget(parent),

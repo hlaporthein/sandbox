@@ -146,7 +146,11 @@ border-style: inset;</string>
           </sizepolicy>
          </property>
          <property name="text">
-          <string>More &gt;&gt;</string>
+          <string>Settings</string>
+         </property>
+         <property name="icon">
+          <iconset resource="resources.qrc">
+           <normaloff>:/icon/setting.png</normaloff>:/icon/setting.png</iconset>
          </property>
         </widget>
        </item>

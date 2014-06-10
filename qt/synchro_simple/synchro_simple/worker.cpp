@@ -6,9 +6,7 @@
 #include <QtDebug>
 #include <QDir>
 
-extern "C" {
 #include "../../../synchro_test/synchro.h"
-}
 
 Worker *g_worker = NULL;
 

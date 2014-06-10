@@ -1,6 +1,10 @@
 #ifndef SYNCHRO_H
 #define SYNCHRO_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "file.h"
 #include "filter.h"
 
@@ -69,5 +73,8 @@ void synchro_log(const char* format, ...);
 	synchro_log(format, ##__VA_ARGS__)
 #define INFO_LOG(format, ...) synchro_log(format, ##__VA_ARGS__)
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

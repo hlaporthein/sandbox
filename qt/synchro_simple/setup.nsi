@@ -31,6 +31,7 @@ Section "${NAME} (required)"
   File "/oname=libstdc++-6.dll" "${INPUT_DIR}\libstdc++-6.dll"
   File "/oname=libwinpthread-1.dll" "${INPUT_DIR}\libwinpthread-1.dll"
   File "/oname=synchro.dll" "${INPUT_DIR}\synchro.dll"
+  File "/oname=libtre-5.dll" "${INPUT_DIR}\libtre-5.dll"
   File "/oname=${EXECUTABLE_NAME}.exe" "${INPUT_DIR}\${EXECUTABLE_NAME}.exe"
 
   ; Write the installation path into the registry
