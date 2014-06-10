@@ -7,10 +7,15 @@
 #define CONF_OPTIONS_GEOMETRY "geometry"
 #define CONF_USE_PERIOD "use_period"
 #define CONF_PERIOD "period"
+#define CONF_FILTERS "filters"
+#define CONF_FILTERS_LABEL "label"
+#define CONF_FILTERS_VALUE "value"
+#define CONF_FILTERS_IS_DIR "is_dir"
 
 #define CONF_DEF_MAX_OP 2000
 #define CONF_DEF_USE_PERIOD false
 #define CONF_DEF_PERIOD 120
+#define CONF_DEF_FILTERS_IS_DIR false
 
 #ifdef __WIN32__
 #include "windows.h"

@@ -28,6 +28,10 @@ private slots:
 
     void on_periodCheckBox_toggled(bool checked);
 
+    void on_addFilterButton_clicked();
+
+    void on_removeFilterButton_clicked();
+
 private:
     Ui::Options *ui;
     QSettings settings;

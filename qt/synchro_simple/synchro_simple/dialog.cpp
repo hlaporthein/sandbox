@@ -144,6 +144,11 @@ void Dialog::enableProcess(bool enabled) {
     ui->progressBar->setRange(0, 0);
     ui->progressBar->setValue(0);
     ui->progressBar->setVisible(enabled);
+    if (enabled) {
+        tray->setIcon(QIcon(":/icon/ocp_busy_icon.png"));
+    } else {
+        tray->setIcon(QIcon(":/icon/ocp_icon.png"));
+    }
 }
 
 void Dialog::errorString(QString str) {
@@ -164,7 +169,6 @@ void Dialog::createTrayIcon() {
     trayMenu->addAction(quitAction);
 
     tray->setContextMenu(trayMenu);
-    tray->setIcon(QIcon(":/icon/ocp_icon.png"));
     tray->setToolTip(VER_PRODUCTNAME_STR);
 
     connect(tray, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
