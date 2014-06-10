@@ -14,10 +14,10 @@ int main() {
 
 	// Compile regular expression
 	regex_t regex;
-	int res = TRY(regcomp(&regex, "^a[[:alnum:]]", 0), res , "Could not compile regex\n");
+	int res = TRY(regcomp(&regex, "^a[[:alnum:]_]", 0), res , "Could not compile regex\n");
 
 	// Execute regular expression
-	res = regexec(&regex, "abc", 0, NULL, 0);
+	res = regexec(&regex, "a_bc", 0, NULL, 0);
 	if (res == 0) {
 		puts("Match");
 	} else if (res == REG_NOMATCH) {
@@ -30,10 +30,10 @@ int main() {
 		goto cleanup;
 	}
 
-	// Free compiled regular expression if you want to use the regex_t again
-    regfree(&regex);
-
 cleanup:
+	// Free compiled regular expression if you want to use the regex_t again
+	regfree(&regex);
+
 	return result;
 }
 

@@ -24,6 +24,7 @@ int g_log_level = 0;
 int g_max_op = 0;
 int g_file_full = FALSE;
 int g_total_op = 0;
+char g_error_msg[BUFFER_SIZE];
 
 void set_print(print_t print) {
 	g_print = print;
@@ -155,8 +156,18 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level) {
 		snprintf(dest_filepath, PATH_SIZE, "%s/%s", dst, fname);
 
 		if (is_dir(src_filepath)) {
+			if (is_filtered(DIR_TYPE, fname)) {
+				DEBUG_LOG("Dir ignored: %s\n", src_filepath);
+				continue;
+			}
 			sync_dir_build_cmd(src_filepath, dest_filepath, level + 1);
 		} else {
+			if (is_filtered(FILE_TYPE, fname)) {
+				DEBUG_LOG("File ignored: %s\n", src_filepath);
+				continue;
+			} else {
+				DEBUG_LOG("File not filtered: %s\n", src_filepath);
+			}
 			int do_copy = FALSE;
 			struct stat src_statbuf;
 			result = TRY(stat(src_filepath, &src_statbuf), result == -1, "stat error(%d): %s\n", errno, strerror(errno));

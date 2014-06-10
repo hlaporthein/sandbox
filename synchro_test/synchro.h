@@ -2,6 +2,7 @@
 #define SYNCHRO_H
 
 #include "file.h"
+#include "filter.h"
 
 #define PATH_SIZE 1<<15
 #define BUFFER_SIZE 1<<16
@@ -10,6 +11,9 @@
 
 #define TRUE 1
 #define FALSE 0
+
+#define DIR_TYPE 0
+#define FILE_TYPE 1
 
 #define MKDIR_STEP 100
 
@@ -39,7 +43,6 @@ int cp(const char* srcpath, const char* destpath, int buffer_size);
 int sync_dir_build_cmd(const char* src, const char* dst, int level);
 void inform_progress();
 
-
 typedef void (*print_t)(const char* buf);
 typedef void (*progress_value_t)(const int v);
 void set_print(print_t print);
@@ -58,6 +61,9 @@ void synchro_log(const char* format, ...);
 #else
 #define DEBUG_LOG(format, ...)
 #endif
+
+#define DEBUG_VAR_STR(var) DEBUG_LOG(#var"=%s\n", var)
+#define DEBUG_VAR_INT(var) DEBUG_LOG(#var"=%d\n", var)
 
 #define ERROR_LOG(format, ...) synchro_log("file: %s, line: %d ", __FILE__, __LINE__); \
 	synchro_log(format, ##__VA_ARGS__)

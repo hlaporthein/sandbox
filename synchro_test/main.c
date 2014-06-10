@@ -23,6 +23,9 @@ int main (int argc, char **argv) {
 	set_progress_value(my_progress_value);
 	set_progress_min_delay(0);
 
+	char* filter_list[2] = { "*\\.a$", "^m" };
+	set_filter(FILE_TYPE, 2, filter_list);
+
 	printf("total step: %d\n", g_total_step);
 	int result = sync_dir_build_cmd(argv[1], argv[2], 0);
 	if (result) {
