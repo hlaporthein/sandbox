@@ -5,19 +5,16 @@
 extern "C" {
 #endif
 
-#include "file.h"
-#include "filter.h"
-
 #define PATH_SIZE 1<<15
 #define BUFFER_SIZE 1<<16
 #define LINE_SIZE 1<<16
 #define CP_BUFFER_SIZE 1 << 16
 
+#include "file.h"
+#include "filter.h"
+
 #define TRUE 1
 #define FALSE 0
-
-#define DIR_TYPE 0
-#define FILE_TYPE 1
 
 #define MKDIR_STEP 100
 
@@ -77,4 +74,4 @@ void synchro_log(const char* format, ...);
 }
 #endif
 
-#endif
+#endif // SYNCHRO_H

@@ -23,8 +23,14 @@ int main (int argc, char **argv) {
 	set_progress_value(my_progress_value);
 	set_progress_min_delay(0);
 
-	char* filter_list[2] = { "*\\.a$", "^m" };
-	set_filter(FILE_TYPE, 2, filter_list);
+	filter_t filter_list[3];
+	strncpy(filter_list[0].filter, "*\\.a$", BUFFER_SIZE);
+	filter_list[0].is_dir = FALSE;
+	strncpy(filter_list[1].filter, "^m", BUFFER_SIZE);
+	filter_list[1].is_dir = FALSE;
+	strncpy(filter_list[2].filter, "^toto$", BUFFER_SIZE);
+	filter_list[2].is_dir = TRUE;
+	set_filter(3, filter_list);
 
 	printf("total step: %d\n", g_total_step);
 	int result = sync_dir_build_cmd(argv[1], argv[2], 0);
@@ -36,6 +42,7 @@ int main (int argc, char **argv) {
 	result = run_file(argv[1], argv[2], 0);
 
 cleanup:
+	free_filter();
 	return (unsigned char) result;
 }
 

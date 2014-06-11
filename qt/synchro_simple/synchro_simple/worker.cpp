@@ -18,7 +18,10 @@ void worker_progress_value(int i) {
     g_worker->sendValue(i);
 }
 
-Worker::Worker(Dialog* d) : dialog(d) {
+Worker::Worker(Dialog* d) :
+    dialog(d),
+    filters(NULL),
+    filters_length(0) {
 }
 
 void Worker::process() {
@@ -35,15 +38,17 @@ void Worker::process() {
 
     g_worker = this;
 
+    reset_abort();
     set_max_op(settings.value(CONF_MAX_OP, CONF_DEF_MAX_OP).toInt());
     set_print(worker_print);
     set_progress_value(worker_progress_value);
     set_progress_min_delay(0);
     set_temp_dir(tmpBuf);
     qDebug() << "tmp_dir=" << tmpBuf;
-    reset_abort();
 
+    setFilters();
     int status = sync_dir_build_cmd(srcBuf, dstBuf, 0);
+    freeFilters();
 
     progressTotal = g_total_step;
 
@@ -69,6 +74,28 @@ void Worker::process() {
 
 //cleanup:
     emit finished();
+}
+
+void Worker::setFilters() {
+    filters_length = settings.beginReadArray(CONF_FILTERS);
+    filters = (filter_t*) malloc(sizeof(filter_t) * filters_length);
+    for (int i = 0; i < filters_length; i++) {
+        settings.setArrayIndex(i);
+        strncpy(filters[i].label,
+                settings.value(CONF_FILTERS_LABEL, "").toString().toLocal8Bit().data(), BUFFER_SIZE);
+        strncpy(filters[i].filter,
+                settings.value(CONF_FILTERS_VALUE, "").toString().toLocal8Bit().data(), BUFFER_SIZE);
+        filters[i].is_dir = (settings.value(CONF_FILTERS_IS_DIR).toBool())? TRUE : FALSE;
+    }
+    settings.endArray();
+    set_filter(filters_length, filters);
+}
+
+void Worker::freeFilters() {
+    free_filter();
+    free(filters);
+    filters = NULL;
+    filters_length = 0;
 }
 
 void Worker::printMsg(const char* buf) {

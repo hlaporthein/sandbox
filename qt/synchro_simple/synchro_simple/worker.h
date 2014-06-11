@@ -6,6 +6,7 @@
 #include <QWaitCondition>
 
 #include "dialog.h"
+#include "../../../synchro_test/synchro.h"
 
 class Worker : public QObject
 {
@@ -28,6 +29,12 @@ private:
     Dialog* dialog;
     QSettings settings;
     int progressTotal;
+
+    filter_t* filters;
+    int filters_length;
+
+    void setFilters();
+    void freeFilters();
 };
 
 #endif // WORKER_H

@@ -156,13 +156,13 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level) {
 		snprintf(dest_filepath, PATH_SIZE, "%s/%s", dst, fname);
 
 		if (is_dir(src_filepath)) {
-			if (is_filtered(DIR_TYPE, fname)) {
+			if (is_filtered(TRUE, fname)) {
 				DEBUG_LOG("Dir ignored: %s\n", src_filepath);
 				continue;
 			}
 			sync_dir_build_cmd(src_filepath, dest_filepath, level + 1);
 		} else {
-			if (is_filtered(FILE_TYPE, fname)) {
+			if (is_filtered(FALSE, fname)) {
 				DEBUG_LOG("File ignored: %s\n", src_filepath);
 				continue;
 			} else {
