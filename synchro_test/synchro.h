@@ -13,6 +13,8 @@ extern "C" {
 #include "file.h"
 #include "filter.h"
 
+typedef long long int64;
+
 #define TRUE 1
 #define FALSE 0
 
@@ -32,8 +34,8 @@ extern "C" {
 	}
 
 extern int g_abort;
-extern int g_total_step;
-extern int g_current_step;
+extern int64 g_total_step;
+extern int64 g_current_step;
 extern int g_max_op;
 extern int g_total_op;
 extern int g_file_full;
@@ -45,7 +47,7 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level);
 void inform_progress();
 
 typedef void (*print_t)(const char* buf);
-typedef void (*progress_value_t)(const int v);
+typedef void (*progress_value_t)(const int64 v);
 void set_print(print_t print);
 void set_progress_value(progress_value_t progress_value);
 void set_abort();
@@ -65,6 +67,7 @@ void synchro_log(const char* format, ...);
 
 #define DEBUG_VAR_STR(var) DEBUG_LOG(#var"=%s\n", var)
 #define DEBUG_VAR_INT(var) DEBUG_LOG(#var"=%d\n", var)
+#define DEBUG_VAR_INT64(var) DEBUG_LOG(#var"=%I64d\n", var)
 
 #define ERROR_LOG(format, ...) synchro_log("file: %s, line: %d ", __FILE__, __LINE__); \
 	synchro_log(format, ##__VA_ARGS__)

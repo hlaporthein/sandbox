@@ -15,6 +15,7 @@ Options::Options(QWidget *parent) :
     ui->setupUi(this);
     ui->maxOpLineEdit->setValidator(new QIntValidator(0, 1000000, this));
     ui->periodLineEdit->setValidator(new QIntValidator(0, 3600*24, this));
+    ui->progressRefreshrateLineEdit->setValidator(new QIntValidator(0, 5000, this));
 
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->tableWidget->horizontalHeader()->resizeSection(0, 20);
@@ -43,6 +44,9 @@ void Options::load() {
     ui->periodLineEdit->setText(settings.value(CONF_PERIOD, CONF_DEF_PERIOD).toString());
     ui->periodLineEdit->setEnabled(usePeriod);
     ui->periodCheckBox->setChecked(usePeriod);
+
+    ui->progressRefreshrateLineEdit->setText(
+                settings.value(CONF_PROGRESS_REFRESH_RATE, CONF_DEF_PROGRESS_REFRESH_RATE).toString());
 
     while (ui->tableWidget->rowCount() > 0) {
         ui->tableWidget->removeRow(0);
@@ -76,6 +80,7 @@ void Options::save() {
     settings.setValue(CONF_MAX_OP, ui->maxOpLineEdit->text().toInt());
     settings.setValue(CONF_USE_PERIOD, ui->periodCheckBox->isChecked());
     settings.setValue(CONF_PERIOD, ui->periodLineEdit->text().toInt());
+    settings.setValue(CONF_PROGRESS_REFRESH_RATE, ui->progressRefreshrateLineEdit->text().toInt());
 
     ((Dialog*) parent())->setBackgroundMode(ui->periodCheckBox->isChecked());
 

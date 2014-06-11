@@ -12,11 +12,13 @@
 #define CONF_FILTERS_LABEL "label"
 #define CONF_FILTERS_VALUE "value"
 #define CONF_FILTERS_IS_DIR "is_dir"
+#define CONF_PROGRESS_REFRESH_RATE "progress_refresh_rate"
 
 #define CONF_DEF_MAX_OP 2000
 #define CONF_DEF_USE_PERIOD false
 #define CONF_DEF_PERIOD 120
 #define CONF_DEF_FILTERS_IS_DIR false
+#define CONF_DEF_PROGRESS_REFRESH_RATE 2000
 
 #ifdef __WIN32__
 #include "windows.h"

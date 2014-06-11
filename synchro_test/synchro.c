@@ -16,8 +16,8 @@ char* mode_map[] = {
 print_t g_print = NULL;
 progress_value_t g_progress_value = NULL;
 int g_abort = FALSE;
-int g_total_step = 0;
-int g_current_step = 0;
+int64 g_total_step = 0;
+int64 g_current_step = 0;
 clock_t g_last_call = 0;
 clock_t g_min_delay = 300;
 int g_log_level = 0;
@@ -185,6 +185,7 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level) {
 			if (do_copy) {
 				file_push_cp(src_filepath, dest_filepath);
 				g_total_step += src_statbuf.st_size;
+				DEBUG_VAR_INT64(g_total_step);
 			}
 		}
 	}

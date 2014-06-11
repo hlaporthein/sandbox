@@ -12,6 +12,7 @@
 
 #include "options.h"
 #include "settings.h"
+#include "../../../synchro_test/synchro.h"
 
 extern bool g_quit;
 extern QWaitCondition g_canContinue;
@@ -45,7 +46,7 @@ private slots:
     void errorString(QString str);
     void print(const char* buf);
     void finishedProcess();
-    void progressBar(int total, int val);
+    void progressBar(int64 total, int64 val);
     void backgroundSync();
 private:
     Ui::Dialog *ui;
@@ -57,7 +58,7 @@ private:
 
     void createTrayIcon();
     void enableProcess(bool enabled);
-
+    void getRemainingStr(char *buf, int size, int sec);
 
 };
 

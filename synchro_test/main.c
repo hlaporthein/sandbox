@@ -8,7 +8,7 @@ void my_print(const char* buf) {
 	printf("%s", buf);
 }
 
-void my_progress_value(const int value) {
+void my_progress_value(const int64 value) {
 	int percent = (int) (100.0 * value) / g_total_step;
 	printf("%02d%%\n", percent);
 }
@@ -32,13 +32,13 @@ int main (int argc, char **argv) {
 	filter_list[2].is_dir = TRUE;
 	set_filter(3, filter_list);
 
-	printf("total step: %d\n", g_total_step);
+	printf("total step: %I64d\n", g_total_step);
 	int result = sync_dir_build_cmd(argv[1], argv[2], 0);
 	if (result) {
 		goto cleanup;
 	}
 
-	printf("total step: %d\n", g_total_step);
+	printf("total step: %I64d\n", g_total_step);
 	result = run_file(argv[1], argv[2], 0);
 
 cleanup:

@@ -14,13 +14,13 @@ class Worker : public QObject
 public:
     explicit Worker(Dialog* w);
     void printMsg(const char* buf);
-    void sendValue(const int val);
+    void sendValue(const int64 val);
 
 signals:
     void finished();
     void error(QString err);
     void print(const char* buf);
-    void progressBar(int total, int val);
+    void progressBar(int64 total, int64 val);
 
 public slots:
     void process();
@@ -28,7 +28,7 @@ public slots:
 private:
     Dialog* dialog;
     QSettings settings;
-    int progressTotal;
+    int64 progressTotal;
 
     filter_t* filters;
     int filters_length;

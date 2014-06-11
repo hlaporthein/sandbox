@@ -96,26 +96,53 @@ void Dialog::on_syncButton_clicked() {
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     connect(worker, SIGNAL(finished()), this, SLOT(finishedProcess()));
     connect(worker, SIGNAL(print(const char*)), this, SLOT(print(const char*)));
-    connect(worker, SIGNAL(progressBar(int,int)), this, SLOT(progressBar(int, int)));
+
+    qRegisterMetaType<int64>("int64");
+    connect(worker, SIGNAL(progressBar(int64,int64)), this, SLOT(progressBar(int64, int64)));
 
     QtConcurrent::run(worker, &Worker::process);
 }
 
-void Dialog::progressBar(int total, int val) {
+void Dialog::getRemainingStr(char* buf, int size, int sec) {
+    if (sec < 60) {
+        snprintf(buf, size, "Remaining: %ds", sec);
+        return;
+    }
+    if (sec < 60 * 30) {
+        int min = sec / 60;
+        snprintf(buf, size, "Remaining: %dmin", min);
+        return;
+    }
+    if (sec < 60 * 60 ) {
+        int min = ((sec / 60) / 5) * 5;
+        snprintf(buf, size, "Remaining: %dmin", min);
+        return;
+    }
+    int min = (((sec / 60) % 60) / 5) * 5;
+    int h = sec / (60 * 60);
+    snprintf(buf, size, "Remaining: %dh %dmin", h, min);
+}
+
+void Dialog::progressBar(int64 total, int64 val) {
     g_mutex.lock();
-    ui->progressBar->setRange(0, total);
-    ui->progressBar->setValue(val);
+
+    int max = (total * 100000) / total;
+    int current = (val * 100000) / total;
+
+    ui->progressBar->setRange(0, max);
+    ui->progressBar->setValue(current);
 
     int elapsed = time.elapsed() / 1000;
     double speed = val / ((double) elapsed);
     int remaining = (total - val) / speed;
 
     char buf[BUFFER_SIZE];
-    snprintf(buf, BUFFER_SIZE, "Remaining: %ds", remaining);
+    getRemainingStr(buf, BUFFER_SIZE, remaining);
     ui->remainingLabel->setText(buf);
     ui->remainingLabel->repaint();
 
-    snprintf(buf, BUFFER_SIZE, "Sync. data: %d of %d KB", val / 1024, total / 1024);
+    //qDebug() << "current=" << current << "  max=" << max;
+    snprintf(buf, BUFFER_SIZE, "Sync. data: %lld of %lld KB", val / 1024, total / 1024);
     ui->bytesDoneLabel->setText(buf);
     ui->bytesDoneLabel->repaint();
 

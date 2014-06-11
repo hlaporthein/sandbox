@@ -14,7 +14,7 @@ void worker_print(const char* buf) {
     g_worker->printMsg(buf);
 }
 
-void worker_progress_value(int i) {
+void worker_progress_value(int64 i) {
     g_worker->sendValue(i);
 }
 
@@ -42,7 +42,8 @@ void Worker::process() {
     set_max_op(settings.value(CONF_MAX_OP, CONF_DEF_MAX_OP).toInt());
     set_print(worker_print);
     set_progress_value(worker_progress_value);
-    set_progress_min_delay(0);
+    set_progress_min_delay(
+                settings.value(CONF_PROGRESS_REFRESH_RATE, CONF_DEF_PROGRESS_REFRESH_RATE).toInt());
     set_temp_dir(tmpBuf);
     qDebug() << "tmp_dir=" << tmpBuf;
 
@@ -110,11 +111,12 @@ void Worker::printMsg(const char* buf) {
     g_mutex.unlock();
 }
 
-void Worker::sendValue(const int val) {
+void Worker::sendValue(const int64 val) {
     if (g_quit) {
         return;
     }
     g_mutex.lock();
+    //qDebug() << "progressTotal=" << progressTotal << "   val=" << val;
     emit progressBar(progressTotal, val);
     //qDebug() << "1. send value thread->about to wait.";
     g_canContinue.wait(&g_mutex);
