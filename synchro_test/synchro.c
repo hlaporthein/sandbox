@@ -170,13 +170,13 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level) {
 			}
 			int do_copy = FALSE;
 			struct stat src_statbuf;
-			result = TRY(stat(src_filepath, &src_statbuf), result == -1, "stat error(%d): %s\n", errno, strerror(errno));
+			result = TRY(stat(src_filepath, &src_statbuf), result == -1, "Source stat error on %s (%d): %s\n", src_filepath, errno, strerror(errno));
 
 			if (!exists(dest_filepath)) {
 				do_copy = TRUE;
 			} else {
 				struct stat dst_statbuf;
-				result = TRY(stat(dest_filepath, &dst_statbuf), result == -1, "stat error(%d): %s\n", errno, strerror(errno));
+				result = TRY(stat(dest_filepath, &dst_statbuf), result == -1, "Destination stat error on %s (%d): %s\n", dest_filepath, errno, strerror(errno));
 				if (src_statbuf.st_mtime > dst_statbuf.st_mtime) {
 					do_copy = TRUE;
 				}
