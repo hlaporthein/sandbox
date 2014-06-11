@@ -1,6 +1,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#define CONF_EXISTING_CONF "existing_conf"
 #define CONF_SRC_DIR "src_dir"
 #define CONF_DST_DIR "dst_dir"
 #define CONF_MAX_OP "max_op"
