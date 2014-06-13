@@ -8,7 +8,7 @@ int file_reset();
 void file_close();
 int file_push_mkdir(const char* dir);
 int file_push_cp(const char* src, const char* dst);
-int file_append(const char* format, ...);
+int file_append(MY_LPCTSTR format, ...);
 int run_file();
 void chomp(char* s);
 

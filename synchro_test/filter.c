@@ -56,7 +56,7 @@ int is_filtered(int is_dir, const char* name) {
 		} else {
 			char msgbuf[1024];
 			regerror(res, regex, msgbuf, 1024);
-			synchro_log("Regex match failed: %s\n", msgbuf);
+			synchro_log(_T("Regex match failed: %s\n"), msgbuf);
 			goto cleanup;
 		}
 	}
