@@ -1,4 +1,6 @@
 all:
+	gcc -E -o my_liba.i my_lib.c
+	gcc -E -D_UNICODE -o my_libw.i my_lib.c
 	gcc -c -o my_liba.o my_lib.c
 	gcc -c -D_UNICODE -o my_libw.o my_lib.c
 	gcc -s -shared -o my_lib.dll my_liba.o my_libw.o

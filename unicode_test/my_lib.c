@@ -10,7 +10,7 @@ LPCTSTR FTEXT(coucou2) = _T("coucou2");
 int FTEXT(do_things)(LPCTSTR s) {
 	int result = 0;
 	FILE* f = NULL;
-	f = _tfopen(FTEXT(coucou1), TEXT("rb"));
+	f = _tfopen(FTEXT(coucou1), _T("rb"));
 	if (f == NULL) {
 		printf("Error(%d): %s\n", errno, strerror(errno));
 		result = -1;
