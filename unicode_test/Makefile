@@ -7,8 +7,9 @@ all:
 	gcc -o maina.exe main.c my_lib.dll
 
 clean:
-	rm -rf *.exe *.o *.dll
+	rm -rf *.exe *.o *.dll *.txt
 
 test: all
+	touch abc.txt
 	./maina
 	./mainw
