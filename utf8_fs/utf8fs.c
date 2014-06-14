@@ -183,3 +183,18 @@ int utf8_closedir(UTF8_DIR *dirp) {
 	free(dirp);
 	return result;
 }
+
+int utf8_stat(const char *path, struct stat *buf) {
+	if (is_ansi(path)) {
+		return stat(path, buf);
+	}
+
+	int result = 0;
+	wchar_t *wpath = NULL;
+	wpath = getWideCharFromUTF8(path);
+	result = _wstat(wpath, buf);
+	if (wpath) {
+		free(wpath);
+	}
+	return result;
+}

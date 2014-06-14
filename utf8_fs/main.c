@@ -68,7 +68,9 @@ int main() {
 	DO(utf8_mkdir("αβγ"));
 
 	DO(ls("."));
-
+	struct stat buf;
+	DO(utf8_stat("αβγ.txt", &buf));
+	printf("size of file: %d\n", (int) buf.st_size);
 	DO(utf8_rmdir("αβγ"));
 	DO(utf8_unlink("αβγ.txt"));
 	printf("End with success.");
