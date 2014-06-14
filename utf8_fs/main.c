@@ -12,16 +12,30 @@
 		goto cleanup; \
 	}
 
-int main() {
+#define DO(statement) \
+	if (statement) { \
+		goto cleanup; \
+	}
+
+
+int write_file(const char *filename, const char *content) {
 	int result = 0;
 	FILE *fd = NULL;
-	fd = TRY(utf8_fopen("αβγ.txt", "wb"), fd == NULL, "Cannot open file. Error(%d): %s\n", errno, strerror(errno));
-	char *name = "Jean-Louis Guénégo";
-	fprintf(fd, "Hello %s\n", name);
+	fd = TRY(utf8_fopen(filename, "wb"), fd == NULL, "Cannot open file. Error(%d): %s\n", errno, strerror(errno));
+	fprintf(fd, "Hello %s\n", content);
 
 cleanup:
 	if (fd) {
 		fclose(fd);
 	}
+	return result;
+
+}
+
+int main() {
+	int result = 0;
+	DO(write_file("αβγ.txt", "Jean-Louis Guénégo"));
+	DO(write_file("abc.txt", "Jean-Louis Guénégo"));
+cleanup:
 	return result;
 }
