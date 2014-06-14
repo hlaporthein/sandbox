@@ -5,6 +5,7 @@
 #include <windows.h>
 #include <wchar.h>
 #include <io.h>
+#include <dirent.h>
 
 int is_ansi(const char*s) {
 	do {
@@ -20,6 +21,14 @@ wchar_t *getWideCharFromUTF8(const char *s) {
 	int length = MultiByteToWideChar(CP_UTF8, 0, s, len, 0, 0);
 	wchar_t *result = (wchar_t *) malloc(sizeof(wchar_t) * length);
 	MultiByteToWideChar(CP_UTF8, 0, s, len, result, length);
+	return result;
+}
+
+char *getUTF8FromWideChar(const wchar_t *ws) {
+	int len = wcslen(ws) + 1;
+	int length = WideCharToMultiByte(CP_UTF8, 0, ws, len, 0, 0, NULL, NULL);
+	char *result = (char *) malloc(sizeof(char *) * length);
+	WideCharToMultiByte(CP_UTF8, 0, ws, len, result, length, NULL, NULL);
 	return result;
 }
 
@@ -89,10 +98,88 @@ int utf8_unlink(const char *path) {
 	return result;
 }
 
+#define  ANSI_TYPE 0
+#define WCHAR_TYPE 1
+
 UTF8_DIR *utf8_opendir(const char *dirname) {
-	errno = 2;
-	return NULL;
+	UTF8_DIR* result = NULL;
+	wchar_t *wdirname = NULL;
+	if (is_ansi(dirname)) {
+		DIR* dir = opendir(dirname);
+		if (dir == NULL) {
+			goto cleanup;
+		}
+		result = (UTF8_DIR*) malloc(sizeof(UTF8_DIR));
+		result->dir = dir;
+		result->type = ANSI_TYPE;
+		result->first = NULL;
+		goto cleanup;
+	}
+
+	wdirname = getWideCharFromUTF8(dirname);
+	_WDIR* dir = _wopendir(wdirname);
+	if (dir == NULL) {
+		goto cleanup;
+	}
+	result = (UTF8_DIR*) malloc(sizeof(UTF8_DIR));
+	result->dir = dir;
+	result->type = WCHAR_TYPE;
+	result->first = NULL;
+
+cleanup:
+	if (wdirname) {
+		free(wdirname);
+	}
+	return result;
 }
+
 struct utf8_dirent *utf8_readdir(UTF8_DIR *dirp) {
-	return NULL;
+	struct utf8_dirent *result = NULL;
+	if (dirp->type == ANSI_TYPE) {
+		struct dirent* dir_entry = readdir(dirp->dir);
+		if (dir_entry == NULL) {
+			return NULL;
+		}
+		result = (struct utf8_dirent *) malloc(sizeof(struct utf8_dirent));
+		result->dir_entry = dir_entry;
+		result->d_name = strdup(dir_entry->d_name);
+	} else {
+		struct _wdirent* dir_entry = _wreaddir(dirp->dir);
+		if (dir_entry == NULL) {
+			return NULL;
+		}
+		result = (struct utf8_dirent *) malloc(sizeof(struct utf8_dirent));
+		result->dir_entry = dir_entry;
+		result->d_name = getUTF8FromWideChar(dir_entry->d_name);
+	}
+	result->next = dirp->first;
+	dirp->first = result;
+	return result;
+}
+
+void utf8_free_entry_list(struct utf8_dirent *first) {
+	if (first == NULL) {
+		return;
+	}
+	utf8_free_entry_list(first->next);
+	free(first->d_name);
+	free(first);
+}
+
+int utf8_closedir(UTF8_DIR *dirp) {
+	if (dirp == NULL) {
+		return 0;
+	}
+	int result = 0;
+	if (dirp->type == ANSI_TYPE) {
+		result = closedir(dirp->dir);
+	}
+	if (dirp->type == WCHAR_TYPE) {
+		result = _wclosedir(dirp->dir);
+	}
+	// clean the linked list of read entries.
+	utf8_free_entry_list(dirp->first);
+
+	free(dirp);
+	return result;
 }

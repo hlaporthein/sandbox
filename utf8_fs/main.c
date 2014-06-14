@@ -55,6 +55,9 @@ int ls(const char *s) {
 		printf("fname=%s\n", fname);
 	}
 cleanup:
+	if (d) {
+		utf8_closedir(d);
+	}
 	return result;
 }
 
@@ -62,11 +65,12 @@ int main() {
 	int result = 0;
 	DO(write_file("αβγ.txt", "Jean-Louis Guénégo"));
 	DO(write_file("abc.txt", "Jean-Louis Guénégo"));
-	DO(utf8_unlink("αβγ.txt"));
+	DO(utf8_mkdir("αβγ"));
 
 	DO(ls("."));
-	DO(utf8_mkdir("αβγ"));
+
 	DO(utf8_rmdir("αβγ"));
+	DO(utf8_unlink("αβγ.txt"));
 	printf("End with success.");
 cleanup:
 	return result;
