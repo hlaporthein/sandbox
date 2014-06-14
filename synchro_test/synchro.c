@@ -2,6 +2,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <stdarg.h>
+#include <windows.h>
 #include <errno.h>
 #include <string.h>
 #include <time.h>
@@ -12,7 +13,7 @@ char* mode_map[] = {
 	"preview", "real"
 };
 
-_FT(print_t) _FT(g_print) = NULL;
+print_t g_print = NULL;
 progress_value_t g_progress_value = NULL;
 int g_abort = FALSE;
 int64 g_total_step = 0;
@@ -25,8 +26,8 @@ int g_file_full = FALSE;
 int g_total_op = 0;
 char g_error_msg[BUFFER_SIZE];
 
-void set_print(_FT(print_t) print) {
-	_FT(g_print) = print;
+void set_print(print_t print) {
+	g_print = print;
 }
 
 void set_progress_value(progress_value_t progress_value) {
@@ -49,21 +50,21 @@ int is_aborted() {
 	return g_abort;
 }
 
-void synchro_log(MY_LPCTSTR format, ...) {
-	MY_TCHAR buf[BUFFER_SIZE];
+void synchro_log(const char* format, ...) {
+	char buf[BUFFER_SIZE];
 	va_list params;
 	va_start(params, format);
 	vsnprintf(buf, BUFFER_SIZE, format, params);
 	va_end(params);
-	_FT(g_print)(buf);
+	g_print(buf);
 }
 
 int exists(const char* file) {
 	struct stat statbuf;
 	if (stat(file, &statbuf) == -1) {
-		DEBUG_LOG(_T("%s does not exist\n"), file);
+		DEBUG_LOG("%s does not exist\n", file);
 	} else {
-		DEBUG_LOG(_T("%s exists\n"), file);
+		DEBUG_LOG("%s exists\n", file);
 	}
 	return stat(file, &statbuf) != -1;
 }
@@ -86,7 +87,7 @@ void set_max_op(int max_op) {
 
 int cp(const char* srcpath, const char* destpath, int buffer_size) {
 	int result = 0;
-	INFO_LOG(_T("Copying: %s => %s\n"), srcpath, destpath);
+	INFO_LOG("Copying: %s => %s\n", srcpath, destpath);
 	char buf[buffer_size];
 
 	FILE* source = fopen(srcpath, "rb");
@@ -100,7 +101,7 @@ int cp(const char* srcpath, const char* destpath, int buffer_size) {
 
 		size_t s = fwrite(buf, 1, size, dest);
 		if (s != size) {
-			ERROR_LOG(_T("Cannot write data. Error(%d): %s\n"), errno, strerror(errno));
+			ERROR_LOG("Cannot write data. Error(%d): %s\n", errno, strerror(errno));
 			result = 1;
 			goto cleanup;
 		}
@@ -120,7 +121,7 @@ cleanup:
 }
 
 int sync_dir_build_cmd(const char* src, const char* dst, int level) {
-	DEBUG_LOG(_T("Starting sync_dir_build_cmd(level %d): %s => %s\n"), level, src, dst);
+	DEBUG_LOG("Starting sync_dir_build_cmd(level %d): %s => %s\n", level, src, dst);
 	if (level == 0) {
 		g_total_step = 0;
 		file_reset(TRUE);
@@ -130,7 +131,7 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level) {
 	DIR *d = NULL;
 	d = opendir(src);
 	if (!d) {
-		ERROR_LOG(_T("Cannot open directory for sync %s. Error(%d): %s\n"), src, errno, strerror(errno));
+		ERROR_LOG("Cannot open directory for sync %s. Error(%d): %s\n", src, errno, strerror(errno));
 		result = -1;
 		goto cleanup;
 	}
@@ -156,26 +157,26 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level) {
 
 		if (is_dir(src_filepath)) {
 			if (is_filtered(TRUE, fname)) {
-				DEBUG_LOG(_T("Dir ignored: %s\n"), src_filepath);
+				DEBUG_LOG("Dir ignored: %s\n", src_filepath);
 				continue;
 			}
 			sync_dir_build_cmd(src_filepath, dest_filepath, level + 1);
 		} else {
 			if (is_filtered(FALSE, fname)) {
-				DEBUG_LOG(_T("File ignored: %s\n"), src_filepath);
+				DEBUG_LOG("File ignored: %s\n", src_filepath);
 				continue;
 			} else {
-				DEBUG_LOG(_T("File not filtered: %s\n"), src_filepath);
+				DEBUG_LOG("File not filtered: %s\n", src_filepath);
 			}
 			int do_copy = FALSE;
 			struct stat src_statbuf;
-			result = TRY(stat(src_filepath, &src_statbuf), result == -1, _T("Source stat error on %s (%d): %s\n"), src_filepath, errno, strerror(errno));
+			result = TRY(stat(src_filepath, &src_statbuf), result == -1, "Source stat error on %s (%d): %s\n", src_filepath, errno, strerror(errno));
 
 			if (!exists(dest_filepath)) {
 				do_copy = TRUE;
 			} else {
 				struct stat dst_statbuf;
-				result = TRY(stat(dest_filepath, &dst_statbuf), result == -1, _T("Destination stat error on %s (%d): %s\n"), dest_filepath, errno, strerror(errno));
+				result = TRY(stat(dest_filepath, &dst_statbuf), result == -1, "Destination stat error on %s (%d): %s\n", dest_filepath, errno, strerror(errno));
 				if (src_statbuf.st_mtime > dst_statbuf.st_mtime) {
 					do_copy = TRUE;
 				}

@@ -24,7 +24,7 @@ int file_reset(int remove) {
 	g_total_op = 0;
 	g_fd = fopen(g_filename, "ab");
 	if (!g_fd) {
-		ERROR_LOG(_T("Cannot open file %s. Error(%d): %s\n"), g_filename, errno, strerror(errno));
+		ERROR_LOG("Cannot open file %s. Error(%d): %s\n", g_filename, errno, strerror(errno));
 		result = errno;
 		goto cleanup;
 	}
@@ -41,14 +41,14 @@ void file_close() {
 }
 
 int file_push_mkdir(const char* dir) {
-	return file_append(_T("D\n%s\n"), dir);
+	return file_append("D\n%s\n", dir);
 }
 
 int file_push_cp(const char* src, const char* dst) {
-	return file_append(_T("F\n%s\n%s\n"), src, dst);
+	return file_append("F\n%s\n%s\n", src, dst);
 }
 
-int file_append(MY_LPCTSTR format, ...) {
+int file_append(const char* format, ...) {
 	int result = 0;
 	if (!g_fd) {
 		result = file_reset(FALSE);
@@ -56,15 +56,16 @@ int file_append(MY_LPCTSTR format, ...) {
 			goto cleanup;
 		}
 	}
-	MY_TCHAR sBuffer[BUFFER_SIZE];
+	char sBuffer[BUFFER_SIZE];
 	va_list params;
 	va_start(params, format);
 	vsnprintf(sBuffer, BUFFER_SIZE, format, params);
 	va_end(params);
 
-	size_t s = _tfprintf(g_fd, _T("%s"), sBuffer);
-	if (s == -1) {
-		ERROR_LOG(_T("Cannot append to file %s. Error(%d): %s\n"), g_filename, errno, strerror(errno));
+	size_t count = strlen(sBuffer);
+	size_t s = fwrite(sBuffer, 1, count, g_fd);
+	if (s != count) {
+		ERROR_LOG("Cannot append to file %s. Error(%d): %s\n", g_filename, errno, strerror(errno));
 		result = 1;
 		goto cleanup;
 	}
@@ -83,7 +84,7 @@ int run_file() {
 
 	g_fd = fopen(g_filename, "rb");
 	if (!g_fd) {
-		ERROR_LOG(_T("Cannot open file %s. Error(%d): %s\n"), g_filename, errno, strerror(errno));
+		ERROR_LOG("Cannot open file %s. Error(%d): %s\n", g_filename, errno, strerror(errno));
 		result = errno;
 		goto cleanup;
 	}
@@ -98,7 +99,7 @@ int run_file() {
 		if (strcmp(line, "D") == 0) {
 			fgets(line, LINE_SIZE, g_fd);
 			chomp(line);
-			int res = TRY(mkdir(line), res != 0, _T("mkdir error: (%d) %s\n"), errno, strerror(errno));
+			int res = TRY(mkdir(line), res != 0, "mkdir error: (%d) %s\n", errno, strerror(errno));
 			g_current_step += MKDIR_STEP;
 			inform_progress();
 		} else if (strcmp(line, "F") == 0) {

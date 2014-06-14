@@ -4,8 +4,8 @@
 
 #include "synchro.h"
 
-void my_print(MY_LPCTSTR buf) {
-	_tprintf(_T("%s"), buf);
+void my_print(const char* buf) {
+	printf("%s", buf);
 }
 
 void my_progress_value(const int64 value) {
