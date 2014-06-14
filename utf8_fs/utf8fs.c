@@ -3,6 +3,8 @@
 #define BUFFER_SIZE 1 << 16
 
 #include <windows.h>
+#include <wchar.h>
+#include <io.h>
 
 int is_ansi(const char*s) {
 	do {
@@ -40,4 +42,57 @@ FILE *utf8_fopen(const char *path, const char *mode) {
 		free(wmode);
 	}
 	return fd;
+}
+
+int utf8_mkdir(const char *path) {
+	if (is_ansi(path)) {
+		return mkdir(path);
+	}
+
+	int result = 0;
+	wchar_t *wpath = NULL;
+	wpath = getWideCharFromUTF8(path);
+	result = _wmkdir(wpath);
+	if (wpath) {
+		free(wpath);
+	}
+	return result;
+}
+
+int utf8_rmdir(const char *path) {
+	if (is_ansi(path)) {
+		return rmdir(path);
+	}
+
+	int result = 0;
+	wchar_t *wpath = NULL;
+	wpath = getWideCharFromUTF8(path);
+	result = _wrmdir(wpath);
+	if (wpath) {
+		free(wpath);
+	}
+	return result;
+}
+
+int utf8_unlink(const char *path) {
+	if (is_ansi(path)) {
+		return unlink(path);
+	}
+
+	int result = 0;
+	wchar_t *wpath = NULL;
+	wpath = getWideCharFromUTF8(path);
+	result = _wunlink(wpath);
+	if (wpath) {
+		free(wpath);
+	}
+	return result;
+}
+
+UTF8_DIR *utf8_opendir(const char *dirname) {
+	errno = 2;
+	return NULL;
+}
+struct utf8_dirent *utf8_readdir(UTF8_DIR *dirp) {
+	return NULL;
 }
