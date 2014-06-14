@@ -1,6 +1,6 @@
 all: file_reader.exe
 
-file_reader.exe: *.o
+file_reader.exe: main.o file_reader.o
 	g++ -o file_reader main.o file_reader.o -Wall -O
 
 main.o: main.cc

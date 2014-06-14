@@ -13,6 +13,7 @@ void print_hexa(const string file_name) {
 	ifstream is;
 	is.exceptions(ifstream::failbit | ifstream::badbit);
 	try {
+		// cannot open file with no-ANSI character.
 		is.open(file_name, ifstream::in | ifstream::binary);
 		is.exceptions(ifstream::badbit);
 
