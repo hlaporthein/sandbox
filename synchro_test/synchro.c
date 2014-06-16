@@ -139,6 +139,7 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level) {
 
 	if (!is_dir(dst)) {
 		file_push_mkdir(dst);
+		g_total_step += MKDIR_STEP;
 	}
 
 	struct utf8_dirent *dir;

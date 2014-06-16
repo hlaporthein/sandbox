@@ -25,7 +25,7 @@ Options::Options(QWidget *parent) :
     ui->priorityComboBox->addItem("Below Normal", QVariant(BELOW_NORMAL_PRIORITY_CLASS));
     ui->priorityComboBox->addItem("Normal", QVariant(NORMAL_PRIORITY_CLASS));
     ui->priorityComboBox->addItem("Above Normal", QVariant(ABOVE_NORMAL_PRIORITY_CLASS));
-    ui->priorityComboBox->addItem("Hight", QVariant(HIGH_PRIORITY_CLASS));
+    ui->priorityComboBox->addItem("High", QVariant(HIGH_PRIORITY_CLASS));
     ui->priorityComboBox->addItem("Real Time", QVariant(REALTIME_PRIORITY_CLASS));
 #else
     ui->priorityComboBox->setEnabled(false);
@@ -117,6 +117,7 @@ void Options::reset() {
 void Options::show() {
     qDebug() << "show";
     load();
+    ui->settingsTab->setCurrentIndex(0);
     restoreGeometry(settings.value(CONF_OPTIONS_GEOMETRY).toByteArray());
     QDialog::show();
 }

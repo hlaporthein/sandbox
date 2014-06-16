@@ -92,29 +92,22 @@ int run_file() {
 	char line[LINE_SIZE];
 	char line2[LINE_SIZE];
 	while (fgets(line, LINE_SIZE, g_fd)) {
-		DEBUG_LOG("Begin While\n");
 		if (g_abort) {
 			break;
 		}
 		chomp(line);
-		DEBUG_LOG("Retrieving line: %s\n", line);
 		if (strcmp(line, "D") == 0) {
 			fgets(line, LINE_SIZE, g_fd);
 			chomp(line);
 			DEBUG_LOG("Making dir %s\n", line);
 			int res = TRY(utf8_mkdir(line), res != 0, "mkdir error: (%d) %s\n", errno, strerror(errno));
-			DEBUG_LOG("End mkdir %s\n", line);
 			g_current_step += MKDIR_STEP;
-			DEBUG_LOG("Inform progress\n");
 			inform_progress();
-			DEBUG_LOG("End inform progress\n");
 		} else if (strcmp(line, "F") == 0) {
 			fgets(line, LINE_SIZE, g_fd);
 			chomp(line);
-			DEBUG_LOG("About to copy %s ", line);
 			fgets(line2, LINE_SIZE, g_fd);
 			chomp(line2);
-			DEBUG_LOG("to %s\n", line2);
 			DO(cp(line, line2, CP_BUFFER_SIZE));
 		}
 	}

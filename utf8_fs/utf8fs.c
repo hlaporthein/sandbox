@@ -8,17 +8,17 @@
 #include <dirent.h>
 
 int is_ansi(const char*s) {
-	printf("is_ansi(%s)\n", s);
+	//printf("is_ansi(%s)\n", s);
 	int result = 1;
 	while (*s != 0) {
-		printf("*s=%c\n", *s);
+		//printf("*s=%c\n", *s);
 		if (*s < 0) {
 			result = 0;
 			break;
 		}
 		s++;
 	}
-	printf("result=%d\n", result);
+	//printf("result=%d\n", result);
 	return result;
 }
 
