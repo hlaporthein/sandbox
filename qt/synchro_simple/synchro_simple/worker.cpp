@@ -30,11 +30,11 @@ void Worker::process() {
     char dstBuf[PATH_SIZE];
     char tmpBuf[PATH_SIZE];
     char buf[PATH_SIZE];
-    char* str = settings.value(CONF_SRC_DIR).toString().toLocal8Bit().data();
+    char* str = settings.value(CONF_SRC_DIR).toString().toUtf8().data();
     strncpy(srcBuf, str, PATH_SIZE);
-    char* dst = settings.value(CONF_DST_DIR).toString().toLocal8Bit().data();
+    char* dst = settings.value(CONF_DST_DIR).toString().toUtf8().data();
     strncpy(dstBuf, dst, PATH_SIZE);
-    strncpy(tmpBuf, QDir::tempPath().toLocal8Bit().data(), PATH_SIZE);
+    strncpy(tmpBuf, QDir::tempPath().toUtf8().data(), PATH_SIZE);
 
     g_worker = this;
 
@@ -83,9 +83,9 @@ void Worker::setFilters() {
     for (int i = 0; i < filters_length; i++) {
         settings.setArrayIndex(i);
         strncpy(filters[i].label,
-                settings.value(CONF_FILTERS_LABEL, "").toString().toLocal8Bit().data(), BUFFER_SIZE);
+                settings.value(CONF_FILTERS_LABEL, "").toString().toUtf8().data(), BUFFER_SIZE);
         strncpy(filters[i].filter,
-                settings.value(CONF_FILTERS_VALUE, "").toString().toLocal8Bit().data(), BUFFER_SIZE);
+                settings.value(CONF_FILTERS_VALUE, "").toString().toUtf8().data(), BUFFER_SIZE);
         filters[i].is_dir = (settings.value(CONF_FILTERS_IS_DIR).toBool())? TRUE : FALSE;
     }
     settings.endArray();
