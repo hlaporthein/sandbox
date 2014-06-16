@@ -63,16 +63,19 @@ cleanup:
 
 int main() {
 	int result = 0;
-	DO(write_file("αβγ.txt", "Jean-Louis Guénégo"));
-	DO(write_file("abc.txt", "Jean-Louis Guénégo"));
+//	DO(write_file("αβγ.txt", "Jean-Louis Guénégo"));
+//	DO(write_file("abc.txt", "Jean-Louis Guénégo"));
 	DO(utf8_mkdir("αβγ"));
+	DO(write_file("αβγ/αβγ.txt", "Jean-Louis Guénégo"));
 
 	DO(ls("."));
-	struct stat buf;
-	DO(utf8_stat("αβγ.txt", &buf));
-	printf("size of file: %d\n", (int) buf.st_size);
+//	struct stat buf;
+//	DO(utf8_stat("αβγ.txt", &buf));
+//	printf("size of file: %d\n", (int) buf.st_size);
+	DO(utf8_unlink("αβγ/αβγ.txt"));
 	DO(utf8_rmdir("αβγ"));
-	DO(utf8_unlink("αβγ.txt"));
+//	DO(utf8_unlink("αβγ.txt"));
+
 	printf("End with success.");
 cleanup:
 	return result;

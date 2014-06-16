@@ -61,17 +61,18 @@ void synchro_log(const char* format, ...) {
 
 int exists(const char* file) {
 	struct stat statbuf;
-	if (stat(file, &statbuf) == -1) {
+	int result = utf8_stat(file, &statbuf);
+	if (result == -1) {
 		DEBUG_LOG("%s does not exist\n", file);
 	} else {
 		DEBUG_LOG("%s exists\n", file);
 	}
-	return stat(file, &statbuf) != -1;
+	return result != -1;
 }
 
 int is_dir(const char* file) {
 	struct stat statbuf;
-	if(stat(file, &statbuf) == -1) {
+	if(utf8_stat(file, &statbuf) == -1) {
 		return 0;
 	}
 	return S_ISDIR(statbuf.st_mode);
@@ -90,8 +91,8 @@ int cp(const char* srcpath, const char* destpath, int buffer_size) {
 	INFO_LOG("Copying: %s => %s\n", srcpath, destpath);
 	char buf[buffer_size];
 
-	FILE* source = fopen(srcpath, "rb");
-	FILE* dest = fopen(destpath, "wb");
+	FILE* source = utf8_fopen(srcpath, "rb");
+	FILE* dest = utf8_fopen(destpath, "wb");
 
 	size_t size = 0;
 	while ((size = fread(buf, 1, buffer_size, source))) {
@@ -114,7 +115,7 @@ cleanup:
 	fclose(dest);
 
 	if (g_abort) {
-		unlink(destpath);
+		utf8_unlink(destpath);
 	}
 
 	return result;
@@ -128,8 +129,8 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level) {
 	}
 	int result = 0;
 
-	DIR *d = NULL;
-	d = opendir(src);
+	UTF8_DIR *d = NULL;
+	d = utf8_opendir(src);
 	if (!d) {
 		ERROR_LOG("Cannot open directory for sync %s. Error(%d): %s\n", src, errno, strerror(errno));
 		result = -1;
@@ -140,8 +141,8 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level) {
 		file_push_mkdir(dst);
 	}
 
-	struct dirent *dir;
-	while ((dir = readdir(d)) != NULL) {
+	struct utf8_dirent *dir;
+	while ((dir = utf8_readdir(d)) != NULL) {
 		if (g_abort || g_file_full) {
 			break;
 		}
@@ -170,13 +171,13 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level) {
 			}
 			int do_copy = FALSE;
 			struct stat src_statbuf;
-			result = TRY(stat(src_filepath, &src_statbuf), result == -1, "Source stat error on %s (%d): %s\n", src_filepath, errno, strerror(errno));
+			result = TRY(utf8_stat(src_filepath, &src_statbuf), result == -1, "Source stat error on %s (%d): %s\n", src_filepath, errno, strerror(errno));
 
 			if (!exists(dest_filepath)) {
 				do_copy = TRUE;
 			} else {
 				struct stat dst_statbuf;
-				result = TRY(stat(dest_filepath, &dst_statbuf), result == -1, "Destination stat error on %s (%d): %s\n", dest_filepath, errno, strerror(errno));
+				result = TRY(utf8_stat(dest_filepath, &dst_statbuf), result == -1, "Destination stat error on %s (%d): %s\n", dest_filepath, errno, strerror(errno));
 				if (src_statbuf.st_mtime > dst_statbuf.st_mtime) {
 					do_copy = TRUE;
 				}
@@ -192,7 +193,7 @@ int sync_dir_build_cmd(const char* src, const char* dst, int level) {
 
 cleanup:
 	if (d) {
-		closedir(d);
+		utf8_closedir(d);
 	}
 
 	if (result == 0 && g_abort) {

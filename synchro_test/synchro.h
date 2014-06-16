@@ -12,6 +12,7 @@ extern "C" {
 
 #include "file.h"
 #include "filter.h"
+#include "../utf8_fs/utf8fs.h"
 
 typedef long long int64;
 

@@ -8,12 +8,18 @@
 #include <dirent.h>
 
 int is_ansi(const char*s) {
-	do {
+	printf("is_ansi(%s)\n", s);
+	int result = 1;
+	while (*s != 0) {
+		printf("*s=%c\n", *s);
 		if (*s < 0) {
-			return 0;
+			result = 0;
+			break;
 		}
-	} while (s++);
-	return 1;
+		s++;
+	}
+	printf("result=%d\n", result);
+	return result;
 }
 
 wchar_t *getWideCharFromUTF8(const char *s) {
@@ -104,17 +110,6 @@ int utf8_unlink(const char *path) {
 UTF8_DIR *utf8_opendir(const char *dirname) {
 	UTF8_DIR* result = NULL;
 	wchar_t *wdirname = NULL;
-	if (is_ansi(dirname)) {
-		DIR* dir = opendir(dirname);
-		if (dir == NULL) {
-			goto cleanup;
-		}
-		result = (UTF8_DIR*) malloc(sizeof(UTF8_DIR));
-		result->dir = dir;
-		result->type = ANSI_TYPE;
-		result->first = NULL;
-		goto cleanup;
-	}
 
 	wdirname = getWideCharFromUTF8(dirname);
 	_WDIR* dir = _wopendir(wdirname);
@@ -123,7 +118,6 @@ UTF8_DIR *utf8_opendir(const char *dirname) {
 	}
 	result = (UTF8_DIR*) malloc(sizeof(UTF8_DIR));
 	result->dir = dir;
-	result->type = WCHAR_TYPE;
 	result->first = NULL;
 
 cleanup:
@@ -135,23 +129,13 @@ cleanup:
 
 struct utf8_dirent *utf8_readdir(UTF8_DIR *dirp) {
 	struct utf8_dirent *result = NULL;
-	if (dirp->type == ANSI_TYPE) {
-		struct dirent* dir_entry = readdir(dirp->dir);
-		if (dir_entry == NULL) {
-			return NULL;
-		}
-		result = (struct utf8_dirent *) malloc(sizeof(struct utf8_dirent));
-		result->dir_entry = dir_entry;
-		result->d_name = strdup(dir_entry->d_name);
-	} else {
-		struct _wdirent* dir_entry = _wreaddir(dirp->dir);
-		if (dir_entry == NULL) {
-			return NULL;
-		}
-		result = (struct utf8_dirent *) malloc(sizeof(struct utf8_dirent));
-		result->dir_entry = dir_entry;
-		result->d_name = getUTF8FromWideChar(dir_entry->d_name);
+	struct _wdirent* dir_entry = _wreaddir(dirp->dir);
+	if (dir_entry == NULL) {
+		return NULL;
 	}
+	result = (struct utf8_dirent *) malloc(sizeof(struct utf8_dirent));
+	result->dir_entry = dir_entry;
+	result->d_name = getUTF8FromWideChar(dir_entry->d_name);
 	result->next = dirp->first;
 	dirp->first = result;
 	return result;
@@ -171,12 +155,7 @@ int utf8_closedir(UTF8_DIR *dirp) {
 		return 0;
 	}
 	int result = 0;
-	if (dirp->type == ANSI_TYPE) {
-		result = closedir(dirp->dir);
-	}
-	if (dirp->type == WCHAR_TYPE) {
-		result = _wclosedir(dirp->dir);
-	}
+	result = _wclosedir(dirp->dir);
 	// clean the linked list of read entries.
 	utf8_free_entry_list(dirp->first);
 

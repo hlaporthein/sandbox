@@ -18,7 +18,6 @@ struct utf8_dirent {
 
 typedef struct {
 	void *dir;
-	int type;
 	struct utf8_dirent *first;
 } UTF8_DIR;
 

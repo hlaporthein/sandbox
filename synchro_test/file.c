@@ -18,11 +18,11 @@ int file_reset(int remove) {
 
 	snprintf(g_filename, PATH_SIZE, "%s/synchro_simple.txt", g_tmp_dir);
 	if (remove) {
-		unlink(g_filename);
+		utf8_unlink(g_filename);
 	}
 	g_file_full = FALSE;
 	g_total_op = 0;
-	g_fd = fopen(g_filename, "ab");
+	g_fd = utf8_fopen(g_filename, "ab");
 	if (!g_fd) {
 		ERROR_LOG("Cannot open file %s. Error(%d): %s\n", g_filename, errno, strerror(errno));
 		result = errno;
@@ -82,7 +82,7 @@ int run_file() {
 	g_current_step = 0;
 	file_close();
 
-	g_fd = fopen(g_filename, "rb");
+	g_fd = utf8_fopen(g_filename, "rb");
 	if (!g_fd) {
 		ERROR_LOG("Cannot open file %s. Error(%d): %s\n", g_filename, errno, strerror(errno));
 		result = errno;
@@ -92,21 +92,29 @@ int run_file() {
 	char line[LINE_SIZE];
 	char line2[LINE_SIZE];
 	while (fgets(line, LINE_SIZE, g_fd)) {
+		DEBUG_LOG("Begin While\n");
 		if (g_abort) {
 			break;
 		}
 		chomp(line);
+		DEBUG_LOG("Retrieving line: %s\n", line);
 		if (strcmp(line, "D") == 0) {
 			fgets(line, LINE_SIZE, g_fd);
 			chomp(line);
-			int res = TRY(mkdir(line), res != 0, "mkdir error: (%d) %s\n", errno, strerror(errno));
+			DEBUG_LOG("Making dir %s\n", line);
+			int res = TRY(utf8_mkdir(line), res != 0, "mkdir error: (%d) %s\n", errno, strerror(errno));
+			DEBUG_LOG("End mkdir %s\n", line);
 			g_current_step += MKDIR_STEP;
+			DEBUG_LOG("Inform progress\n");
 			inform_progress();
+			DEBUG_LOG("End inform progress\n");
 		} else if (strcmp(line, "F") == 0) {
 			fgets(line, LINE_SIZE, g_fd);
 			chomp(line);
+			DEBUG_LOG("About to copy %s ", line);
 			fgets(line2, LINE_SIZE, g_fd);
 			chomp(line2);
+			DEBUG_LOG("to %s\n", line2);
 			DO(cp(line, line2, CP_BUFFER_SIZE));
 		}
 	}
