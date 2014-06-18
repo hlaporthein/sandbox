@@ -14,4 +14,5 @@ clean:
 	rm -f *.exe *.o
 
 install: all
+	mkdir -p /usr/local/bin
 	cp -f pe_reader.exe /usr/local/bin
