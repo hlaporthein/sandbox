@@ -4,10 +4,10 @@
 
 static LPTOP_LEVEL_EXCEPTION_FILTER g_old_exception_handler = NULL;
 
-jmp_buf g_env;
+my_jmp_buf g_env;
 
 static LONG WINAPI exception_handler(LPEXCEPTION_POINTERS ExceptionInfo) {
-	longjmp(g_env, -1);
+	my_longjmp(g_env, -1);
 	// Normally we don't go here, so we can return whatever
 	return EXCEPTION_CONTINUE_EXECUTION;
 }

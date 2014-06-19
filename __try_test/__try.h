@@ -3,14 +3,14 @@
 
 #include <windows.h>
 
-#include "setjmp.h"
+#include "my_setjmp.h"
 
 void manage_handler();
 
-extern jmp_buf g_env;
+extern my_jmp_buf g_env;
 
 #define __try \
-	if (setjmp(g_env) != 0) { \
+	if (my_setjmp(g_env) != 0) { \
 		goto __try_exception_catched; \
 	} \
 	set_handler();
