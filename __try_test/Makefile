@@ -1,4 +1,4 @@
-CFLAGS = -Wall -Werror -std=gnu99 -masm=intel
+CFLAGS = -Wall -Werror -std=gnu99 -masm=intel -fno-asynchronous-unwind-tables
 
 all:
 	gcc $(CFLAGS) -c -o __try.o __try.c

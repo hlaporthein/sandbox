@@ -2,15 +2,22 @@
 
 int setjmp(jmp_buf env) {
 	__asm__ __volatile__ (
-		"add ebp, 80\n\t"
-		"mov esp, ebp\n\t"
+		"mov ebx, ebp\n\t"
+
+		"mov eax, %[my_env]\n\t"
+		"add eax, 44\n\t"
+		"mov esp, eax\n\t"
+		"mov ebp, eax\n\t"
+
 		"push 123\n\t"
 		"pushf\n\t"
 		"pusha\n\t"
 		"call my_next\n\t"
 		"my_next:\n\t"
-		"sub esp, 36\n\t"
+
+		"mov esp, ebx\n\t"
 		"mov ebp, esp\n\t"
+		:: [my_env] "r" (env)
 	);
 	return env[10];
 }
