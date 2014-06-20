@@ -22,15 +22,14 @@ int main() {
 	my_jmp_buf env;
 	memset(&env, 0, sizeof(env));
 	int a = my_setjmp(env);
-	a++;
 	print_env(env);
-//	if (a != 123) {
-//		printf("Exception catched!");
-//		goto cleanup;
-//	}
+	if (a != 123) {
+		printf("Exception catched!");
+		goto cleanup;
+	}
 	my_longjmp(env, 125);
 	printf("longjmp done\n");
 	print_env(env);
-//cleanup:
+cleanup:
 	return 0;
 }
