@@ -15,6 +15,7 @@ void print_env(my_jmp_buf env) {
 	printf("esp=%08X\n", env[8]);
 	printf("eflags=%08X\n", env[9]);
 	printf("eip=%08X\n", env[10]);
+	printf("eip2=%08X\n", env[11]);
 }
 
 int main() {
@@ -22,15 +23,14 @@ int main() {
 	memset(&env, 0, sizeof(env));
 	int a = my_setjmp(env);
 	a++;
-	//printf("a=%d\n", a);
 	print_env(env);
-//	my_longjmp(env, 125);
-//	printf("longjmp done\n");
-//	print_env(env);
-//	__try {
-//		int i = 10;
-//		int* p = (int*) i;
-//		printf("%x\n", *p);
-//	} __except
+//	if (a != 123) {
+//		printf("Exception catched!");
+//		goto cleanup;
+//	}
+	my_longjmp(env, 125);
+	printf("longjmp done\n");
+	print_env(env);
+//cleanup:
 	return 0;
 }
