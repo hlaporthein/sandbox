@@ -19,7 +19,7 @@ void print_env(my_jmp_buf env) {
 	printf("eip2=%08X\n", env[12]);
 }
 
-int main() {
+int main1() {
 	my_jmp_buf env;
 	memset(&env, 0, sizeof(env));
 	int a = my_setjmp(env);
@@ -33,5 +33,18 @@ int main() {
 	print_env(env);
 cleanup:
 	printf("cleanup\n");
+	return 0;
+}
+
+int main(int argc, char** argv) {
+	__try {
+		int x = argc - 1;
+		printf("x=%d\n", x);
+		int y = x / x;
+		printf("y=%d\n", y);
+	} __except {
+		printf("Exception catched\n");
+	}
+	printf("finished\n");
 	return 0;
 }

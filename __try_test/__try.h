@@ -5,20 +5,22 @@
 
 #include "my_setjmp.h"
 
-void manage_handler();
+void set_handler();
+void restore_handler();
 
 extern my_jmp_buf g_env;
 
 #define __try \
-	if (my_setjmp(g_env) != 0) { \
+	int __run_exception_catched = 0; \
+	if (my_setjmp(g_env) != 123) { \
+		__run_exception_catched = 1; \
 		goto __try_exception_catched; \
 	} \
 	set_handler();
 
 #define __except \
-	goto __try_finally; \
 __try_exception_catched: \
 	restore_handler(); \
-__try_finally:
+	if (__run_exception_catched)
 
 #endif // __TRY_H
