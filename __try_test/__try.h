@@ -18,7 +18,7 @@ extern my_jmp_buf g_env;
 	} \
 	set_handler();
 
-#define __except \
+#define __except(x) \
 __try_exception_catched: \
 	restore_handler(); \
 	if (__run_exception_catched)
