@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
 		printf("x=%d\n", x);
 		int y = x / x;
 		printf("y=%d\n", y);
-	} __except (2) {
+	} __except {
 		printf("Exception catched\n");
 	}
 	printf("finished\n");

@@ -18,9 +18,8 @@ extern my_jmp_buf g_env;
 	} \
 	set_handler();
 
-#define __except(x) \
+#define __except \
 __try_exception_catched: \
-	printf("x=%d\n", x); \
 	restore_handler(); \
 	if (__run_exception_catched)
 
