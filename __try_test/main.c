@@ -12,10 +12,11 @@ void print_env(my_jmp_buf env) {
 	printf("esi=%08X\n", env[5]);
 	printf("edi=%08X\n", env[6]);
 	printf("ebp=%08X\n", env[7]);
-	printf("esp=%08X\n", env[8]);
-	printf("eflags=%08X\n", env[9]);
-	printf("eip=%08X\n", env[10]);
-	printf("eip2=%08X\n", env[11]);
+	printf("[ebp]=%08X\n", env[8]);
+	printf("esp=%08X\n", env[9]);
+	printf("eflags=%08X\n", env[10]);
+	printf("eip=%08X\n", env[11]);
+	printf("eip2=%08X\n", env[12]);
 }
 
 int main() {

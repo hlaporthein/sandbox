@@ -1,7 +1,7 @@
 #ifndef SETJMP_H
 #define SETJMP_H
 
-typedef unsigned int my_jmp_buf[12];
+typedef unsigned int my_jmp_buf[13];
 
 // Save Register + Stack
 int my_setjmp(my_jmp_buf env);
