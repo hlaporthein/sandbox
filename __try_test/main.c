@@ -24,12 +24,13 @@ int main() {
 	int a = my_setjmp(env);
 	print_env(env);
 	if (a != 123) {
-		printf("Exception catched!");
+		printf("Exception catched!\n");
 		goto cleanup;
 	}
 	my_longjmp(env, 125);
 	printf("longjmp done\n");
 	print_env(env);
 cleanup:
+	printf("cleanup\n");
 	return 0;
 }
