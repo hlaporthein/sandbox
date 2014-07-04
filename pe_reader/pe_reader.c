@@ -139,8 +139,8 @@ void pe_print_standard_header() {
 
 	time_t time_as_time_t = s_pe.header.FileHeader.TimeDateStamp;
 	struct tm *tm = localtime(&time_as_time_t);
-	printf("Creation date: %d/%d/%d - %d:%d:%d\n",
-			tm->tm_mday, (1 + tm->tm_mon), (1900 + tm->tm_year), tm->tm_hour, tm->tm_min, tm->tm_sec);
+	printf("Creation date: %04d/%02d/%02d - %02d:%02d:%02d\n",
+			(1900 + tm->tm_year), (1 + tm->tm_mon), tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 	//printf("Creation date: %s", asctime(tm));
 
 	printf("Symbol table address: 0x%08x\n", s_pe.header.FileHeader.PointerToSymbolTable);
