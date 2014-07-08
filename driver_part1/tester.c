@@ -3,14 +3,19 @@
 
 #define BUFFER_SIZE 1024
 
-int main(void) {
+int main(int argc, char** argv) {
+	if (argc < 2) {
+		printf("need a filename. ex: \\\\.\\Example\n");
+		return 1;
+	}
 	int status = 0;
 	HANDLE hFile = NULL;
 	DWORD dwReturn;
 	char buf[BUFFER_SIZE];
 	int funcSuccess = 1;
 
-	hFile = CreateFile( "\\\\.\\Example",
+	hFile = CreateFile(
+						argv[1],
 						GENERIC_READ | GENERIC_WRITE,
 						0,
 						NULL,
@@ -19,6 +24,7 @@ int main(void) {
 						NULL);
 
 	if(hFile == INVALID_HANDLE_VALUE) {
+		printf("Invalid handle.\n");
 		goto cleanup;
 	}
 	char* str = "Hello from user mode!\n";

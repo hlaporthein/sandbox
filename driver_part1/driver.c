@@ -18,7 +18,8 @@ NTSTATUS STDCALL DriverEntry(PDRIVER_OBJECT driverObject, PUNICODE_STRING regist
 								//							PWSTR  Buffer, the string /!\not even NULL terminated!
 
 	RtlInitUnicodeString(&deviceName, L"\\Device\\Example"); // Initialize a unicode string
-	RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\Example");
+	RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\DosExample");
+	DbgPrint("dos_device name=%wZ\n", &dosDeviceName);
 
 	status = IoCreateDevice(driverObject, 			// driver object
 							0, 						// length of device extention (extra data to pass)
@@ -109,6 +110,8 @@ NTSTATUS STDCALL my_write_direct(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
 		DbgPrint("Cannot get Irp current stack location.\n");
 		goto cleanup;
 	}
+
+	DbgPrint("Hello from Kernel: file=%wZ\n", &(pIoStackIrp->FileObject->FileName));
 
 // SPECIALIZED PART
 	if (!Irp->MdlAddress) {
