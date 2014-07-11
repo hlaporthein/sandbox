@@ -1,15 +1,16 @@
-#include <stdio.h>
-#include <string.h> // for calling memset
+
 
 #ifdef __MINGW32__
-#include <winsock2.h>
+#include <winsock.h>
 #include <windows.h>
 #else
 #include <sys/socket.h> // for socket(), ...
 #include <netinet/in.h> // for sockaddr_in
 #include <netdb.h> // for gethostbyname(), ...
 #endif
-#include <unistd.h> // for closing socket
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h> // for write and closing socket
 
 #define SERVER_HOSTNAME "127.0.0.1"
 #define SERVER_PORT 22222

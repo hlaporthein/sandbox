@@ -1,10 +1,14 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h> // for calling memset
-
+#ifdef __MINGW32__
+#include <winsock.h>
+#include <windows.h>
+#else
 #include <sys/socket.h> // for socket(), ...
 #include <netinet/in.h> // for sockaddr_in
-#include <unistd.h> // for closing socket
+#include <netdb.h> // for gethostbyname(), ...
+#endif
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h> // for write and closing socket
 
 #define PORT 22222
 #define LISTEN_QUEUE_SIZE 5
@@ -30,7 +34,7 @@ static int s_return_code = 0;
 int handle_connection(int socket) {
 	// here a socket is like a stream referenced by an integer
 	// print on the screen the stream...
-	
+
 	while (TRUE) {
 		int size = 16;
 		int qty_read = 0;
@@ -43,19 +47,27 @@ int handle_connection(int socket) {
 			break;
 		}
 	}
-	
+
 	// write on the socket file descriptor an answer.
 	char *answer = "Message received!";
 	int ret = write(socket, answer, strlen(answer));
 	CHECK_ERROR(ret < 0, "Error while answering");
-	
+
 cleanup:
 	return s_return_code;
 }
-	
+
 int main() {
+#ifdef __MINGW32__
+	WORD versionWanted = MAKEWORD(1, 1);
+	WSADATA wsaData;
+	WSAStartup(versionWanted, &wsaData);
+	printf("Windows version.\n");
+#else
+	printf("Posix version.\n");
+#endif
 	printf("Starting TCP Server on Port %d.\n", PORT);
-	
+
 	// start the server
 	// create a socket pointer
 	// int socket(int domain, int type, int protocol);
@@ -76,23 +88,23 @@ int main() {
     servaddr.sin_port        = htons(PORT);
 
 	CHECK_ERROR(bind(server_socket, (struct sockaddr *) &servaddr, sizeof(servaddr)) < 0, "ECHOSERV: Error calling bind()\n");
-	
+
 	CHECK_ERROR(listen(server_socket, LISTEN_QUEUE_SIZE) < 0, "ECHOSERV: Error calling listen()\n");
-	
+
 	while (TRUE) {
-	
+
 		// Wait for a connection, then accept() it
 		int client_socket = 0;
 		CHECK_ERROR((client_socket = accept(server_socket, NULL, NULL)) < 0, "ECHOSERV: Error calling accept()\n");
 
 		CHECK_ERROR(handle_connection(client_socket), "Error while handling a connection\n");
-		
+
 		// Close the connected socket
 		CHECK_ERROR(close(client_socket) < 0, "ECHOSERV: Error calling close()\n");
-	
+
 	}
 
-	
+
 cleanup:
 	return s_return_code;
 }
