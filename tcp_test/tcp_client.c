@@ -10,6 +10,7 @@
 #endif
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h> // for write and closing socket
 
 #define SERVER_HOSTNAME "127.0.0.1"
@@ -23,17 +24,14 @@
 #define TRUE 1
 #define FALSE 0
 
-static int s_return_code = 0;
-
-#define CHECK_ERROR(condition, ...) \
+#define TRY(condition, ...) \
 	if (condition) { \
 		char my_buffer[BUFFER_SIZE] = ""; \
 		snprintf(my_buffer, BUFFER_SIZE, __VA_ARGS__); \
 		fprintf(stderr, my_buffer); \
-		s_return_code = 1; \
+		result = 1; \
 		goto cleanup; \
 	} \
-
 
 int main() {
 #ifdef __MINGW32__
@@ -44,13 +42,14 @@ int main() {
 #else
 	printf("Posix version.\n");
 #endif
+	int result = 0;
+	
 	int client_socket = 0;
-	CHECK_ERROR((client_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0, "ERROR opening socket");
+	TRY((client_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0, "ERROR opening socket: %d (%s)", errno, strerror(errno));
 
 	// retrieve host by name
-	char *hostname = SERVER_HOSTNAME;
 	struct hostent *server;
-	CHECK_ERROR((server = gethostbyname(hostname)) < 0, "ERROR, no such host as %s\n", hostname);
+	TRY((server = gethostbyname(SERVER_HOSTNAME)) < 0, "ERROR, no such host as %s: %d\n", SERVER_HOSTNAME, h_errno);
 
 	struct    sockaddr_in servaddr;
 	// set all the fields to 0
@@ -60,17 +59,17 @@ int main() {
 	memmove((void *)&servaddr.sin_addr.s_addr, (void *)server->h_addr, server->h_length);
     servaddr.sin_port        = htons(SERVER_PORT);
 
-	CHECK_ERROR(connect(client_socket, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0, "ERROR connecting");
+	TRY(connect(client_socket, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0, "ERROR connecting socket: %d (%s)", errno, strerror(errno));
 
     int ret = 0;
 	ret = write(client_socket, MESSAGE, strlen(MESSAGE));
-	CHECK_ERROR(ret < 0, "Error while writing the message on the socket file descriptor");
+	TRY(ret < 0, "Error while writing the message on the socket file descriptor");
 
 	while (TRUE) {
 		int size = BUFFER_SIZE;
 		int qty_read = 0;
 		char buffer[BUFFER_SIZE] = "";
-		CHECK_ERROR((qty_read = read(client_socket, buffer, size - 1)) < 0, "Error while reading the socket content.\n");
+		TRY((qty_read = read(client_socket, buffer, size - 1)) < 0, "Error while reading the socket content.\n");
 		buffer[BUFFER_SIZE - 1] = '\0';
 		printf("Socket content: %s\n", buffer);
 		if (qty_read != size - 1) {
@@ -79,7 +78,7 @@ int main() {
 		}
 	}
 
-	CHECK_ERROR(close(client_socket) < 0, "Error while closing the socket");
+	TRY(close(client_socket) < 0, "Error while closing the socket");
 cleanup:
-	return s_return_code;
+	return result;
 }
