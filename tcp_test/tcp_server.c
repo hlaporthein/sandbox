@@ -107,11 +107,12 @@ int main() {
 
 		// Close the connected socket
 #ifdef __MINGW32__
-#define close closesocket
-#endif
+		result = TRY(closesocket(client_socket),
+			result != 0, "ECHOSERV: Error calling windows closesocket(): error code = %d (see msdn doc)\n", result);
+#else
 		result = TRY(close(client_socket),
 			result < 0, "ECHOSERV: Error calling close(): %d %s\n", errno, strerror(errno));
-
+#endif
 	}
 
 
