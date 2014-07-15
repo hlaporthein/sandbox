@@ -1,15 +1,17 @@
-#include <stdio.h>
-#include <string.h> // for calling memset
+
 
 #ifdef __MINGW32__
-#include <winsock2.h>
+#include <winsock.h>
 #include <windows.h>
 #else
 #include <sys/socket.h> // for socket(), ...
 #include <netinet/in.h> // for sockaddr_in
 #include <netdb.h> // for gethostbyname(), ...
 #endif
-#include <unistd.h> // for closing socket
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <unistd.h> // for write and closing socket
 
 #define SERVER_HOSTNAME "127.0.0.1"
 #define SERVER_PORT 22222
@@ -22,17 +24,14 @@
 #define TRUE 1
 #define FALSE 0
 
-static int s_return_code = 0;
-
-#define CHECK_ERROR(condition, ...) \
+#define TRY(statement, condition, ...) \
+	statement; \
 	if (condition) { \
-		char my_buffer[BUFFER_SIZE] = ""; \
-		snprintf(my_buffer, BUFFER_SIZE, __VA_ARGS__); \
-		fprintf(stderr, my_buffer); \
-		s_return_code = 1; \
+		fprintf(stderr, __VA_ARGS__); \
+		result = 1; \
+		errno = 0; \
 		goto cleanup; \
 	} \
-
 
 int main() {
 #ifdef __MINGW32__
@@ -43,33 +42,46 @@ int main() {
 #else
 	printf("Posix version.\n");
 #endif
-	int client_socket = 0;
-	CHECK_ERROR((client_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0, "ERROR opening socket");
+	int result = 0;
+
+	int client_socket = TRY(socket(AF_INET, SOCK_STREAM, 0),
+		client_socket < 0,
+		"ERROR opening socket (%d: %s)", errno, strerror(errno));
 
 	// retrieve host by name
 	char *hostname = SERVER_HOSTNAME;
-	struct hostent *server;
-	CHECK_ERROR((server = gethostbyname(hostname)) < 0, "ERROR, no such host as %s\n", hostname);
+	struct hostent *server = TRY(gethostbyname(hostname),
+		server < 0,
+		"ERROR while getting hostname %s. (%d: %s)\n", hostname, errno, strerror(errno));
 
 	struct    sockaddr_in servaddr;
 	// set all the fields to 0
 	memset(&servaddr, 0, sizeof(servaddr));
 	// set some fields to the desired values
-    servaddr.sin_family      = AF_INET;
+	servaddr.sin_family      = AF_INET;
 	memmove((void *)&servaddr.sin_addr.s_addr, (void *)server->h_addr, server->h_length);
-    servaddr.sin_port        = htons(SERVER_PORT);
+	servaddr.sin_port        = htons(SERVER_PORT);
 
-	CHECK_ERROR(connect(client_socket, (const struct sockaddr *) &servaddr, sizeof(servaddr)) < 0, "ERROR connecting");
+	result = TRY(connect(client_socket, (const struct sockaddr *) &servaddr, sizeof(servaddr)),
+		result < 0,
+		"ERROR connecting. (%d: %s)", errno, strerror(errno));
 
-    int ret = 0;
-	ret = write(client_socket, MESSAGE, strlen(MESSAGE));
-	CHECK_ERROR(ret < 0, "Error while writing the message on the socket file descriptor");
+	printf("result=%d\n", result);
+	printf("client_socket=%d\n", client_socket);
+
+	result = TRY(send(client_socket, MESSAGE, strlen(MESSAGE) + 1, 0),
+		result < 0,
+		"Error while writing the message on the socket file descriptor: %d (%s)", errno, strerror(errno));
 
 	while (TRUE) {
 		int size = BUFFER_SIZE;
 		int qty_read = 0;
 		char buffer[BUFFER_SIZE] = "";
-		CHECK_ERROR((qty_read = read(client_socket, buffer, size - 1)) < 0, "Error while reading the socket content.\n");
+
+		qty_read = TRY(recv(client_socket, buffer, size - 1, 0),
+			qty_read < 0,
+			"Error while reading the socket content.\n");
+
 		buffer[BUFFER_SIZE - 1] = '\0';
 		printf("Socket content: %s\n", buffer);
 		if (qty_read != size - 1) {
@@ -78,7 +90,11 @@ int main() {
 		}
 	}
 
-	CHECK_ERROR(close(client_socket) < 0, "Error while closing the socket");
+
+
 cleanup:
-	return s_return_code;
+	if (client_socket) {
+		close(client_socket);
+	}
+	return result;
 }
