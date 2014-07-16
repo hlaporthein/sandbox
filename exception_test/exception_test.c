@@ -51,7 +51,9 @@ int main() {
 	} else {
 		printf("Exception Handling Function = 0x%08x.\n", p);
 	}
-
+	
+	int *q = NULL;
+	printf("char = %c.\n", *q);
 	int i = 0;
 	int j = 0;
 	int k = i / j;
