@@ -1,0 +1,76 @@
+.\" $Copyright: $
+.\" Copyright (c) 2014 by Julia Thomias
+.\" All Rights reserved
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program; if not, write to the Free Software
+.\" Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+.\"
+...
+.TH ar_reader 1 "2014/07/15" "ar_reader 0.0.1"
+.SH NAME
+ar_reader \- parse an archive file (static or import library).
+.SH SYNOPSIS
+\fBar_reader\fP [\fB-hv\fP]
+
+.br
+.SH DESCRIPTION
+\fIar_reader\fP is a utility for parsing all kind of archive file. It gives a
+maximum of information about an archive file. For information an archive file 
+can be generated with the \fIar\fP command or any tool that would generate 
+a static or import library (gcc, Microsoft Visual Studio tools, etc.). 
+.br
+\fIar_reader\fP has been designed to run on MinGW/MSYS environment.
+
+.SH OPTIONS
+\fIar_reader\fP understands the following command line switches:
+
+.TP
+.B -h
+Print help.
+.PP
+.TP
+.B -v
+Print version.
+.PP
+
+.SH FILES
+\fIar_reader\fP uses no external files when running.
+
+.SH ENVIRONMENT
+\fIar_reader\fP uses no environment variables when running.
+
+.SH AUTHOR
+Julia Thomias (julia.thomias@gmail.com)
+.br
+Jean-Louis Guenego (jlguenego@gmail.com)
+.br 3
+Thanks to my older brother for his contributions!
+.br
+Yannis Thomias (thomias.yannis@gmail.com)
+
+.br
+Thanks to Microsoft for providing the specifications.
+.br
+Microsoft Portable Executable and Common Object File Format Specification
+v8.3
+
+.SH BUGS AND NOTES
+Please send bugs report to jlguenego@gmail.com
+
+.SH SEE ALSO
+.BR dumpbin (1),
+.BR objdump (1),
+.BR grep (1),
+
+
