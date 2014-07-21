@@ -96,5 +96,8 @@ cleanup:
 	if (client_socket) {
 		close(client_socket);
 	}
+#ifdef __MINGW32__
+	WSACleanup();
+#endif
 	return result;
 }
