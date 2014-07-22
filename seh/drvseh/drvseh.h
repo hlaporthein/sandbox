@@ -94,12 +94,14 @@ extern int g_esp;
 
 #define SET_STACK_FRAME(ebp, esp)                     \
 	__asm__ __volatile__ (                            \
-		"movl %0, (%%ebp)"                            \
-		: : "r" (ebp)                                 \
+		"movl %0, %%ebp;"                              \
+		"movl %1, %%esp;"                              \
+		: : "a" (ebp), "c" (esp)                      \
 	);                                                \
+
+#define LEAVE()                                       \
 	__asm__ __volatile__ (                            \
-		"movl %0, %%esp"                              \
-		: : "r" (esp)                                 \
+		"leave"                                       \
 	);                                                \
 
 typedef struct {
@@ -134,12 +136,15 @@ int drv_finish(drv_buf_t *buf);
 		switch (a = drv_init(&_drvbuf)) {  \
 			case 0:                        \
 				DEBUG("case 0");           \
+				DEBUG_CPU_STATE("case 0"); \
 				goto _label_try_start;     \
 			case 1:                        \
 				DEBUG("case 1");           \
+				DEBUG_CPU_STATE("case 1"); \
 				goto _label_except_start;  \
 			case 2:                        \
 				DEBUG("case 2");           \
+				DEBUG_CPU_STATE("case 2"); \
 				goto _label_except_end;    \
 		}                                  \
 		DEBUG("a=0x%08X (%d)", a, a);         \

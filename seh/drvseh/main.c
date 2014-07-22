@@ -9,21 +9,21 @@ void oops(int b) {
 }
 
 int main() {
-//	__drv_try {
-//		oops(1);
-//	} __drv_except {
-//		printf("Exception catched.\n");
-//	} __drv_end_except;
-//
-//	printf("\n\n\n");
-
 	__drv_try {
-		oops(0);
+		oops(1);
 	} __drv_except {
 		printf("Exception catched.\n");
 	} __drv_end_except;
 
-	printf("Finished.\n");
+//	printf("\n\n\n");
+//
+//	__drv_try {
+//		oops(0);
+//	} __drv_except {
+//		printf("Exception catched.\n");
+//	} __drv_end_except;
+//
+//	printf("Finished.\n");
 
 	return 0;
 }
