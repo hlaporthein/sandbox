@@ -1,4 +1,4 @@
-WINDDK = C:\\WinDDK\\7600.16385.1
+WINDDK = $(shell echo $${WINDDK:-C:\\WinDDK\\7600.16385.1})
 
 CL = $(WINDDK)\\bin\\x86\\x86\\cl.exe
 LINK = $(WINDDK)\\bin\\x86\\x86\\link.exe
@@ -36,15 +36,7 @@ all:
 	//IGNORE:4198,4010,4037,4039,4065,4070,4078,4087,4089,4221 \
 	.\\driver.obj
 
-#	/MERGE:_PAGE=PAGE
-#	/MERGE:_TEXT=.text
-#	/SECTION:INIT,d
-#	/OPT:REF
-#	/OPT:ICF
-#	/debugtype:cv,fixup,pdata
-#	/version:6.1
-#	/osversion:6.1
-#	/pdbcompress
+	objdump -d -M intel driver.sys > driver.s
 
 clean:
 	rm -rf *.obj *.sys winddk/obj* winddk/build*
