@@ -39,4 +39,4 @@ all:
 	objdump -d -M intel driver.sys > driver.s
 
 clean:
-	rm -rf *.obj *.sys winddk/obj* winddk/build*
+	rm -rf *.obj *.sys winddk/obj* winddk/build* *.s

@@ -44,4 +44,4 @@ install:
 	cp -f drvseh.h /usr/local/include
 
 clean:
-	rm -rf *.exe *.i *.s *.o *.a
+	rm -rf *.exe *.i *.s *.o *.a *.sys
