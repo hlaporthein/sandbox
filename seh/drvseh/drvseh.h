@@ -94,8 +94,8 @@ extern int g_esp;
 
 #define SET_STACK_FRAME(ebp, esp)                     \
 	__asm__ __volatile__ (                            \
-		"movl %0, %%ebp;"                              \
-		"movl %1, %%esp;"                              \
+		"movl %0, %%ebp;"                             \
+		"movl %1, %%esp;"                             \
 		: : "a" (ebp), "c" (esp)                      \
 	);                                                \
 
@@ -116,7 +116,7 @@ typedef struct {
 	drv_context_t ctx;
 } drv_buf_t;
 
-int drv_init(drv_buf_t *buf);
+int __stdcall drv_init(drv_buf_t *buf);
 int drv_end_except(drv_buf_t *buf);
 int drv_finish(drv_buf_t *buf);
 

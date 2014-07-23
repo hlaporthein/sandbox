@@ -41,38 +41,38 @@ void set_fs0(void *val) {
 	);
 }
 
-int drv_init(drv_buf_t *buf) {
-	DEBUG_START;
-	DEBUG_CPU_STATE("2");
-
-	int eip = 0;
-	GET_EIP(eip);
-	int ebp = 0;
-	int esp = 0;
-	GET_STACK_FRAME_BEFORE_CALL(ebp, esp);
-
-	DEBUG("eip= 0x%08X", eip);
-
-	buf->ex_reg.prev = (EXCEPTION_REGISTRATION *) get_fs0();
-	buf->ex_reg.handler = drvseh_handler;
-	set_fs0(buf);
-
-	buf->magic = DRVSEH_MAGIC;
-
-	// TODO: Memorize context
-	buf->ctx.eip = eip;
-	buf->ctx.esp = esp;
-	buf->ctx.ebp = ebp;
-
-	DEBUG_BUF(buf);
-
-	DEBUG_END;
-	//SET_STACK_FRAME(buf->ctx.ebp, buf->ctx.esp);
-	JMP_AND_RET(0, eip);
-
-	ERROR_UNREACHABLE;
-	return -1;
-}
+//int drv_init(drv_buf_t *buf) {
+//	DEBUG_START;
+//	DEBUG_CPU_STATE("2");
+//
+//	int eip = 0;
+//	GET_EIP(eip);
+//	int ebp = 0;
+//	int esp = 0;
+//	GET_STACK_FRAME_BEFORE_CALL(ebp, esp);
+//
+//	DEBUG("eip= 0x%08X", eip);
+//
+//	buf->ex_reg.prev = (EXCEPTION_REGISTRATION *) get_fs0();
+//	buf->ex_reg.handler = drvseh_handler;
+//	set_fs0(buf);
+//
+//	buf->magic = DRVSEH_MAGIC;
+//
+//	// TODO: Memorize context
+//	buf->ctx.eip = eip;
+//	buf->ctx.esp = esp;
+//	buf->ctx.ebp = ebp;
+//
+//	DEBUG_BUF(buf);
+//
+//	DEBUG_END;
+//	//SET_STACK_FRAME(buf->ctx.ebp, buf->ctx.esp);
+//	JMP_AND_RET(0, eip);
+//
+//	ERROR_UNREACHABLE;
+//	return -1;
+//}
 
 int drv_end_except(drv_buf_t *buf) {
 	return 0;
