@@ -9,6 +9,7 @@ all:
 	//Fodriver.obj                      \
 	//EHs-c-                            \
 	//Gz                                \
+	//GS                                \
 	//I$(WINDDK)\\inc\\ddk              \
 	//I$(WINDDK)\\inc\\crt              \
 	//I$(WINDDK)\\inc\\api              \
@@ -17,21 +18,33 @@ all:
 	//hotpatch                          \
 	.\\driver.c
 
-	$(LINK)                                       \
-	//out:.\\driver.sys                           \
-	//NODEFAULTLIB                                \
-	//driver                                      \
-	//base:0x10000                                \
-	//STACK:0x40000,0x1000                        \
-	//subsystem:native,6.01                       \
-	//entry:DriverEntry@8                         \
-	//INCREMENTAL:NO                              \
-	$(WINDDK)\\lib\\win7\\i386\\ntoskrnl.lib      \
-	//safeseh                                     \
-	//release                                     \
-	//WX                                          \
-	//functionpadmin:5                            \
+	$(LINK)                                                    \
+	//out:.\\driver.sys                                        \
+	//NODEFAULTLIB                                             \
+	//driver                                                   \
+	//base:0x10000                                             \
+	//STACK:0x40000,0x1000                                     \
+	//subsystem:native,6.01                                    \
+	//entry:DriverEntry@8                                      \
+	//INCREMENTAL:NO                                           \
+	$(WINDDK)\\lib\\win7\\i386\\ntoskrnl.lib                   \
+	$(WINDDK)\\lib\\win7\\i386\\BufferOverflowK.lib            \
+	//safeseh                                                  \
+	//release                                                  \
+	//WX                                                       \
+	//functionpadmin:5                                         \
+	//IGNORE:4198,4010,4037,4039,4065,4070,4078,4087,4089,4221 \
 	.\\driver.obj
+
+#	/MERGE:_PAGE=PAGE
+#	/MERGE:_TEXT=.text
+#	/SECTION:INIT,d
+#	/OPT:REF
+#	/OPT:ICF
+#	/debugtype:cv,fixup,pdata
+#	/version:6.1
+#	/osversion:6.1
+#	/pdbcompress
 
 clean:
 	rm -rf *.obj *.sys winddk/obj* winddk/build*

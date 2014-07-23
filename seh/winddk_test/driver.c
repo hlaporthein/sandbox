@@ -9,6 +9,20 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT driverObject, PUNICODE_STRING registryPath) 
 
 	DbgPrint("Hello!!\n");
 
+	__try {
+		DbgPrint("inside __try\n");
+	} __except(EXCEPTION_EXECUTE_HANDLER) {
+		DbgPrint("Error\n");
+	}
+
+	__try {
+		DbgPrint("About to probe\n");
+		ProbeForWrite((PVOID) 0, 10, 4);
+		DbgPrint("Everything ok\n");
+	} __except(EXCEPTION_EXECUTE_HANDLER) {
+		DbgPrint("Error\n");
+	}
+
 cleanup:
 	return status;
 }
