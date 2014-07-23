@@ -3,9 +3,14 @@
 #include "drvseh.h"
 
 void oops(int b) {
-	int a = 15;
-	int c = a / b;
-	printf("a/b=%d\n", c);
+	if (b >= 0) {
+		int a = 15;
+		int c = a / b;
+		printf("a/b=%d\n", c);
+		return;
+	}
+	int *p = NULL;
+	*p = 55;
 }
 
 int main() {
@@ -22,7 +27,7 @@ int main() {
 	} __drv_end_except;
 
 	__drv_try {
-		oops(0);
+		oops(-1);
 	} __drv_except {
 		printf("Exception catched.\n");
 	} __drv_end_except;
