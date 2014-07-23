@@ -60,50 +60,6 @@ extern int g_esp;
 
 #endif // _DEBUG
 
-
-#define GET_EIP(eip)            \
-	__asm__ __volatile__ (      \
-		"movl 4(%%ebp), %0"     \
-		: "=r" (eip)            \
-	)                           \
-
-#define JMP_AND_RET(ret, addr)    \
-	DEBUG("About to jump to 0x%08X with eax=%d", addr, ret); \
-	__asm__ __volatile__ (        \
-		"jmp *%%ecx"              \
-		: : "a" (ret), "c" (addr) \
-	)                             \
-
-
-#define SET_REGISTER(name, val) \
-	__asm__ __volatile__ (      \
-		"movl %0, %%" name      \
-		: : "c" (val)           \
-	)                           \
-
-#define GET_STACK_FRAME_BEFORE_CALL(ebp, esp)         \
-	__asm__ __volatile__ (                            \
-		"movl (%%ebp), %0"                            \
-		: "=r" (ebp)                                  \
-	);                                                \
-	__asm__ __volatile__ (                            \
-		"movl %%ebp, %0"                              \
-		: "=r" (esp)                                  \
-	);                                                \
-	esp += 8;                                         \
-
-#define SET_STACK_FRAME(ebp, esp)                     \
-	__asm__ __volatile__ (                            \
-		"movl %0, %%ebp;"                             \
-		"movl %1, %%esp;"                             \
-		: : "a" (ebp), "c" (esp)                      \
-	);                                                \
-
-#define LEAVE()                                       \
-	__asm__ __volatile__ (                            \
-		"leave"                                       \
-	);                                                \
-
 typedef struct {
 	unsigned int eip;
 	unsigned int ebp;

@@ -7,6 +7,11 @@ all:
 	gcc -S -Wall -Werror -o main.s main.c
 	gcc -Wall -Werror -o main main.c drvseh.a
 
+install:
+	mkdir -p /usr/local/lib
+	cp -f drvseh.a /usr/local/lib
+	mkdir -p /usr/local/include
+	cp -f drvseh.h /usr/local/include
 
 clean:
 	rm -rf *.exe *.i *.s
