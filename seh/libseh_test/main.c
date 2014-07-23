@@ -19,21 +19,18 @@ void oops(int b) {
 
 int main() {
 	print_fs0();
-	__libseh_try {
-		int y[1000];
-		y[0] = 0;
-		y[0]++;
-		int x = 0;
+	__seh_try {
 
-		int fs0 = print_fs0();
-		printf("&x=0x%08X\n", (unsigned int) &x);
-		//printf("&y=0x%08X\n", (unsigned int) &y);
-		printf("width=%d\n", ((int)&x) - fs0);
-		printf("width=%d\n", -2);
-		oops(x);
-	} __libseh_except(1) {
+		__seh_try {
+			oops(0);
+		} __seh_finally {
+			printf("Finally.\n");
+		} __seh_end_finally
+
+	} __seh_except(1) {
 		printf("Exception catched.\n");
-	} __libseh_end_except;
+	} __seh_end_except
+
 	print_fs0();
 	return 0;
 }

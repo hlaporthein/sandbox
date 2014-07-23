@@ -72,6 +72,8 @@ typedef struct {
 	drv_context_t ctx;
 } drv_buf_t;
 
+extern drv_buf_t *g_buf;
+
 int __stdcall drv_init(drv_buf_t *buf);
 void __stdcall drv_restore_ctx(drv_buf_t *buf, int retval);
 int drv_end_except(drv_buf_t *buf);
@@ -88,6 +90,7 @@ int drv_finish(drv_buf_t *buf);
 			goto _label_except_end;        \
 		}                                  \
 		drv_buf_t _drvbuf;                 \
+		g_buf = &_drvbuf;                  \
 		DEBUG_CPU_STATE("1");              \
 		int a = 0;                         \
 		switch (a = drv_init(&_drvbuf)) {  \

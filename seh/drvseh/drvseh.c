@@ -4,13 +4,15 @@ int g_eax;
 int g_ebp;
 int g_esp;
 
+drv_buf_t *g_buf = NULL;
+
 EXCEPTION_DISPOSITION drvseh_handler(EXCEPTION_RECORD *ExceptionRecord,
 										void *EstablisherFrame,
 										CONTEXT *ContextRecord,
 										void *DispatcherContext) {
 	DEBUG_START;
 
-	drv_buf_t *buf = (drv_buf_t *) EstablisherFrame;
+	drv_buf_t *buf = g_buf;
 
 	if (buf->magic != DRVSEH_MAGIC) {
 		ERROR("Not reconize magic");

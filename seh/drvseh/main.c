@@ -21,7 +21,9 @@ int main() {
 	} __drv_end_except;
 
 	__drv_try {
+		DEBUG("Start try");
 		oops(0);
+		DEBUG("End try");
 	} __drv_except {
 		printf("Exception catched.\n");
 	} __drv_end_except;
