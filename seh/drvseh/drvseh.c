@@ -16,10 +16,8 @@ EXCEPTION_DISPOSITION drvseh_handler(EXCEPTION_RECORD *ExceptionRecord,
 		ERROR("Not reconize magic");
 	}
 
-	SET_STACK_FRAME(buf->ctx.ebp, buf->ctx.esp);
-
 	DEBUG_END;
-	JMP_AND_RET(1, buf->ctx.eip);
+	drv_restore_ctx(buf, 1);
 
 	ERROR_UNREACHABLE;
 	return ExceptionContinueSearch;

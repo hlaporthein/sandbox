@@ -3,6 +3,8 @@
 
 #define DRVSEH_MAGIC $0xDEADBEEF
 
+// When using the macro, be carefull to not insert space before args.
+// STDCALL_SYM(drv_init, 4); will make a syntax error.
 .global STDCALL_SYM(drv_init,4);
 
 STDCALL_SYM(drv_init,4):
@@ -23,3 +25,15 @@ STDCALL_SYM(drv_init,4):
 
 	xorl %eax, %eax; 						// return 0
 	jmp *%edx; 								// return to the eip
+
+
+.global STDCALL_SYM(drv_restore_ctx,8);
+STDCALL_SYM(drv_restore_ctx,8):
+	addl $4, %esp;			// Return address... we don't need it.
+	popl %ebx;				// Context buffer
+	popl %eax;				// Return value
+	movl 12(%ebx), %edx;	// eip
+	movl 16(%ebx), %ebp;	// ebp
+	movl 20(%ebx), %esp;	// esp
+	jmp *%edx;
+

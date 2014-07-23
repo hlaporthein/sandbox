@@ -117,6 +117,7 @@ typedef struct {
 } drv_buf_t;
 
 int __stdcall drv_init(drv_buf_t *buf);
+void __stdcall drv_restore_ctx(drv_buf_t *buf, int retval);
 int drv_end_except(drv_buf_t *buf);
 int drv_finish(drv_buf_t *buf);
 
@@ -142,12 +143,8 @@ int drv_finish(drv_buf_t *buf);
 				DEBUG("case 1");           \
 				DEBUG_CPU_STATE("case 1"); \
 				goto _label_except_start;  \
-			case 2:                        \
-				DEBUG("case 2");           \
-				DEBUG_CPU_STATE("case 2"); \
-				goto _label_except_end;    \
 		}                                  \
-		DEBUG("a=0x%08X (%d)", a, a);         \
+		DEBUG("a=0x%08X (%d)", a, a);      \
 _label_try_start:                          \
 
 
