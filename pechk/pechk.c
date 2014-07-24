@@ -69,16 +69,40 @@ cleanup:
 	return result;
 }
 
+int update_pe_checksum(const char *filename) {
+	int result = 0;
 
+	unsigned int expected_checksum = 0;
+	TRY(compute_pe_checksum("pechk2.dll", &expected_checksum));
 
-int compute_pe_checksum(const char *filename, int *chksum) {
+	FILE *fd = NULL;
+	fd = fopen(filename, "rb+");
+	if (!fd) {
+		printf("Cannot open %s: (%d) %s\n", filename, errno, strerror(errno));
+		result = 1;
+		goto cleanup;
+	}
+
+	IMAGE_DOS_HEADER dosh;
+	FREAD(&dosh, sizeof(IMAGE_DOS_HEADER), 1, fd);
+	FSEEK(fd, dosh.e_lfanew + CHECKSUM_OFFSET);
+	FWRITE(&expected_checksum, sizeof(unsigned int), 1, fd);
+
+cleanup:
+	if (fd) {
+		fclose(fd);
+	}
+	return result;
+}
+
+int compute_pe_checksum(const char *filename, unsigned int *chksum) {
 	int result = 0;
 
 	unsigned int current_checksum = 0;
 	TRY(get_current_pe_checksum(filename, &current_checksum));
 
 	FILE *fd = NULL;
-	fd = fopen(filename, "rb+");
+	fd = fopen(filename, "rb");
 	if (!fd) {
 		printf("Cannot open %s: (%d) %s\n", filename, errno, strerror(errno));
 		result = 1;
@@ -101,17 +125,10 @@ int compute_pe_checksum(const char *filename, int *chksum) {
 	}
 
 	// Adjust the checksum
-	int yy = ((chk - 1 < current_checksum) ? (chk - 1) : chk) - current_checksum;
+	unsigned int yy = ((chk - 1 < current_checksum) ? (chk - 1) : chk) - current_checksum;
 	yy = (yy & 0xFFFF) + (yy >> 16);
 	yy = (yy & 0xFFFF) + (yy >> 16);
 	*chksum = yy + file_size;
-
-//	FSEEK(fd, 0);
-//
-//	IMAGE_DOS_HEADER dosh;
-//	FREAD(&dosh, sizeof(IMAGE_DOS_HEADER), 1, fd);
-//	FSEEK(fd, dosh.e_lfanew + CHECKSUM_OFFSET);
-//	FWRITE(&chk, sizeof(int), 1, fd);
 
 cleanup:
 	if (fd) {
