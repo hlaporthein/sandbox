@@ -20,7 +20,7 @@ void set_fs0(int fs0) {
 
 #define __try2(pHandler) \
 	{ \
-		int buf[2]; \
+		int __volatile__ buf[18]; \
 		buf[0] = get_fs0(); \
 		buf[1] = (int) pHandler; \
 		set_fs0((int) buf);

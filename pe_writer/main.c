@@ -4,6 +4,7 @@
 
 #include <ctype.h>
 #include <unistd.h>
+#include <pechk.h>
 
 #include "pe_writer.h"
 
@@ -60,6 +61,8 @@ void manage_options(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
+	int result = 0;
+
 	progname = argv[0];
 
 	manage_options(argc, argv);
@@ -67,6 +70,10 @@ int main(int argc, char *argv[]) {
 	printf("pe_file: %s\n", pe_file);
 	printf("cmd_file: %s\n", cmd_file);
 
-	return pe_writer();
+	TRY(pe_writer());
+	TRY(update_pe_checksum(pe_file));
+
+cleanup:
+	return result;
 }
 

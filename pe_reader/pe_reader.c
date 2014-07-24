@@ -259,7 +259,7 @@ void pe_print_section_header(int index) {
 	printf("  PointerToLinenumbers: 0x%08x\n", p->PointerToLinenumbers);
 	printf("  NumberOfRelocations: %d\n", p->NumberOfRelocations);
 	printf("  NumberOfLinenumbers: %d\n", p->NumberOfLinenumbers);
-	printf("  Characteristics: %s\n",
+	printf("  Characteristics: (0x%08X) %s %s\n", p->Characteristics, section_list[index],
 			list_flags(s_buffer, BUFFER_SIZE, SECTION_SECTION_CHARACTERISTICS, p->Characteristics));
 	printf("\n");
 

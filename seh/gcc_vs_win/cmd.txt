@@ -1,0 +1,1 @@
+update_section_characteristics .text 0x68000020

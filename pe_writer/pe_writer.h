@@ -53,9 +53,13 @@ int pe_writer();
 int process_cmd(char *cmd);
 int parse_cmd(char *cmd, int argc, ...);
 void chomp(char* s);
-int update_section_characteristics(char *name, int val);
+int update_section_characteristics(char *name, int val, int mode);
 int get_section_table_offset(FILE *fd);
 int get_pe_offset(FILE *fd);
 
+
+#define MODE_SET_FLAGS 0
+#define MODE_ADD_FLAGS 1
+#define MODE_REMOVE_FLAGS 2
 
 #endif // PE_READER_H

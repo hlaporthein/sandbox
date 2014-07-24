@@ -48,7 +48,7 @@ cleanup:
 int process_cmd(char *cmd) {
 	int result = 0;
 
-	if (STARTS_WITH(cmd, "update_section_characteristics")) {
+	if (STARTS_WITH(cmd, "update_section_characteristics ")) {
 		char *name = NULL;
 		char *valstr = NULL;
 		TRY(parse_cmd(cmd, 2, &name, &valstr));
@@ -60,14 +60,45 @@ int process_cmd(char *cmd) {
 		sscanf(valstr, "%x", &val);
 		DEBUG_VAR_HEX(val);
 
-		update_section_characteristics(name, val);
+		update_section_characteristics(name, val, MODE_SET_FLAGS);
 	}
+
+	if (STARTS_WITH(cmd, "update_section_characteristics_add_flag ")) {
+		char *name = NULL;
+		char *valstr = NULL;
+		TRY(parse_cmd(cmd, 2, &name, &valstr));
+
+		DEBUG_VAR_STR(name);
+		DEBUG_VAR_STR(valstr);
+
+		int val = 0;
+		sscanf(valstr, "%x", &val);
+		DEBUG_VAR_HEX(val);
+
+		update_section_characteristics(name, val, MODE_ADD_FLAGS);
+	}
+
+	if (STARTS_WITH(cmd, "update_section_characteristics_remove_flag ")) {
+		char *name = NULL;
+		char *valstr = NULL;
+		TRY(parse_cmd(cmd, 2, &name, &valstr));
+
+		DEBUG_VAR_STR(name);
+		DEBUG_VAR_STR(valstr);
+
+		int val = 0;
+		sscanf(valstr, "%x", &val);
+		DEBUG_VAR_HEX(val);
+
+		update_section_characteristics(name, val, MODE_REMOVE_FLAGS);
+	}
+
 
 cleanup:
 	return result;
 }
 
-int update_section_characteristics(char *name, int val) {
+int update_section_characteristics(char *name, int val, int mode) {
 	int result = 0;
 	FILE *fd = NULL;
 
@@ -105,7 +136,17 @@ int update_section_characteristics(char *name, int val) {
 
 	FSEEK(fd, section_table_offset + (index * sizeof(IMAGE_SECTION_HEADER)));
 
-	section_header.Characteristics = val;
+	switch (mode) {
+		case MODE_ADD_FLAGS:
+			section_header.Characteristics |= val;
+			break;
+		case MODE_REMOVE_FLAGS:
+			section_header.Characteristics &= (~val);
+			break;
+		case MODE_SET_FLAGS:
+			section_header.Characteristics = val;
+			break;
+	}
 	FWRITE(&section_header, sizeof(IMAGE_SECTION_HEADER), 1, fd);
 	DEBUG_VAR_HEX(section_table_offset);
 

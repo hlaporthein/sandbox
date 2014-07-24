@@ -1,0 +1,4 @@
+update_section_characteristics_add_flag .text 0x08000000
+update_section_characteristics_add_flag .rdata 0x08000000
+update_section_characteristics_add_flag .eh_fram 0x08000000
+update_section_characteristics_add_flag .bss 0x08000000

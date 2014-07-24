@@ -5,7 +5,7 @@ OBJECTS=$(SOURCES:%.c=%.o)
 all: pe_writer.exe
 
 pe_writer.exe: $(OBJECTS)
-	gcc -o $@ $(OBJECTS) -Wl,--strip-all -lcfgmap
+	gcc -o $@ $(OBJECTS) -Wl,--strip-all -lcfgmap -lpechk
 
 %.o: %.c
 	gcc $(CFLAGS) -c $< -o $@

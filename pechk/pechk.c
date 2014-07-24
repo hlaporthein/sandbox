@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
+#include <windows.h>
 
 #include "pechk.h"
 
@@ -73,7 +74,7 @@ int update_pe_checksum(const char *filename) {
 	int result = 0;
 
 	unsigned int expected_checksum = 0;
-	TRY(compute_pe_checksum("pechk2.dll", &expected_checksum));
+	TRY(compute_pe_checksum(filename, &expected_checksum));
 
 	FILE *fd = NULL;
 	fd = fopen(filename, "rb+");

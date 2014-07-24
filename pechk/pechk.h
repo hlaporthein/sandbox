@@ -1,8 +1,6 @@
 #ifndef _PECHK_H
 #define _PECHK_H
 
-#include <windows.h>
-
 int get_current_pe_checksum(const char *filename, unsigned int *checksum);
 int compute_pe_checksum(const char *filename, unsigned int *chksum);
 int update_pe_checksum(const char *filename);
