@@ -8,3 +8,4 @@ int compute_pe_checksum(const char *filename, int *chksum);
 unsigned short int checksum(short int current, unsigned short int *buffer, int dw_nbr);
 
 #endif // _PECHK_H
+
