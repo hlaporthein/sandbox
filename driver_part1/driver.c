@@ -277,6 +277,88 @@ cleanup:
 	return status;
 }
 
+
+NTSTATUS STDCALL my_write_neither(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
+	NTSTATUS NtStatus = STATUS_SUCCESS;
+
+	int dwDataRead = 0;
+
+	DbgPrint("my_write_neither called \r\n");
+
+	PIO_STACK_LOCATION pIoStackIrp = IoGetCurrentIrpStackLocation(Irp);
+	if (!pIoStackIrp) {
+		NtStatus = STATUS_UNSUCCESSFUL;
+		goto cleanup;
+	}
+
+	__gtry {
+		ProbeForRead(Irp->UserBuffer,
+					pIoStackIrp->Parameters.Write.Length,
+					1);
+	} __gexcept {
+		NtStatus = GetExceptionCode();
+	} __gend_except
+
+	PCHAR pWriteDataBuffer = Irp->UserBuffer;
+	if (!pWriteDataBuffer) {
+		NtStatus = STATUS_UNSUCCESSFUL;
+		goto cleanup;
+	}
+
+	if (isStrNullTerminated(pWriteDataBuffer, pIoStackIrp->Parameters.Write.Length)) {
+		DbgPrint("nbnd: content=%s\n", pWriteDataBuffer);
+	} else {
+		DbgPrint("nbnd: content=%.*s\n", pIoStackIrp->Parameters.Write.Length, pWriteDataBuffer);
+	}
+	dwDataRead = pIoStackIrp->Parameters.Write.Length;
+
+cleanup:
+	Irp->IoStatus.Status = NtStatus;
+	Irp->IoStatus.Information = dwDataRead;
+	IoCompleteRequest(Irp, IO_NO_INCREMENT);
+	return NtStatus;
+}
+
+NTSTATUS STDCALL my_read_neither(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
+	NTSTATUS NtStatus = STATUS_SUCCESS;
+
+	int dwDataWritten = 0;
+
+	DbgPrint("my_read_neither called \r\n");
+
+	PIO_STACK_LOCATION pIoStackIrp = IoGetCurrentIrpStackLocation(Irp);
+	if (!pIoStackIrp) {
+		NtStatus = STATUS_UNSUCCESSFUL;
+		goto cleanup;
+	}
+
+	__gtry {
+		ProbeForWrite(Irp->UserBuffer,
+					pIoStackIrp->Parameters.Write.Length,
+					1);
+	} __gexcept {
+		NtStatus = GetExceptionCode();
+	} __gend_except
+
+	PCHAR pReadDataBuffer = Irp->UserBuffer;
+	if (!pReadDataBuffer) {
+		NtStatus = STATUS_UNSUCCESSFUL;
+		goto cleanup;
+	}
+
+	PCHAR pReturnData = "Hello from NeitherNeither!!!";
+	int dwDataSize = strlen(pReturnData) + 1;
+	RtlCopyMemory(pReadDataBuffer, pReturnData, dwDataSize);
+
+	dwDataWritten = dwDataSize;
+
+cleanup:
+	Irp->IoStatus.Status = NtStatus;
+	Irp->IoStatus.Information = dwDataWritten;
+	IoCompleteRequest(Irp, IO_NO_INCREMENT);
+	return NtStatus;
+}
+
 BOOLEAN isStrNullTerminated(PCHAR str, UINT length) {
 	BOOLEAN result = FALSE;
 

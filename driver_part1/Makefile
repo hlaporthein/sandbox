@@ -1,12 +1,12 @@
 all:
-	gcc -c -I/mingw/include/ddk -std=gnu99 -o driver.o driver.c -D__USE_DIRECT__
+	gcc -c -I/mingw/include/ddk -std=gnu99 -o driver.o driver.c #-D__USE_DIRECT__
 	gcc -Wl,--base-file,driver.base \
 		-Wl,--subsystem,native \
 		-Wl,--entry,_DriverEntry@8 \
 		-nostartfiles -nostdlib \
 		-o junk.tmp \
 		driver.o \
-		-lntoskrnl -lhal
+		-lntoskrnl -lhal -lgseh
 	rm junk.tmp
 	dlltool --dllname my_driver.sys \
 		--base-file driver.base --output-exp driver.exp
@@ -22,7 +22,7 @@ all:
 		-nostdlib -nostartfiles \
 		-o my_driver.sys \
 		driver.o \
-		-lntoskrnl -lhal
+		-lntoskrnl -lhal -lgseh
 	gcc -o tester tester.c
 
 clean:
