@@ -32,6 +32,9 @@ int main() {
 		oops(-1);
 	} __gexcept {
 		printf("Exception catched.\n");
+		printf("Exception catched: flags=0x%08X\n", (unsigned int) GetExceptionInformation()->ExceptionRecord->ExceptionFlags);
+		printf("Exception catched: ebp=0x%08X\n", (unsigned int) GetExceptionInformation()->ContextRecord->Ebp);
+		printf("Exception catched: esp=0x%08X\n", (unsigned int) GetExceptionInformation()->ContextRecord->Esp);
 	} __gend_except;
 
 	printf("Finished.\n");

@@ -27,8 +27,15 @@ NTSTATUS STDCALL DriverEntry(PDRIVER_OBJECT driverObject, PUNICODE_STRING regist
 		DbgPrint("Everything ok\n");
 	} __gexcept {
 		DbgPrint("Exception catched: code=0x%08X\n", GetExceptionCode());
+		DbgPrint("Exception catched: flags=0x%08X\n", GetExceptionInformation()->ExceptionRecord->ExceptionFlags);
+		DbgPrint("Exception catched: ebp=0x%08X\n", GetExceptionInformation()->ContextRecord->Ebp);
+		DbgPrint("Exception catched: esp=0x%08X\n", GetExceptionInformation()->ContextRecord->Esp);
 	} __gend_except;
 	DbgPrint("RegistryPath=%wZ\n", registryPath);
+
+	int x = 9;
+	int y = 0;
+	RtlCopyMemory(&y, &x, sizeof(int));
 
 	__gtry {
 		DbgPrint("About to probe\n");

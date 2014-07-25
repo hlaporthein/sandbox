@@ -1,14 +1,14 @@
 all: libgseh.a main.exe my_driver.sys
 
-my_driver.sys: libgsehdd.a driver.c
-	gcc -c -I/mingw/include/ddk -std=gnu99 -o driver.o driver.c
+my_driver.sys: libgsehdrvd.a libgsehdrv.a driver.c
+	gcc -c -I/mingw/include/ddk -std=gnu99 -D_DRIVER -o driver.o driver.c
 	gcc -Wl,--base-file,driver.base \
 		-Wl,--subsystem,native \
 		-Wl,--entry,_DriverEntry@8 \
 		-nostartfiles -nostdlib \
 		-o junk.tmp \
 		driver.o \
-		-lntoskrnl -lhal libgsehdd.a
+		libgsehdrvd.a -lntoskrnl -lhal
 	rm junk.tmp
 	dlltool --dllname my_driver.sys \
 		--base-file driver.base --output-exp driver.exp
@@ -24,9 +24,9 @@ my_driver.sys: libgsehdd.a driver.c
 		-nostdlib -nostartfiles \
 		-o my_driver.sys \
 		driver.o \
-		-lntoskrnl -lhal libgsehdd.a
+		libgsehdrvd.a -lntoskrnl -lhal
 
-main.exe: libgsehd.a main.c gseh.h
+main.exe: libgsehd.a libgseh.a main.c gseh.h
 	gcc -E -Wall -Werror -o main.i main.c
 	gcc -S -Wall -Werror -o main.s main.c
 	gcc -D_DEBUG -Wall -Werror -o main main.c libgsehd.a
@@ -43,11 +43,17 @@ libgsehd.a: gseh.h gseh.c gseh_func.S
 	gcc -o gseh_func.o -c gseh_func.S
 	ar cru libgsehd.a gseh.o gseh_func.o
 
-libgsehdd.a: gseh.h gseh.c gseh_func.S
+libgsehdrv.a: gseh.h gseh.c gseh_func.S
+	gcc -fno-asynchronous-unwind-tables -S -Wall -Werror -o gseh.s gseh.c
+	gcc -I/mingw/include/ddk -D_DRIVER -c -Wall -Werror -o gseh.o gseh.c
+	gcc -o gseh_func.o -c gseh_func.S
+	ar cru libgsehdrv.a gseh.o gseh_func.o
+
+libgsehdrvd.a: gseh.h gseh.c gseh_func.S
 	gcc -fno-asynchronous-unwind-tables -S -Wall -Werror -o gseh.s gseh.c
 	gcc -I/mingw/include/ddk -D_DRIVER -D_DEBUG -c -Wall -Werror -o gseh.o gseh.c
 	gcc -o gseh_func.o -c gseh_func.S
-	ar cru libgsehdd.a gseh.o gseh_func.o
+	ar cru libgsehdrvd.a gseh.o gseh_func.o
 
 install: libgseh.a gseh.h
 	mkdir -p /usr/local/lib

@@ -5,11 +5,18 @@ int g_ebp;
 int g_esp;
 
 int g_exception_code = 0;
+EXCEPTION_POINTERS g_exception_info;
+EXCEPTION_RECORD g_ExceptionRecord;
+CONTEXT g_ContextRecord;
 
 gseh_buf_t *g_buf = NULL;
 
-int __cdecl _exception_code() {
+int _exception_code() {
 	return g_exception_code;
+}
+
+EXCEPTION_POINTERS *_exception_info() {
+	return &g_exception_info;
 }
 
 EXCEPTION_DISPOSITION gseh_handler(EXCEPTION_RECORD *ExceptionRecord,
@@ -21,6 +28,11 @@ EXCEPTION_DISPOSITION gseh_handler(EXCEPTION_RECORD *ExceptionRecord,
 	gseh_buf_t *buf = g_buf;
 
 	g_exception_code = ExceptionRecord->ExceptionCode;
+	g_exception_info.ExceptionRecord = &g_ExceptionRecord;
+	g_exception_info.ContextRecord = &g_ContextRecord;
+
+	memcpy(&g_ExceptionRecord, ExceptionRecord, sizeof(EXCEPTION_RECORD));
+	memcpy(&g_ContextRecord, ContextRecord, sizeof(CONTEXT));
 
 	if (buf->magic != GSEH_MAGIC) {
 		ERROR("Not reconize magic");
