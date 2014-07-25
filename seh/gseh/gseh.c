@@ -4,7 +4,13 @@ int g_eax;
 int g_ebp;
 int g_esp;
 
+int g_exception_code = 0;
+
 gseh_buf_t *g_buf = NULL;
+
+int __cdecl _exception_code() {
+	return g_exception_code;
+}
 
 EXCEPTION_DISPOSITION gseh_handler(EXCEPTION_RECORD *ExceptionRecord,
 										void *EstablisherFrame,
@@ -13,6 +19,8 @@ EXCEPTION_DISPOSITION gseh_handler(EXCEPTION_RECORD *ExceptionRecord,
 	DEBUG_START;
 
 	gseh_buf_t *buf = g_buf;
+
+	g_exception_code = ExceptionRecord->ExceptionCode;
 
 	if (buf->magic != GSEH_MAGIC) {
 		ERROR("Not reconize magic");

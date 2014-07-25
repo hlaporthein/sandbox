@@ -88,6 +88,9 @@ extern gseh_buf_t *g_buf;
 int __stdcall gseh_init(gseh_buf_t *buf);
 void __stdcall gseh_restore_ctx(gseh_buf_t *buf, int retval);
 int gseh_finish(gseh_buf_t *buf);
+int __cdecl _exception_code();
+
+#define GetExceptionCode _exception_code
 
 #define __gtry                                 \
 	{                                          \

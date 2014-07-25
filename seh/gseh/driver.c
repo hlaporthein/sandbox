@@ -26,7 +26,7 @@ NTSTATUS STDCALL DriverEntry(PDRIVER_OBJECT driverObject, PUNICODE_STRING regist
 		ProbeForWrite((PVOID) 0, 10, 4);
 		DbgPrint("Everything ok\n");
 	} __gexcept {
-		DbgPrint("Exception catched.\n");
+		DbgPrint("Exception catched: code=0x%08X\n", GetExceptionCode());
 	} __gend_except;
 	DbgPrint("RegistryPath=%wZ\n", registryPath);
 

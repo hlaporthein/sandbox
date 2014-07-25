@@ -1,6 +1,6 @@
-all: gseh.a main.exe my_driver.sys
+all: libgseh.a main.exe my_driver.sys
 
-my_driver.sys: gsehdd.a driver.c cmd.txt
+my_driver.sys: libgsehdd.a driver.c
 	gcc -c -I/mingw/include/ddk -std=gnu99 -o driver.o driver.c
 	gcc -Wl,--base-file,driver.base \
 		-Wl,--subsystem,native \
@@ -8,7 +8,7 @@ my_driver.sys: gsehdd.a driver.c cmd.txt
 		-nostartfiles -nostdlib \
 		-o junk.tmp \
 		driver.o \
-		-lntoskrnl -lhal gsehdd.a
+		-lntoskrnl -lhal libgsehdd.a
 	rm junk.tmp
 	dlltool --dllname my_driver.sys \
 		--base-file driver.base --output-exp driver.exp
@@ -24,34 +24,34 @@ my_driver.sys: gsehdd.a driver.c cmd.txt
 		-nostdlib -nostartfiles \
 		-o my_driver.sys \
 		driver.o \
-		-lntoskrnl -lhal gsehdd.a
+		-lntoskrnl -lhal libgsehdd.a
 
-main.exe: gsehd.a main.c gseh.h
+main.exe: libgsehd.a main.c gseh.h
 	gcc -E -Wall -Werror -o main.i main.c
 	gcc -S -Wall -Werror -o main.s main.c
-	gcc -D_DEBUG -Wall -Werror -o main main.c gsehd.a
+	gcc -D_DEBUG -Wall -Werror -o main main.c libgsehd.a
 
-gseh.a: gseh.h gseh.c gseh_func.S
+libgseh.a: gseh.h gseh.c gseh_func.S
 	gcc -fno-asynchronous-unwind-tables -S -Wall -Werror -o gseh.s gseh.c
 	gcc -c -Wall -Werror -o gseh.o gseh.c
 	gcc -o gseh_func.o -c gseh_func.S
-	ar cru gseh.a gseh.o gseh_func.o
+	ar cru libgseh.a gseh.o gseh_func.o
 
-gsehd.a: gseh.h gseh.c gseh_func.S
+libgsehd.a: gseh.h gseh.c gseh_func.S
 	gcc -fno-asynchronous-unwind-tables -S -Wall -Werror -o gseh.s gseh.c
 	gcc -D_DEBUG -c -Wall -Werror -o gseh.o gseh.c
 	gcc -o gseh_func.o -c gseh_func.S
-	ar cru gsehd.a gseh.o gseh_func.o
+	ar cru libgsehd.a gseh.o gseh_func.o
 
-gsehdd.a: gseh.h gseh.c gseh_func.S
+libgsehdd.a: gseh.h gseh.c gseh_func.S
 	gcc -fno-asynchronous-unwind-tables -S -Wall -Werror -o gseh.s gseh.c
 	gcc -I/mingw/include/ddk -D_DRIVER -D_DEBUG -c -Wall -Werror -o gseh.o gseh.c
 	gcc -o gseh_func.o -c gseh_func.S
-	ar cru gsehdd.a gseh.o gseh_func.o
+	ar cru libgsehdd.a gseh.o gseh_func.o
 
-install:
+install: libgseh.a gseh.h
 	mkdir -p /usr/local/lib
-	cp -f gseh.a /usr/local/lib
+	cp -f libgseh.a /usr/local/lib
 	mkdir -p /usr/local/include
 	cp -f gseh.h /usr/local/include
 
