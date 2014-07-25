@@ -7,10 +7,8 @@ all:
 	#DRIVER1
 	$(CL)                               \
 	//c                                 \
-	//Fod1.obj                      \
-	//EHs-c-                            \
+	//Fod1.obj                          \
 	//Gz                                \
-	//GS                                \
 	//I$(WINDDK)\\inc\\ddk              \
 	//I$(WINDDK)\\inc\\crt              \
 	//I$(WINDDK)\\inc\\api              \
@@ -18,6 +16,7 @@ all:
 	//DSTD_CALL                         \
 	//hotpatch                          \
 	.\\d1.c
+	#//GS //EHs-c-
 
 	$(LINK)                                                    \
 	//out:.\\d1.sys                                        \

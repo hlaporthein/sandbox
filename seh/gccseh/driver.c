@@ -1,4 +1,4 @@
-#include "drvseh.h"
+#include "gseh.h"
 #include "driver.h"
 
 PDRIVER_OBJECT p = NULL;
@@ -11,23 +11,23 @@ NTSTATUS STDCALL DriverEntry(PDRIVER_OBJECT driverObject, PUNICODE_STRING regist
 
 	DbgPrint("Hello!!\n");
 	DbgPrint("str=%s\n", str);
-	__drv_try {
+	__gseh_try {
 		DbgPrint("Success\n");
-	} __drv_except {
+	} __gseh_except {
 		DbgPrint("Exception catched.\n");
-	} __drv_end_except;
+	} __gseh_end_except;
 
 	p = driverObject;
 
 	p->DriverUnload = my_unload;
 
-//	__drv_try {
+//	__gseh_try {
 //		DbgPrint("About to probe\n");
 //		ProbeForWrite((PVOID) 0, 10, 4);
 //		DbgPrint("Everything ok\n");
-//	} __drv_except {
+//	} __gseh_except {
 //		DbgPrint("Exception catched.\n");
-//	} __drv_end_except;
+//	} __gseh_end_except;
 //	DbgPrint("RegistryPath=%wZ\n", registryPath);
 
 cleanup:

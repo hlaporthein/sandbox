@@ -38,10 +38,17 @@
 		goto cleanup; \
 	}
 
+#ifdef _DEBUG
 #define DEBUG_VAR_STR(var) printf(#var"=%s\n", var)
 #define DEBUG_VAR_INT(var) printf(#var"=%d\n", var)
 #define DEBUG_VAR_HEX(var) printf(#var"=0x%08X\n", var)
 #define DEBUG_VAR_WORD(var) printf(#var"=0x%04X\n", var)
+#else
+#define DEBUG_VAR_STR(var)
+#define DEBUG_VAR_INT(var)
+#define DEBUG_VAR_HEX(var)
+#define DEBUG_VAR_WORD(var)
+#endif // _DEBUG
 
 #define STARTS_WITH(str, prefix) (strstr(str, prefix) == str)
 #define EQUALS(s1, s2) (strcmp(s1, s2) == 0)

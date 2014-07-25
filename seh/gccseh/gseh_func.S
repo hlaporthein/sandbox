@@ -4,17 +4,17 @@
 #define DRVSEH_MAGIC $0xDEADBEEF
 
 // When using the macro, be carefull to not insert space before args.
-// STDCALL_SYM(drv_init, 4); will make a syntax error.
-.global STDCALL_SYM(drv_init,4);
+// STDCALL_SYM(gseh_init, 4); will make a syntax error.
+.global STDCALL_SYM(gseh_init,4);
 
-STDCALL_SYM(drv_init,4):
+STDCALL_SYM(gseh_init,4):
 	popl %edx;								// eip
 	popl %eax;								// arg#1=&buf
 
 	movl %fs:0, %ecx;						// ecx = fs:0
 	movl %ecx, 0(%eax);						// buf->ex_reg.prev = ecx (= fs:0)
-	leal CDECL_SYM(drvseh_handler), %ecx;	// ecx = &drvseh_handler
-	movl %ecx, 4(%eax);						// buf->ex_reg.handler = ecx (= &drvseh_handler)
+	leal CDECL_SYM(gseh_handler), %ecx;		// ecx = &gseh_handler
+	movl %ecx, 4(%eax);						// buf->ex_reg.handler = ecx (= &gseh_handler)
 
 	movl %eax, %fs:0;						// fs:0 = &buf (replace previous exception handler by ours)
 
@@ -27,8 +27,8 @@ STDCALL_SYM(drv_init,4):
 	jmp *%edx; 								// return to the eip
 
 
-.global STDCALL_SYM(drv_restore_ctx,8);
-STDCALL_SYM(drv_restore_ctx,8):
+.global STDCALL_SYM(gseh_restore_ctx,8);
+STDCALL_SYM(gseh_restore_ctx,8):
 	addl $4, %esp;			// Return address... we don't need it.
 	popl %ebx;				// Context buffer
 	popl %eax;				// Return value

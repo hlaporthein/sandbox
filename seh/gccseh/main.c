@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "drvseh.h"
+#include "gseh.h"
 
 void oops(int b) {
 	if (b >= 0) {
@@ -14,25 +14,25 @@ void oops(int b) {
 }
 
 int main() {
-	__drv_try {
+	__gseh_try {
 		oops(1);
-	} __drv_except {
+	} __gseh_except {
 		printf("Exception catched.\n");
-	} __drv_end_except;
+	} __gseh_end_except;
 
-	__drv_try {
+	__gseh_try {
 		DEBUG("Start try");
 		oops(0);
 		DEBUG("End try");
-	} __drv_except {
+	} __gseh_except {
 		printf("Exception catched.\n");
-	} __drv_end_except;
+	} __gseh_end_except;
 
-	__drv_try {
+	__gseh_try {
 		oops(-1);
-	} __drv_except {
+	} __gseh_except {
 		printf("Exception catched.\n");
-	} __drv_end_except;
+	} __gseh_end_except;
 
 	printf("Finished.\n");
 

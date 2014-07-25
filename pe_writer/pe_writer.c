@@ -32,7 +32,6 @@ int pe_writer() {
 		}
 
 		chomp(line);
-		printf("line=%s\n", line);
 
 		TRY(process_cmd(line));
 	}

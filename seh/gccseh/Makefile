@@ -1,6 +1,6 @@
-all: drvseh.a main.exe my_driver.sys
+all: gseh.a main.exe my_driver.sys
 
-my_driver.sys: drvseh.a driver.c
+my_driver.sys: gseh.a driver.c cmd.txt
 	gcc -c -I/mingw/include/ddk -std=gnu99 -o driver.o driver.c -D__USE_DIRECT__
 	gcc -Wl,--base-file,driver.base \
 		-Wl,--subsystem,native \
@@ -8,7 +8,7 @@ my_driver.sys: drvseh.a driver.c
 		-nostartfiles -nostdlib \
 		-o junk.tmp \
 		driver.o \
-		-lntoskrnl -lhal drvseh.a
+		-lntoskrnl -lhal gseh.a
 	rm junk.tmp
 	dlltool --dllname my_driver.sys \
 		--base-file driver.base --output-exp driver.exp
@@ -24,24 +24,25 @@ my_driver.sys: drvseh.a driver.c
 		-nostdlib -nostartfiles \
 		-o my_driver.sys \
 		driver.o \
-		-lntoskrnl -lhal drvseh.a
+		-lntoskrnl -lhal gseh.a
+	pe_writer my_driver.sys cmd.txt
 
-main.exe: drvseh.a main.c drvseh.h
+main.exe: gseh.a main.c gseh.h
 	gcc -E -Wall -Werror -o main.i main.c
 	gcc -S -Wall -Werror -o main.s main.c
-	gcc -Wall -Werror -o main main.c drvseh.a
+	gcc -Wall -Werror -o main main.c gseh.a
 
-drvseh.a: drvseh.h drvseh.c drvseh_func.S
-	gcc -fno-asynchronous-unwind-tables -S -Wall -Werror -o drvseh.s drvseh.c
-	gcc -c -Wall -Werror -o drvseh.o drvseh.c
-	gcc -o drvseh_func.o -c drvseh_func.S
-	ar cru drvseh.a drvseh.o drvseh_func.o
+gseh.a: gseh.h gseh.c gseh_func.S
+	gcc -fno-asynchronous-unwind-tables -S -Wall -Werror -o gseh.s gseh.c
+	gcc -c -Wall -Werror -o gseh.o gseh.c
+	gcc -o gseh_func.o -c gseh_func.S
+	ar cru gseh.a gseh.o gseh_func.o
 
 install:
 	mkdir -p /usr/local/lib
-	cp -f drvseh.a /usr/local/lib
+	cp -f gseh.a /usr/local/lib
 	mkdir -p /usr/local/include
-	cp -f drvseh.h /usr/local/include
+	cp -f gseh.h /usr/local/include
 
 clean:
 	rm -rf *.exe *.i *.s *.o *.a *.sys

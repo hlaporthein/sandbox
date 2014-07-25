@@ -1,5 +1,5 @@
-#ifndef _DRVSEH_H_
-#define _DRVSEH_H_
+#ifndef _GSEH_H_
+#define _GSEH_H_
 
 #include <excpt.h>
 #include <stdio.h>
@@ -64,60 +64,57 @@ typedef struct {
 	unsigned int eip;
 	unsigned int ebp;
 	unsigned int esp;
-} drv_context_t;
+} gseh_context_t;
 
 typedef struct {
 	EXCEPTION_REGISTRATION ex_reg;
 	int magic;
-	drv_context_t ctx;
-} drv_buf_t;
+	gseh_context_t ctx;
+} gseh_buf_t;
 
-extern drv_buf_t *g_buf;
+extern gseh_buf_t *g_buf;
 
-int __stdcall drv_init(drv_buf_t *buf);
-void __stdcall drv_restore_ctx(drv_buf_t *buf, int retval);
-int drv_end_except(drv_buf_t *buf);
-int drv_finish(drv_buf_t *buf);
+int __stdcall gseh_init(gseh_buf_t *buf);
+void __stdcall gseh_restore_ctx(gseh_buf_t *buf, int retval);
+int gseh_finish(gseh_buf_t *buf);
 
-#define __drv_try                          \
-	{                                      \
-		__label__ _label_try_start;        \
-		__label__ _label_except_start;     \
-		__label__ _label_except_end;       \
-		if (0) {                           \
-			goto _label_try_start;         \
-			goto _label_except_start;      \
-			goto _label_except_end;        \
-		}                                  \
-		drv_buf_t _drvbuf;                 \
-		g_buf = &_drvbuf;                  \
-		DEBUG_CPU_STATE("1");              \
-		int a = 0;                         \
-		switch (a = drv_init(&_drvbuf)) {  \
-			case 0:                        \
-				DEBUG("case 0");           \
-				DEBUG_CPU_STATE("case 0"); \
-				goto _label_try_start;     \
-			case 1:                        \
-				DEBUG("case 1");           \
-				DEBUG_CPU_STATE("case 1"); \
-				goto _label_except_start;  \
-		}                                  \
-		DEBUG("a=0x%08X (%d)", a, a);      \
-_label_try_start:                          \
-
-
-#define __drv_except                     \
-		goto _label_except_end;          \
-_label_except_start:                     \
-		;                                \
+#define __gseh_try                             \
+	{                                          \
+		__label__ _label_try_start;            \
+		__label__ _label_except_start;         \
+		__label__ _label_except_end;           \
+		if (0) {                               \
+			goto _label_try_start;             \
+			goto _label_except_start;          \
+			goto _label_except_end;            \
+		}                                      \
+		gseh_buf_t _gsehbuf;                   \
+		g_buf = &_gsehbuf;                     \
+		DEBUG_CPU_STATE("1");                  \
+		int a = 0;                             \
+		switch (a = gseh_init(&_gsehbuf)) {    \
+			case 0:                            \
+				DEBUG("case 0");               \
+				DEBUG_CPU_STATE("case 0");     \
+				goto _label_try_start;         \
+			case 1:                            \
+				DEBUG("case 1");               \
+				DEBUG_CPU_STATE("case 1");     \
+				goto _label_except_start;      \
+		}                                      \
+		DEBUG("a=0x%08X (%d)", a, a);          \
+_label_try_start:                              \
 
 
+#define __gseh_except                   \
+		goto _label_except_end;         \
+_label_except_start:                    \
+		;                               \
 
-#define __drv_end_except                \
-		drv_end_except(&_drvbuf);       \
+
+#define __gseh_end_except               \
 _label_except_end:                      \
-		drv_finish(&_drvbuf);           \
+		gseh_finish(&_gsehbuf);         \
 	}                                   \
 
-#endif // _DRVSEH_H_
+#endif // _GSEH_H_

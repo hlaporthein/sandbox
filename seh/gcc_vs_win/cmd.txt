@@ -1,1 +1,5 @@
-update_section_characteristics .text 0x68000020
+update_section_characteristics_remove_flag .text 0x00300000
+update_section_characteristics_remove_flag .rdata 0x00300000
+update_section_characteristics_remove_flag .eh_fram 0x00300000
+update_section_characteristics_remove_flag .idata 0x00300000
+update_section_characteristics_remove_flag .reloc 0x00300000
