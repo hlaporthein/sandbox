@@ -14,7 +14,7 @@ EXCEPTION_DISPOSITION gseh_handler(EXCEPTION_RECORD *ExceptionRecord,
 
 	gseh_buf_t *buf = g_buf;
 
-	if (buf->magic != DRVSEH_MAGIC) {
+	if (buf->magic != GSEH_MAGIC) {
 		ERROR("Not reconize magic");
 	}
 

@@ -1,7 +1,7 @@
 #define STDCALL_SYM(x, y)  _ ## x ##@## y
 #define CDECL_SYM(x) _ ## x
 
-#define DRVSEH_MAGIC $0xDEADBEEF
+#define GSEH_MAGIC $0xDEADBEEF
 
 // When using the macro, be carefull to not insert space before args.
 // STDCALL_SYM(gseh_init, 4); will make a syntax error.
@@ -18,7 +18,7 @@ STDCALL_SYM(gseh_init,4):
 
 	movl %eax, %fs:0;						// fs:0 = &buf (replace previous exception handler by ours)
 
-	movl DRVSEH_MAGIC, 8(%eax);				// buf->magic = 0xDEADBEEF;
+	movl GSEH_MAGIC, 8(%eax);				// buf->magic = 0xDEADBEEF;
 	movl %edx, 12(%eax);					// buf->ctx.eip = eip
 	movl %ebp, 16(%eax);					// buf->ctx.ebp = ebp
 	movl %esp, 20(%eax);					// buf->ctx.esp = esp

@@ -14,25 +14,25 @@ void oops(int b) {
 }
 
 int main() {
-	__gseh_try {
+	__gtry {
 		oops(1);
-	} __gseh_except {
+	} __gexcept {
 		printf("Exception catched.\n");
-	} __gseh_end_except;
+	} __gend_except;
 
-	__gseh_try {
+	__gtry {
 		DEBUG("Start try");
 		oops(0);
 		DEBUG("End try");
-	} __gseh_except {
+	} __gexcept {
 		printf("Exception catched.\n");
-	} __gseh_end_except;
+	} __gend_except;
 
-	__gseh_try {
+	__gtry {
 		oops(-1);
-	} __gseh_except {
+	} __gexcept {
 		printf("Exception catched.\n");
-	} __gseh_end_except;
+	} __gend_except;
 
 	printf("Finished.\n");
 

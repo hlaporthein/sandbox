@@ -8,9 +8,17 @@ extern int g_eax;
 extern int g_ebp;
 extern int g_esp;
 
-#define DRVSEH_MAGIC 0xDEADBEEF
+#define GSEH_MAGIC 0xDEADBEEF
 
 #ifdef _DEBUG
+
+#ifdef _DRIVER
+#include <ntddk.h>
+#define printf DbgPrint
+#define fflush(x)
+#else
+#include <stdio.h>
+#endif
 
 #define DEBUG(message, ...) \
 	printf("DEBUG [" __FILE__ ":%d (%s)]: " message "\n", __LINE__, __FUNCTION__, ##__VA_ARGS__); \
@@ -81,7 +89,7 @@ int __stdcall gseh_init(gseh_buf_t *buf);
 void __stdcall gseh_restore_ctx(gseh_buf_t *buf, int retval);
 int gseh_finish(gseh_buf_t *buf);
 
-#define __gseh_try                             \
+#define __gtry                                 \
 	{                                          \
 		__label__ _label_try_start;            \
 		__label__ _label_except_start;         \
@@ -109,13 +117,13 @@ int gseh_finish(gseh_buf_t *buf);
 _label_try_start:                              \
 
 
-#define __gseh_except                   \
+#define __gexcept                       \
 		goto _label_except_end;         \
 _label_except_start:                    \
 		;                               \
 
 
-#define __gseh_end_except               \
+#define __gend_except                   \
 _label_except_end:                      \
 		gseh_finish(&_gsehbuf);         \
 	}                                   \

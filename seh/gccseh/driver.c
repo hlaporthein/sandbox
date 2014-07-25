@@ -11,23 +11,32 @@ NTSTATUS STDCALL DriverEntry(PDRIVER_OBJECT driverObject, PUNICODE_STRING regist
 
 	DbgPrint("Hello!!\n");
 	DbgPrint("str=%s\n", str);
-	__gseh_try {
+	__gtry {
 		DbgPrint("Success\n");
-	} __gseh_except {
+	} __gexcept {
 		DbgPrint("Exception catched.\n");
-	} __gseh_end_except;
+	} __gend_except;
 
 	p = driverObject;
 
 	p->DriverUnload = my_unload;
 
-	__gseh_try {
+	__gtry {
 		DbgPrint("About to probe\n");
 		ProbeForWrite((PVOID) 0, 10, 4);
 		DbgPrint("Everything ok\n");
-	} __gseh_except {
+	} __gexcept {
 		DbgPrint("Exception catched.\n");
-	} __gseh_end_except;
+	} __gend_except;
+	DbgPrint("RegistryPath=%wZ\n", registryPath);
+
+	__gtry {
+		DbgPrint("About to probe\n");
+		ProbeForWrite((PVOID) 0, 10, 4);
+		DbgPrint("Everything ok\n");
+	} __gexcept {
+		DbgPrint("Exception catched.\n");
+	} __gend_except;
 	DbgPrint("RegistryPath=%wZ\n", registryPath);
 
 cleanup:
