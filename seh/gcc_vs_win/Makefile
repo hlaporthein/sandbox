@@ -41,7 +41,7 @@ all:
 	gcc -c -I/mingw/include/ddk -std=gnu99 -o driver_gcc.o driver.c
 	gcc -Wl,--base-file,driver_gcc.base \
 		-Wl,--subsystem,native \
-		-Wl,--entry,_DriverEntry \
+		-Wl,--entry,_DriverEntry@8 \
 		-nostartfiles -nostdlib \
 		-o junk.tmp \
 		driver_gcc.o \
