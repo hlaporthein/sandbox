@@ -21,14 +21,14 @@ NTSTATUS STDCALL DriverEntry(PDRIVER_OBJECT driverObject, PUNICODE_STRING regist
 
 	p->DriverUnload = my_unload;
 
-//	__gseh_try {
-//		DbgPrint("About to probe\n");
-//		ProbeForWrite((PVOID) 0, 10, 4);
-//		DbgPrint("Everything ok\n");
-//	} __gseh_except {
-//		DbgPrint("Exception catched.\n");
-//	} __gseh_end_except;
-//	DbgPrint("RegistryPath=%wZ\n", registryPath);
+	__gseh_try {
+		DbgPrint("About to probe\n");
+		ProbeForWrite((PVOID) 0, 10, 4);
+		DbgPrint("Everything ok\n");
+	} __gseh_except {
+		DbgPrint("Exception catched.\n");
+	} __gseh_end_except;
+	DbgPrint("RegistryPath=%wZ\n", registryPath);
 
 cleanup:
 	return status;

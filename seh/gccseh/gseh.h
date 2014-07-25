@@ -64,6 +64,9 @@ typedef struct {
 	unsigned int eip;
 	unsigned int ebp;
 	unsigned int esp;
+	unsigned int esi;
+	unsigned int edi;
+	unsigned int ebx;
 } gseh_context_t;
 
 typedef struct {

@@ -22,6 +22,9 @@ STDCALL_SYM(gseh_init,4):
 	movl %edx, 12(%eax);					// buf->ctx.eip = eip
 	movl %ebp, 16(%eax);					// buf->ctx.ebp = ebp
 	movl %esp, 20(%eax);					// buf->ctx.esp = esp
+	movl %esi, 24(%eax);					// buf->ctx.esi = esi
+	movl %edi, 28(%eax);					// buf->ctx.edi = edi
+	movl %ebx, 32(%eax);					// buf->ctx.ebx = ebx
 
 	xorl %eax, %eax; 						// return 0
 	jmp *%edx; 								// return to the eip
@@ -30,10 +33,13 @@ STDCALL_SYM(gseh_init,4):
 .global STDCALL_SYM(gseh_restore_ctx,8);
 STDCALL_SYM(gseh_restore_ctx,8):
 	addl $4, %esp;			// Return address... we don't need it.
-	popl %ebx;				// Context buffer
+	popl %ecx;				// Context buffer
 	popl %eax;				// Return value
-	movl 12(%ebx), %edx;	// eip
-	movl 16(%ebx), %ebp;	// ebp
-	movl 20(%ebx), %esp;	// esp
+	movl 12(%ecx), %edx;	// eip
+	movl 16(%ecx), %ebp;	// ebp
+	movl 20(%ecx), %esp;	// esp
+	movl 24(%ecx), %esi;	// esi
+	movl 28(%ecx), %edi;	// edi
+	movl 32(%ecx), %ebx;	// ebx
 	jmp *%edx;
 
