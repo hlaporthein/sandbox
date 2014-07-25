@@ -116,7 +116,6 @@ int compute_pe_checksum(const char *filename, unsigned int *chksum) {
 	int file_size = 0;
 	while ((size = fread(buffer, 1, BUFFER_SIZE, fd)) > 0) {
 		file_size += size;
-		printf("size=%d\n", size);
 		chk = checksum((short int) chk, (unsigned short int *) buffer, size / 2);
 	}
 
