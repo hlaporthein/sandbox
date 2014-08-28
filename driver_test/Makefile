@@ -8,11 +8,11 @@ all:
 
 	# first generate the base file (it contains relocation information)
 	gcc -Wl,--base-file,driver.base \
-		-Wl,--entry,_DriverEntry \
+		-Wl,--entry,_DriverEntry@8 \
 		-nostartfiles -nostdlib \
 		-o junk.tmp \
 		driver.o \
-		ntoskrnl.dll.a -lhal
+		-lntoskrnl -lhal
 	# remove the PE executable generated (not relocatable executable image)
 	rm junk.tmp
 	# second generate the export file (contains the relocation info, the export symbol and the dll name)
@@ -22,7 +22,7 @@ all:
 	rm driver.base
 	# and now we can produce the driver...
 	gcc -v -Wl,--trace -mdll \
-		-Wl,--entry,_DriverEntry \
+		-Wl,--entry,_DriverEntry@8 \
 		-Wl,--subsystem,native \
 		-Wl,--image-base,0x10000 \
 		-Wl,--file-alignment,0x1000 \
@@ -32,7 +32,7 @@ all:
 		-nostdlib -nostartfiles \
 		-o my_hello_driver.sys \
 		driver.o \
-		ntoskrnl.dll.a -lhal
+		-lntoskrnl -lhal
 
 clean:
 	rm -f *sys *o *base *tmp *pe *exp *def *dll.a
@@ -45,3 +45,7 @@ dll_import:
 	echo DbgPrint >> ntoskrnl.def
 	pe_reader "C:/WINDOWS/system32/ntoskrnl.exe" | grep "ExportSymbol" | perl -pe "s/^ExportSymbol: (.*) \\(0x.*$$/\\1/g" >> ntoskrnl.def
 	dlltool --add-stdcall-underscore -d ntoskrnl.def -l ntoskrnl.dll.a
+
+fixlib:
+	perl -pi -e 's/ntoskrnl.dll/ntoskrnl.exe/mg' /mingw/lib/libntoskrnl.a
+	perl -pi -e 's/ntoskrnl.dll/ntoskrnl.exe/mg' /mingw/mingw32/lib/libntoskrnl.a
