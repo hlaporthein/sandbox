@@ -61,12 +61,12 @@ check_var QT_TOOLS_BIN "Dir where Qt Tools binaries is installed (ex: C:/Qt/Qt5.
 title "Compiling"
 (
 	cd ../../utf8_fs
-	make all install
+	make clean all install
 )
 
 (
 	cd ../../synchro_test
-	make all install
+	make clean all install
 )
 
 mkdir -p ${SS_BUILD_DIR}
