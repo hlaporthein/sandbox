@@ -54,8 +54,8 @@ check_dir "/usr/local/include/tre" "tre is not installed (http://laurikari.net/t
 # makensis
 check_cmd makensis "makensis is not installed (http://nsis.sourceforge.net/Main_Page)"
 # Qt
-check_var QT_MINGW_BIN "Dir where Qt MinGW binaries is installed (ex: C:/Qt/Qt5.2.0/5.2.0/mingw48_32/bin)."
-check_var QT_TOOLS_BIN "Dir where Qt Tools binaries is installed (ex: C:/Qt/Qt5.2.0/Tools/mingw48_32/bin)."
+check_var QT_MINGW_BIN "Dir where Qt MinGW binaries are installed (ex: C:/Qt/Qt5.2.0/5.2.0/mingw48_32/bin)."
+check_var QT_TOOLS_BIN "Dir where Qt Tools binaries are installed (ex: C:/Qt/Qt5.2.0/Tools/mingw48_32/bin)."
 
 
 title "Compiling"

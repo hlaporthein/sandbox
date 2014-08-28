@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+</head><body>
+<h1>What is "synchro_simple"?</h1>
+<p>Synchro_simple is a very simple prototype application which
+purpose is to synchronize files and directories for backup/archive
+purpose.<br>
+It was written within the OCP project.<span style="font-weight: bold;"></span></p>
+<p>Synchro_simple is a Qt GUI for Windows OS. The user can
+specifiy a source directory, where the content is taken from, and a
+destination directory, where content is to backup.</p>
+<p>Because synchro_simple does not use driver, the source
+directory is regularely checked for modification and only the
+modification are synchronized.</p>
+<p>Synchro_simple can be run in background mode and has a setting
+menu that allows the user to confugure it.</p>
+<h1>How to install</h1>
+<p>The easiest way is to download synchro_simple_setup.exe
+from&nbsp;<a href="http://ocpforum.org/download/synchro_simple_setup.exe">http://ocpforum.org/download/synchro_simple_setup.exe</a>
+and simply run it on a Windows OS (32 or 64bits).</p>
+<p>You can also compile the source code. It is located
+at&nbsp;<a href="https://github.com/jlguenego/sandbox">https://github.com/jlguenego/sandbox</a>.<br>
+1) Clone the repository with the given URL.<br>
+Then you will need:<br>
+</p>
+<ul>
+<li>TRE installed in /usr/local/include/tre and library
+in&nbsp;/usr/local/lib (<a href="http://laurikari.net/tre">http://laurikari.net/tre</a>)</li>
+<li>MakeNSIS, from NSIS project (<a href="http://nsis.sourceforge.net">http://nsis.sourceforge.net</a>)</li>
+<li>environment variables:</li>
+<ul>
+<li>QT_MINGW_BIN : directory where Qt MinGW binaries are
+installed (ex: C:/Qt/Qt5.2.0/5.2.0/mingw48_32/bin).</li>
+<li>QT_TOOLS_BIN :&nbsp;directory where Qt Tools
+binaries&nbsp;are installed (ex:
+C:/Qt/Qt5.2.0/Tools/mingw48_32/bin).</li>
+</ul>
+</ul>
+<p>2) Open a MinGW console and go inside the
+cloned&nbsp;repository.<br>
+3) Go to qt/synchro_simple and run
+<code>build_windows.sh</code></p>
+<h1>Authors</h1><p>Yannis THOMIAS : thomias.yannis@gmail.com<br>Jean-Louis GUENEGO: jlguenego@gmail.com</p><p>©2014 <a href="http://opensource.org/licenses/MIT">MIT Licence</a></p></body></html>
