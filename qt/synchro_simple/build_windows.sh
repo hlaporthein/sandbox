@@ -91,18 +91,17 @@ DEST_DIR="${SETUP_DIR}/${PROGRAM_NAME}"
 mkdir -p "${DEST_DIR}"
 rm -f "${DEST_DIR}/*"
 
+
+
 BUILD_DIR=`find . -type d -name 'build-*_MinGW_32bit-Release'`
 
 cp "${BUILD_DIR}/release/${EXECUTABLE_NAME}.exe" "${DEST_DIR}"
-cp "${QT_MINGW_BIN}/Qt5Core.dll" "${DEST_DIR}"
-cp "${QT_MINGW_BIN}/Qt5Gui.dll" "${DEST_DIR}"
-cp "${QT_MINGW_BIN}/Qt5Widgets.dll" "${DEST_DIR}"
-cp "${QT_MINGW_BIN}/icudt51.dll" "${DEST_DIR}"
-cp "${QT_MINGW_BIN}/icuin51.dll" "${DEST_DIR}"
-cp "${QT_MINGW_BIN}/icuuc51.dll" "${DEST_DIR}"
+"${QT_MINGW_BIN}/windeployqt.exe" "${DEST_DIR}"
 cp "${QT_TOOLS_BIN}/libgcc_s_dw2-1.dll" "${DEST_DIR}"
 cp "${QT_TOOLS_BIN}/libstdc++-6.dll" "${DEST_DIR}"
 cp "${QT_TOOLS_BIN}/libwinpthread-1.dll" "${DEST_DIR}"
+cp "/mingw/bin/libiconv-2.dll" "${DEST_DIR}"
+cp "/mingw/bin/libintl-8.dll" "${DEST_DIR}"
 cp "../../synchro_test/synchro.dll" "${DEST_DIR}"
 cp "${QT_MINGW_BIN}/libtre-5.dll" "${DEST_DIR}"
 

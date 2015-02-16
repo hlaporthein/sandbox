@@ -1,6 +1,6 @@
 !define NAME "Synchro Simple"
 !define EXECUTABLE_NAME "synchro_simple"
-!define INPUT_DIR "setup\Synchro Simple"
+!define INPUT_DIR "setup\${NAME}"
 
 
 Name "${NAME}"
@@ -21,18 +21,7 @@ Section "${NAME} (required)"
   SectionIn RO
 
   SetOutPath $INSTDIR
-  File "/oname=Qt5Core.dll" "${INPUT_DIR}\Qt5Core.dll"
-  File "/oname=Qt5Gui.dll"  "${INPUT_DIR}\Qt5Gui.dll"
-  File "/oname=Qt5Widgets.dll" "${INPUT_DIR}\Qt5Widgets.dll"
-  File "/oname=icudt51.dll" "${INPUT_DIR}\icudt51.dll"
-  File "/oname=icuin51.dll" "${INPUT_DIR}\icuin51.dll"
-  File "/oname=icuuc51.dll" "${INPUT_DIR}\icuuc51.dll"
-  File "/oname=libgcc_s_dw2-1.dll" "${INPUT_DIR}\libgcc_s_dw2-1.dll"
-  File "/oname=libstdc++-6.dll" "${INPUT_DIR}\libstdc++-6.dll"
-  File "/oname=libwinpthread-1.dll" "${INPUT_DIR}\libwinpthread-1.dll"
-  File "/oname=synchro.dll" "${INPUT_DIR}\synchro.dll"
-  File "/oname=libtre-5.dll" "${INPUT_DIR}\libtre-5.dll"
-  File "/oname=${EXECUTABLE_NAME}.exe" "${INPUT_DIR}\${EXECUTABLE_NAME}.exe"
+  File /r "${INPUT_DIR}\*"
 
   ; Write the installation path into the registry
   WriteRegStr HKLM "SOFTWARE\${NAME}" "Install_Dir" "$INSTDIR"
@@ -65,11 +54,9 @@ Section "Uninstall"
   DeleteRegKey HKLM "SOFTWARE\${NAME}"
 
   ; Remove files and uninstaller
-  Delete "$INSTDIR\*"
-  Delete "$INSTDIR"
+  RMDir /r /REBOOTOK "$INSTDIR"
 
   Delete "$SMPROGRAMS\${NAME}\*.*"
   Delete "$DESKTOP\${NAME}.lnk"
   RMDir "$SMPROGRAMS\${NAME}"
-  RMDir "$INSTDIR"
 SectionEnd
