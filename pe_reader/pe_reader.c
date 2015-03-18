@@ -184,8 +184,8 @@ void pe_print_optional_header_winspec() {
 		printf("MajorSubsystemVersion: %d\n", p->MajorSubsystemVersion);
 		printf("MinorSubsystemVersion: %d\n", p->MinorSubsystemVersion);
 		printf("Win32VersionValue: %d\n", p->Win32VersionValue);
-		printf("SizeOfImage: %d bytes\n", p->SizeOfImage);
-		printf("SizeOfHeaders: %d bytes\n", p->SizeOfHeaders);
+		printf("SizeOfImage: %d bytes (=%d*%d)\n", p->SizeOfImage, p->SectionAlignment, p->SizeOfImage / p->SectionAlignment);
+		printf("SizeOfHeaders: %d bytes (=%d*%d)\n", p->SizeOfHeaders, p->FileAlignment, p->SizeOfHeaders / p->FileAlignment);
 		printf("CheckSum: 0x%08X\n", p->CheckSum);
 		printf("Subsystem: %s\n", map(SECTION_SUBSYSTEM, p->Subsystem));
 		printf("DllCharacteristics: %s\n",
