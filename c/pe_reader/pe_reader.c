@@ -138,9 +138,15 @@ void pe_print_standard_header() {
 	printf("Number of sections: %d\n", s_pe.header.FileHeader.NumberOfSections);
 
 	time_t time_as_time_t = s_pe.header.FileHeader.TimeDateStamp;
+	
 	struct tm *tm = localtime(&time_as_time_t);
-	printf("Creation date: %04d/%02d/%02d - %02d:%02d:%02d\n",
+	
+	if (tm) {
+		printf("Creation date: %04d/%02d/%02d - %02d:%02d:%02d\n",
 			(1900 + tm->tm_year), (1 + tm->tm_mon), tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+	} else {
+		printf("Creation date: Unknown\n");
+	}
 	//printf("Creation date: %s", asctime(tm));
 
 	printf("Symbol table address: 0x%08x\n", s_pe.header.FileHeader.PointerToSymbolTable);
