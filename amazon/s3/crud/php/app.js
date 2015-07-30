@@ -20,6 +20,7 @@
 				$rootScope.fileList = response.data;
 				console.log('response', response);
 				$rootScope.myFile = $rootScope.fileList[0];
+				$rootScope.myFile2 = $rootScope.fileList[0];
 			}).catch(function(error) {
 				console.error('error', error);
 			});
@@ -27,6 +28,7 @@
 
 		$rootScope.fileList = [];
 		$rootScope.myFile = $rootScope.fileList[0];
+		$rootScope.myFile2 = $rootScope.fileList[0];
 		$rootScope.refresh();
 
 		$rootScope.retrieve = function() {
@@ -40,7 +42,7 @@
 				url: 'myAmazon.php',
 				method: 'GET',
 				params: {
-					'delete-data': $rootScope.myFile.name
+					'delete-data': $rootScope.myFile2.name
 				}
 			}).finally(function() {
             	$rootScope.refresh();
