@@ -2,7 +2,7 @@
 	require '/lib/aws-autoloader.php';
 
 	use Aws\S3\S3Client;
-
+	
 	require 'credentials.php';
 
 	// Instantiate the S3 client with your AWS credentials
