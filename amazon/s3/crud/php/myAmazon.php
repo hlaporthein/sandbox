@@ -1,5 +1,5 @@
 <?php
-	require '/aws-autoloader.php';
+	require '/lib/aws-autoloader.php';
 
 	use Aws\S3\S3Client;
 
