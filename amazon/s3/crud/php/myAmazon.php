@@ -2,14 +2,15 @@
 	require '/lib/aws-autoloader.php';
 
 	use Aws\S3\S3Client;
+	require 'credentials.php';
 
 	// Instantiate the S3 client with your AWS credentials
 	$s3Client = S3Client::factory(array(
 	'version'     => 'latest',
     'region'      => 'eu-central-1',
 	'credentials' => array(
-		'key'    => 'AKIAILIXYEO42CJANYOQ',
-		'secret' => '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'
+		'key'    => $credentials["key"],
+		'secret' => $credentials["secret"]
 		)
 	));
 
