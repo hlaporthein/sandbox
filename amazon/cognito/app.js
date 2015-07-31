@@ -63,7 +63,6 @@
 				//var creds = new AWS.Credentials(response.data);
 
 				//AWS.config.update(response.data);
-				//AWS.config.update({accessKeyId: 'AKIAI7XLO4PKZNA323TA', secretAccessKey: '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'});
 				//AWS.config.update({region: 'eu-central-1'});
 
 			}).catch(function(error) {
