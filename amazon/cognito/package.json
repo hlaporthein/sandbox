@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "private": true,
+  "name": "aws-s3-example",
+  "description": "Test for AWS S3.",
+  "repository": "https://github.com/jlguenego/sandbox",
+  "license": "MIT",
+  "devDependencies": {
+    "adm-zip": "",
+    "download": "",
+    "shelljs": ""
+  },
+  "scripts": {
+    "postinstall": "node install.js"
+  }
+}
