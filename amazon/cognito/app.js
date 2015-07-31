@@ -15,8 +15,8 @@
 			console.log('$rootScope.login', $rootScope.login);
 			$http({
 				url: 'myAmazon.php',
-				method: 'POST',
-				data: {
+				method: 'GET',
+				params: {
 					'login': $rootScope.login,
 					'password': $rootScope.password
 				}
@@ -24,6 +24,15 @@
 				console.log('response', response);
 				if (response.data.status == 'ok') {
 					console.log('Good login');
+					console.log('AWS', AWS);
+					AWS.config.region = 'eu-west-1';
+					var cognitoidentity = new AWS.CognitoIdentity();
+					cognitoidentity.getCredentialsForIdentity({
+						IdentityId: response.data.data.IdentityId
+					}, function(err, data) {
+						console.log('getCredentialsForIdentity err', err);
+						console.log('data', data);
+					});
 				} else {
 					console.log('Bad login: ', response.data.error);
 				}

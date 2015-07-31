@@ -2,32 +2,18 @@
 	require 'credentials.php';
 	require '/lib/aws-autoloader.php';
 
-	use Aws\S3\S3Client;
 	use Aws\CognitoIdentity\CognitoIdentityClient;
 
-	// Instantiate the S3 client with your AWS credentials
-	$s3Client = S3Client::factory(array(
+	$client = CognitoIdentityClient::factory(array(
 		'version'     => 'latest',
-	    'region'      => 'eu-central-1',
-		'credentials' => array(
+	    'region'      => 'eu-west-1',
+	    'credentials' => array(
 			'key'    => $credentials["key"],
 			'secret' => $credentials["secret"]
 		)
 	));
 
-	$cognitoClient = CognitoIdentityClient::factory(array(
-		'version'     => 'latest',
-	    'region'      => 'eu-west-1'
-	));
 
-	$result = $client->getOpenIdTokenForDeveloperIdentity(array(
-		'IdentityPoolId' => 'string',
-		'IdentityId' => 'string',
-		'Logins' => array(
-			'IdentityProviderName' => 'string'
-		),
-		'TokenDuration' => integer,
-	));
 
 	$bucket = "jlg-test-bucket";
 
@@ -46,18 +32,33 @@
 
 	//myLog('param = ' . grab_dump($params));
 
-	if (isset($params["login"])) {
+	if (isset($_GET["login"])) {
 
-		$login = $_POST["login"];
-		$password = $_POST["password"];
+		$login = $_GET["login"];
+		$password = $_GET["password"];
 
-		if (!($login == 'juan' && $password == 'juan')) {
+		if (!($login == 'maou' && $password == 'maou')) {
 			echo json_encode(["status"	=> "ko", "error"	=> "bad authentication"]);
 			return;
 		}
 
+		$result = $client->getOpenIdTokenForDeveloperIdentity(array(
+			'IdentityPoolId' => 'eu-west-1:f01a8597-951e-4907-aeab-0ee690f50e40',
+			'Logins' => array(
+				'login.jlg-consulting.com' => 'maou'
+			),
+			'TokenDuration' => 15*60
+		));
 
-		echo json_encode(["status"	=> "ok"]);
+		myLog('result = ' . grab_dump($result));
+
+
+		echo json_encode([
+			"status" => "ok",
+			"data" => [
+				"IdentityId"	=> $result["IdentityId"],
+				"Token"	=> $result["Token"]
+			]]);
 		return;
 	}
 
