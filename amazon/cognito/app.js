@@ -8,28 +8,99 @@
 		var $http = $injector.get('$http');
 		var $rootScope = $injector.get('$rootScope');
 
-		$rootScope.refresh = function() {
+		$rootScope.isConnected = false;
+
+		$rootScope.authenticate = function() {
+			console.log('authenticate');
+			console.log('$rootScope.login', $rootScope.login);
 			$http({
 				url: 'myAmazon.php',
-				method: 'GET',
-				params: {
-					retrieve: 1
+				method: 'POST',
+				data: {
+					'login': $rootScope.login,
+					'password': $rootScope.password
 				}
 			}).then(function(response) {
-				console.log('refreshed');
-				$rootScope.fileList = response.data;
 				console.log('response', response);
-				$rootScope.myFile = $rootScope.fileList[0];
-				$rootScope.myFile2 = $rootScope.fileList[0];
+				if (response.data.status == 'ok') {
+					console.log('Good login');
+				} else {
+					console.log('Bad login: ', response.data.error);
+				}
 			}).catch(function(error) {
 				console.error('error', error);
 			});
 		};
 
+		$rootScope.requestToken = function() {
+			return $http({
+				url: 'myAmazon.php',
+				method: 'GET',
+				params: {
+					requestToken: 1
+				}
+			}).then(function(response) {
+//				console.log('token', response);
+//
+//				var params = {
+//				    IdentityPoolId: "YOUR_COGNITO_IDENTITY_POOL_ID"
+//				};
+//
+//				AWS.config.region = 'eu-central-1';
+//				AWS.config.credentials = new AWS.CognitoIdentityCredentials(params);
+//				AWS.config.credentials.get(function(err) {
+//				    if (err) {
+//				        console.log("Error: "+err);
+//				        return;
+//				    }
+//				    console.log("Cognito Identity Id: " + AWS.config.credentials.identityId);
+//				});
+
+				//AWS.config.credentials = new AWS.TemporaryCredentials();
+
+				//AWS.config.update({credentials: response.data});
+
+				//var creds = new AWS.Credentials(response.data);
+
+				//AWS.config.update(response.data);
+				//AWS.config.update({accessKeyId: 'AKIAI7XLO4PKZNA323TA', secretAccessKey: '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'});
+				//AWS.config.update({region: 'eu-central-1'});
+
+			}).catch(function(error) {
+				console.error('error', error);
+			});
+		};
+
+
+
+		$rootScope.refresh = function() {
+			var bucket = new AWS.S3({params: {Bucket: 'jlg-test-bucket'}});
+			console.log('bucket', bucket);
+
+			bucket.listObjects(function(err, data) {
+				if (err) {
+					console.log('error', err);
+					return;
+				}
+				console.log('data.Contents', data.Contents);
+				$rootScope.fileList = data.Contents.map(function(n) {
+					console.log('n', n);
+					return {
+						name: n.Key
+					};
+				});
+				console.log('$rootScope.fileList', $rootScope.fileList);
+				$rootScope.myFile = $rootScope.fileList[0];
+				$rootScope.myFile2 = $rootScope.fileList[0];
+				$rootScope.$apply();
+			});
+
+		};
+
 		$rootScope.fileList = [];
 		$rootScope.myFile = $rootScope.fileList[0];
 		$rootScope.myFile2 = $rootScope.fileList[0];
-		$rootScope.refresh();
+
 
 		$rootScope.retrieve = function() {
 			console.log('retrieve');
