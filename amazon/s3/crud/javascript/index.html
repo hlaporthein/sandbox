@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>CRUD javascript</title>
+		<style>
+.box {
+	padding: 10px;
+	margin: 10px;
+	width: 400px;
+	background-color: hsla(0, 50%, 90%, 1);
+}
+		</style>
+	</head>
+	<body>
+		<p class="box">
+			Upload a file : <br/>
+			<input type="file" id="file-chooser" /><br/>
+			<button id="upload-button">Upload to bucket</button>
+			<div id="results"></div>
+		</p>
+
+		<p class="box">
+			Add data on a file <br/>
+			<select id="file-selector"></select><br/>
+			<textarea id="data-value"></textarea><br/>
+			<button id="upload-data">Upload data to file</button>
+			<div id="data-result"></div>
+		</p>
+
+		<p class="box">
+			Delete a file : <br/>
+			<select id="delete-file-selector"></select>
+			<button id="delete-button">Delete from bucket</button>
+			<div id="delete-result"></div>
+		</p>
+
+		<p>
+			<div id="status"></div>
+		</p>
+
+		<script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.41.min.js"></script>
+		<script src="app.js"></script>
+	</body>
+</html>
