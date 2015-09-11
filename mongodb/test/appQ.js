@@ -1,35 +1,41 @@
+var Q = require("q");
+
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 var ObjectId = require('mongodb').ObjectID;
 var url = 'mongodb://localhost:27017/test';
 
 var connectP = function(url) {
-	return new Promise(function(fulfill, reject) {
-		MongoClient.connect(url, function(error, db) {
-			console.log('error', error);
-			if (error != null) {
-				reject({db: db, error: error});
-			} else {
-				fulfill({db: db});
-			}
-		});
+	var deferred = Q.defer();
+	MongoClient.connect(url, function(error, db) {
+		console.log('error', error);
+		if (error != null) {
+			deferred.reject({db: db, error: error});
+		} else {
+			deferred.resolve({db: db});
+		}
 	});
+
+	return deferred.promise;
 };
 
 var insertOneP = function(db, collection, document) {
-	return new Promise(function(fulfill, reject) {
-		db.collection(collection).insertOne(document, function(error, result) {
-			console.log('result', result, 'END');
-			console.log('error', error, 'END');
-			//error = 'coucou';
-			if (error != null) {
-				reject({db: db, error: error});
-			} else {
-				console.log('fulfill after insertOneP');
-				fulfill({db: db, result: result});
-			}
-		});
+	var deferred = Q.defer();
+	db.collection(collection).insertOne(document, function(error, result) {
+		console.log('result', result, 'END');
+		console.log('error', error, 'END');
+		//error = 'coucou';
+		if (error != null) {
+			var obj = {db: db, error: error};
+			console.log('obj', obj, 'END');
+			deferred.reject(obj);
+		} else {
+			console.log('fulfill after insertOneP');
+			deferred.resolve({db: db, result: result});
+		}
 	});
+
+	return deferred.promise;
 };
 
 connectP(url).then(function(obj) {
@@ -63,7 +69,6 @@ connectP(url).then(function(obj) {
 	return obj;
 }).then(function(obj) {
 	console.log('finally');
-	console.log('obj', obj);
 	obj.db.close();
 	console.log('end');
 });
