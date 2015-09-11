@@ -13,13 +13,16 @@
 	<li><button ng-click="delete()">Delete</button></li>
 </ul>
 <ul>
-	<li ng-repeat="todo in todos track by $index"><a href="#/todo/{{todo.title}}">{{todo.title}}</a></li>
+	<li ng-repeat="todo in todos track by $index"><a href="#/todo/{{todo._id}}">{{todo.title}}</a></li>
 </ul>
+{{todos}}
 		</script>
 		<script type="text/ng-template" id="object.html">
+<a href="#/">Main menu</a><br/>
 Objet
-<h2>{{title}}</h2>
-<p>{{content}}</p>
+<h2>{{todo.title}}</h2>
+<p>{{todo.content}}</p>
+{{todo}}
 		</script>
 		<script type="text/ng-template" id="create.html">
 <form name="myForm" ng-submit="add(); myForm.$setPristine()" novalidate>
