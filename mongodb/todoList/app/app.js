@@ -16,7 +16,9 @@
 				controllerAs: 'ctrl'
 			})
 			.when('/create', {
-				templateUrl: 'create.html'
+				templateUrl: 'create.html',
+				controller: 'CreateCtrl',
+				controllerAs: 'ctrl'
 			})
 			.otherwise({
 				redirectTo: '/'
@@ -101,6 +103,17 @@
 				return n._id == $routeParams.id;
 			});
 		});
+
+		console.log('$scope.todo', $scope.todo);
+
+	}]);
+
+	app.controller('CreateCtrl', ['$scope', '$injector', function($scope, $injector) {
+		console.log('instantiating CreateCtrl');
+
+		var $rootScope = $injector.get('$rootScope');
+
+		$rootScope.todo = {};
 
 		console.log('$scope.todo', $scope.todo);
 

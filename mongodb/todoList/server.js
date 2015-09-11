@@ -15,9 +15,9 @@ app.use(express.static('app'));
 app.post('/create', function(req, res) {
 	console.log('req.body', req.body);
 	lib.getDBConnection().then(function(obj) {
-		return lib.createTodo(obj.db, req.body);
+		return lib.createTodo(req.body);
 	}).then(function(obj) {
-		return lib.findAllTodos(obj.db);
+		return lib.findAllTodos();
 	}).then(function(obj) {
 		res.json({status: 0, todos: obj.result});
 	}).catch(function(error) {
@@ -32,7 +32,7 @@ app.post('/create', function(req, res) {
 
 app.get('/retrieveAll', function(req, res) {
 	lib.getDBConnection().then(function(obj) {
-		return lib.findAllTodos(obj.db);
+		return lib.findAllTodos();
 	}).then(function(obj) {
 		res.json({status: 0, todos: obj.result});
 	}).catch(function(error) {
