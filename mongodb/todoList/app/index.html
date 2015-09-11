@@ -13,7 +13,7 @@
 	<li><button ng-click="delete()">Delete</button></li>
 </ul>
 <ul>
-	<li><a href="#/todo/1">coucou</a></li>
+	<li ng-repeat="todo in todos track by $index"><a href="#/todo/{{todo.title}}">{{todo.title}}</a></li>
 </ul>
 		</script>
 		<script type="text/ng-template" id="object.html">

@@ -4,19 +4,12 @@ var ObjectId = require('mongodb').ObjectID;
 var url = 'mongodb://localhost:27017/todo';
 
 var myDb;
-MongoClient.connect(url, function(err, db) {
-	if (err) {
-		console.log('Mongo error:', err);
-		return;
-	}
-	myDb = db;
-	console.log("Test connection successfull.");
-});
 
 exports.getDBConnection = function() {
 	return new Promise(function(fulfill, reject) {
 		console.log('myDb', myDb);
 		if (!myDb) {
+			console.log('about to connect');
 			MongoClient.connect(url, function(err, db) {
 				if (err) {
 					console.log('Mongo error:', err);
@@ -27,6 +20,8 @@ exports.getDBConnection = function() {
 				console.log("Test connection successfull.");
 				fulfill({db: myDb});
 			});
+		} else {
+			fulfill({db: myDb});
 		}
 
 	});
@@ -34,11 +29,25 @@ exports.getDBConnection = function() {
 
 exports.createTodo = function(db, document) {
 	return new Promise(function(fulfill, reject) {
+		console.log('document', document);
 		db.collection('todo').insertOne(document, function(error, result) {
 			if (error != null) {
-				reject({db: db, error: error});
+				reject(error);
 			} else {
-				console.log('fulfill after insertOneP');
+				console.log('fulfill after createTodo');
+				fulfill({db: db, result: result});
+			}
+		});
+	});
+};
+
+exports.findAllTodos = function(db) {
+	return new Promise(function(fulfill, reject) {
+		db.collection('todo').find().toArray(function(error, result) {
+			if (error != null) {
+				reject(error);
+			} else {
+				console.log('fulfill after findAllTodos');
 				fulfill({db: db, result: result});
 			}
 		});

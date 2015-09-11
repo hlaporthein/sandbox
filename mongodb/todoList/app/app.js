@@ -25,6 +25,10 @@
 		var $http = $injector.get('$http');
 		var $q = $injector.get('$q');
 
+		$rootScope.todo = {};
+
+		$rootScope.todos = [];
+
 		$rootScope.new = function() {
 			console.log('new');
 
@@ -37,21 +41,42 @@
 
 		$rootScope.add = function() {
 			console.log('add');
+			console.log('$rootScope.todo', $rootScope.todo);
 
 			$http({
 				url: '/create',
-				method: 'POST',
+				method: 'post',
 				data: $rootScope.todo
 			}).then(function(response) {
 				console.log('response', response);
 				if (response.data.status != 0) {
 					return $q.reject('Bad status');
 				}
+				$rootScope.todos = response.data.todos;
 			}).then(function() {
 				$location.path('/');
 			}).catch(function(error) {
 				console.error('error', error);
 			});
 		};
+
+		$rootScope.init = function() {
+			console.log('init');
+
+			$http({
+				url: '/retrieveAll',
+				method: 'get'
+			}).then(function(response) {
+				console.log('response', response);
+				if (response.data.status != 0) {
+					return $q.reject('Bad status');
+				}
+				$rootScope.todos = response.data.todos;
+			}).catch(function(error) {
+				console.error('error', error);
+			});
+		};
+
+		$rootScope.init();
 	}]);
 })();

@@ -1,24 +1,50 @@
 var express = require('express');
 var app = express();
 var path = require('path');
+var bodyParser = require('body-parser');
 
 var lib = require('./server/lib.js');
+
+//to have req.body
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+//end req.body
 
 app.use(express.static('app'));
 
 app.post('/create', function(req, res) {
-	console.log(req.body);
+	console.log('req.body', req.body);
 	lib.getDBConnection().then(function(obj) {
-		return lib.createTodo(obj, req.body);
+		return lib.createTodo(obj.db, req.body);
 	}).then(function(obj) {
-		res.json({status: 0});
+		return lib.findAllTodos(obj.db);
+	}).then(function(obj) {
+		res.json({status: 0, todos: obj.result});
 	}).catch(function(error) {
 		console.log('error', error);
 		res.json({status: 1, error: error});
 	}).then(function(obj) {
 		lib.releaseDBconnection(obj);
+	}).then(function() {
+		console.log('end /create');
 	});
 });
+
+app.get('/retrieveAll', function(req, res) {
+	lib.getDBConnection().then(function(obj) {
+		return lib.findAllTodos(obj.db);
+	}).then(function(obj) {
+		res.json({status: 0, todos: obj.result});
+	}).catch(function(error) {
+		console.log('error', error);
+		res.json({status: 1, error: error});
+	}).then(function(obj) {
+		lib.releaseDBconnection(obj);
+	}).then(function() {
+		console.log('end /retrieveAll');
+	});
+});
+
 
 //404
 app.use(function(req, res, next) {
