@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+	<head>
+		<title>Hello</title>
+	</head>
+	<body>
+		<h1>Todo List</h1>
+		<ng-view></ng-view>
+
+		<script type="text/ng-template" id="list.html">
+<ul>
+	<li><button ng-click="new()">New</button></li>
+	<li><button ng-click="delete()">Delete</button></li>
+</ul>
+<ul>
+	<li><a href="#/todo/1">coucou</a></li>
+</ul>
+		</script>
+		<script type="text/ng-template" id="object.html">
+Objet
+<h2>{{title}}</h2>
+<p>{{content}}</p>
+		</script>
+		<script type="text/ng-template" id="create.html">
+<form name="myForm" ng-submit="add(); myForm.$setPristine()" novalidate>
+	title: <input type="text" ng-model="todo.title" required /><br/>
+	content: <textarea ng-model="todo.content" required></textarea><br/>
+	<input type="submit" value="Create" ng-disabled="myForm.$invalid" />
+</form>
+		</script>
+
+		<script src="bower_components/angular/angular.min.js"></script>
+		<script src="bower_components/angular-route/angular-route.min.js"></script>
+		<script src="app.js"></script>
+	</body>
+</html>
