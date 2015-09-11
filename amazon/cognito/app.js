@@ -29,6 +29,7 @@
 					var cognitoidentity = new AWS.CognitoIdentity();
 					cognitoidentity.getCredentialsForIdentity({
 						IdentityId: response.data.data.IdentityId
+						//IdentityId: 'eu-west-1:b762a27e-3974-497f-9199-747de0093b41'
 					}, function(err, data) {
 						console.log('getCredentialsForIdentity err', err);
 						console.log('data', data);

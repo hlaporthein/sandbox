@@ -1,0 +1,19 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "first test with mongodb",
+  "main": "app.js",
+  "scripts": {
+    "db": "mongod --dbpath data",
+    "start": "node app.js",
+    "clean": "node clean.js",
+    "import": "mongoimport --db test --collection restaurants --drop --file import/primer-dataset.json"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "mongodb": "^2.0.42",
+    "promise.prototype.finally": "^1.0.1",
+    "shelljs": "0.5.3"
+  }
+}
