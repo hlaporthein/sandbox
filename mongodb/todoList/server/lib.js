@@ -54,9 +54,3 @@ exports.findAllTodos = function() {
 	});
 };
 
-exports.releaseDBconnection = function() {
-	return new Promise(function(fulfill, reject) {
-		fulfill({});
-	});
-};
-

@@ -23,8 +23,6 @@ app.post('/create', function(req, res) {
 	}).catch(function(error) {
 		console.log('error', error);
 		res.json({status: 1, error: error});
-	}).then(function(obj) {
-		lib.releaseDBconnection(obj);
 	}).then(function() {
 		console.log('end /create');
 	});
@@ -38,8 +36,6 @@ app.get('/retrieveAll', function(req, res) {
 	}).catch(function(error) {
 		console.log('error', error);
 		res.json({status: 1, error: error});
-	}).then(function(obj) {
-		lib.releaseDBconnection(obj);
 	}).then(function() {
 		console.log('end /retrieveAll');
 	});
