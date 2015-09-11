@@ -1,0 +1,20 @@
+{
+  "name": "todoList",
+  "version": "1.0.0",
+  "description": "CRUD on todo list",
+  "main": "",
+  "scripts": {
+    "postinstall": "bower install",
+    "db": "mongod --dbpath data",
+    "start": "node server.js",
+    "clean": "node clean.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "mongodb": "^2.0.42",
+    "shelljs": "0.5.3",
+    "express": "~4.13.1",
+    "bower": "1.3.12"
+  }
+}
